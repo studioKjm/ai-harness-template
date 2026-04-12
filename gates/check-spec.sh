@@ -5,7 +5,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="${1:-$(dirname "$SCRIPT_DIR")}"
+# Default to CWD so pre-commit/hook invocations without arg find the actual project.
+# (The prior default — dirname of gates/ — resolved to the harness install root,
+# not the project being checked.)
+PROJECT_ROOT="${1:-$(pwd)}"
 
 # Colors
 if [ -f "$SCRIPT_DIR/../lib/colors.sh" ]; then

@@ -12,7 +12,7 @@
 1. [시스템 전체 구조](#1-시스템-전체-구조)
 2. [설치 흐름 (init.sh)](#2-설치-흐름)
 3. [Ouroboros 워크플로우](#3-ouroboros-워크플로우)
-4. [7개 게이트 (자동 강제)](#4-7개-게이트)
+4. [11개 게이트 (자동 강제)](#4-11개-게이트)
 5. [3-Tier Layered Architecture](#5-3-tier-layered-architecture)
 6. [9개 에이전트 페르소나](#6-9개-에이전트-페르소나)
 7. [권한 프리셋](#7-권한-프리셋)
@@ -88,7 +88,7 @@
     │   → .claude/agents/ (9개 .md)
     │
     ├─ [Step 8] 게이트 & 규칙 설치
-    │   → .harness/gates/ (7개 .sh + rules/*.yaml)
+    │   → .harness/gates/ (11개 .sh + rules/*.yaml)
     │   → .harness/hooks/ (pre-commit-gate, post-edit-lint)
     │
     ├─ [Step 9] pre-commit hook 설치
@@ -264,7 +264,7 @@ similarity ≥ 0.95 → 수렴 완료 (루프 종료)
 
 ---
 
-## 4. 7개 게이트
+## 4. 11개 게이트
 
 ### 게이트 목록
 
@@ -763,7 +763,7 @@ my-project/
 │   ├── commands/*.md               # 슬래시 커맨드 (8개)
 │   └── agents/*.md                 # 에이전트 (9개)
 ├── .harness/
-│   ├── gates/*.sh                  # 게이트 스크립트 (7개)
+│   ├── gates/*.sh                  # 게이트 스크립트 (11개: 7 default + 4 opt-in)
 │   ├── gates/rules/*.yaml          # 게이트 규칙
 │   ├── hooks/*.sh                  # Git hooks
 │   └── detect-violations.sh        # 통합 스캐너

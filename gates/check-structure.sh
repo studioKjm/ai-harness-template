@@ -55,18 +55,19 @@ fi
 
 # ─── Check: No orphan migration files ──────────────────────────────
 # SQL files outside migration directories
-find "$PROJECT_ROOT" -name "*.sql" -type f \
+# NOTE: use process substitution so VIOLATIONS propagates (pipe creates subshell)
+while IFS= read -r file; do
+  rel_path="${file#$PROJECT_ROOT/}"
+  warn "SQL file outside migration directory: $rel_path"
+  VIOLATIONS=$((VIOLATIONS + 1))
+done < <(find "$PROJECT_ROOT" -name "*.sql" -type f \
   -not -path "*/node_modules/*" \
   -not -path "*/.git/*" \
   -not -path "*/migrations/*" \
   -not -path "*/alembic/*" \
   -not -path "*/prisma/*" \
   -not -path "*/.harness/*" \
-  2>/dev/null | while IFS= read -r file; do
-  rel_path="${file#$PROJECT_ROOT/}"
-  warn "SQL file outside migration directory: $rel_path"
-  VIOLATIONS=$((VIOLATIONS + 1))
-done
+  2>/dev/null)
 
 # ─── Check: No test files in production directories ───────────────
 # This is a common AI agent mistake

@@ -53,18 +53,20 @@ case "$EXT" in
 
   json)
     # Format JSON with Python (always available on macOS/Linux)
+    # Pass path via argv to avoid string-interpolation injection on special chars
     if command -v python3 &>/dev/null; then
-      python3 -c "
+      python3 -c '
 import json, sys
+path = sys.argv[1]
 try:
-    with open('$FILE_PATH', 'r') as f:
+    with open(path, "r") as f:
         data = json.load(f)
-    with open('$FILE_PATH', 'w') as f:
+    with open(path, "w") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
-        f.write('\n')
-except:
+        f.write("\n")
+except Exception:
     pass
-" 2>/dev/null || true
+' "$FILE_PATH" 2>/dev/null || true
     fi
     ;;
 
