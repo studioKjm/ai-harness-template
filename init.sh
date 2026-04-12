@@ -268,8 +268,7 @@ if [ -f "$HARNESS_DIR/agents/topology.yaml" ]; then
   success "Installed agent orchestration topology"
 fi
 
-# Install Ouroboros templates
-mkdir -p "$TARGET/.ouroboros/seeds" "$TARGET/.ouroboros/interviews" "$TARGET/.ouroboros/evaluations"
+# Install Ouroboros templates (seeds/interviews/evaluations dirs are created lazily by commands)
 if [ -d "$HARNESS_DIR/ouroboros/templates" ]; then
   mkdir -p "$TARGET/.ouroboros/templates"
   cp "$HARNESS_DIR/ouroboros/templates/"* "$TARGET/.ouroboros/templates/" 2>/dev/null || true
@@ -278,7 +277,7 @@ if [ -d "$HARNESS_DIR/ouroboros/scoring" ]; then
   mkdir -p "$TARGET/.ouroboros/scoring"
   cp "$HARNESS_DIR/ouroboros/scoring/"* "$TARGET/.ouroboros/scoring/" 2>/dev/null || true
 fi
-success "Ouroboros structure created"
+success "Ouroboros templates installed"
 
 # ─── Step 9: Copy gate rules ──────────────────────────────────────
 header "Step 9: Installing CI/CD gates & spec gate"
@@ -287,7 +286,7 @@ HARNESS_TARGET="$TARGET/.harness"
 mkdir -p "$HARNESS_TARGET/gates/rules"
 mkdir -p "$HARNESS_TARGET/hooks"
 
-# Copy gate scripts
+# Copy gate scripts (default tier only — opt-in gates installed on demand via GATES.md)
 gate_files=(
   "gates/check-boundaries.sh"
   "gates/check-layers.sh"
@@ -295,11 +294,7 @@ gate_files=(
   "gates/check-security.sh"
   "gates/check-structure.sh"
   "gates/check-spec.sh"
-  "gates/check-complexity.sh"
   "gates/check-deps.sh"
-  "gates/check-mutation.sh"
-  "gates/check-performance.sh"
-  "gates/check-ai-antipatterns.sh"
 )
 for gf in "${gate_files[@]}"; do
   if [ -f "$HARNESS_DIR/$gf" ]; then
@@ -401,8 +396,8 @@ echo "    docs/adr.yaml                   - Architecture Decision Records"
 echo "    .claude/settings.local.json     - Claude Code permissions ($PRESET)"
 echo "    .claude/commands/               - Ouroboros slash commands"
 echo "    .claude/agents/                 - 9 agent personas"
-echo "    .harness/                       - Gates, hooks, and tools"
-echo "    .ouroboros/                     - Seed specs, interviews, evaluations"
+echo "    .harness/                       - Gates (7 default), hooks, and tools"
+echo "    .ouroboros/templates/           - Seed spec templates (see .harness/gates/GATES.md for opt-in gates)"
 echo ""
 echo "  Ouroboros Workflow:"
 echo "    /interview 'topic'  → Socratic interview (clarify requirements)"

@@ -29,6 +29,19 @@ Disabled by default. Enable when the project matures or when noise-to-signal rat
 
 ## Enabling Opt-in Gates
 
+Opt-in gate scripts are **not installed by default** — copy them from the harness source when you're ready:
+
+```shell
+# From the harness repo root (where you cloned/downloaded it)
+cp gates/check-complexity.sh      /path/to/your-project/.harness/gates/
+cp gates/check-mutation.sh        /path/to/your-project/.harness/gates/
+cp gates/check-performance.sh     /path/to/your-project/.harness/gates/
+cp gates/check-ai-antipatterns.sh /path/to/your-project/.harness/gates/
+chmod +x /path/to/your-project/.harness/gates/*.sh
+```
+
+Then enable them:
+
 ### Pre-commit
 
 ```shell
