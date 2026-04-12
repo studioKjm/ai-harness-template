@@ -1,0 +1,77 @@
+# GitHub Actions workflow for AI Harness gates
+# Copy this to .github/workflows/harness-gates.yaml in your project
+#
+# Gate tiers:
+#   DEFAULT (always run): secrets, boundaries, structure, spec, layers, security, deps
+#   OPT-IN (commented out below): complexity, mutation, performance, ai-antipatterns
+
+name: Harness Gates
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  default-gates:
+    name: Default Gates (Blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Secrets
+        run: bash .harness/gates/check-secrets.sh .
+
+      - name: Boundaries
+        run: bash .harness/gates/check-boundaries.sh .
+
+      - name: Structure
+        run: bash .harness/gates/check-structure.sh .
+
+      - name: Layers
+        run: bash .harness/gates/check-layers.sh .
+
+      - name: Security (SAST)
+        run: bash .harness/gates/check-security.sh .
+
+      - name: Dependencies
+        run: bash .harness/gates/check-deps.sh .
+
+      - name: Spec completeness
+        run: |
+          if [ -d ".ouroboros/seeds" ]; then
+            bash .harness/gates/check-spec.sh .
+          else
+            echo "::notice::No seeds found — skipping spec gate."
+          fi
+
+  # ──────────────────────────────────────────────────────────────
+  # OPT-IN GATES — uncomment to enable
+  # Typically slower, more opinionated, or project-specific.
+  # ──────────────────────────────────────────────────────────────
+  # opt-in-gates:
+  #   name: Opt-in Gates (Warning)
+  #   runs-on: ubuntu-latest
+  #   continue-on-error: true
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Complexity
+  #       run: bash .harness/gates/check-complexity.sh .
+  #
+  #     - name: Performance budgets
+  #       run: bash .harness/gates/check-performance.sh .
+  #
+  #     - name: AI anti-patterns
+  #       run: bash .harness/gates/check-ai-antipatterns.sh .
+  #
+  #     - name: Mutation testing
+  #       run: bash .harness/gates/check-mutation.sh . --threshold=60

@@ -1,0 +1,27 @@
+# Dependency boundaries for Next.js + FastAPI project
+
+nextjs:
+  - from: "dashboard/src/components"
+    cannot_import: ["prisma", "@prisma/client", "pg", "mysql2", "sqlalchemy"]
+    reason: "프론트엔드에서 DB 직접 접근 금지"
+    stacks: [nextjs]
+    file_patterns: ["*.tsx", "*.ts"]
+
+  - from: "dashboard/src/lib"
+    cannot_import: ["react", "next/navigation"]
+    reason: "공유 라이브러리에서 UI 의존 금지"
+    stacks: [nextjs]
+    file_patterns: ["*.ts"]
+
+fastapi:
+  - from: "src/api/routes"
+    cannot_import: ["create_engine", "sessionmaker"]
+    reason: "라우트에서 DB 세션 직접 생성 금지. Depends() 사용"
+    stacks: [fastapi]
+    file_patterns: ["*.py"]
+
+  - from: "src/api/routes"
+    cannot_import: ["open(", "os.path"]
+    reason: "라우트에서 파일 시스템 직접 접근 금지"
+    stacks: [fastapi]
+    file_patterns: ["*.py"]

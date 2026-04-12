@@ -1,0 +1,92 @@
+# Architecture Invariants — {{PROJECT_NAME}}
+
+> **이 문서는 프로젝트의 절대 불변 규칙을 정의합니다.**
+> CLAUDE.md, ADR, 기타 모든 문서와 충돌 시 이 문서가 우선합니다.
+
+---
+
+## Part 1: Absolute Invariants (절대 변경 금지)
+
+> 아래 항목은 아키텍처의 근간입니다. 변경하려면 팀 전체 합의가 필요합니다.
+
+### 1. Layer Separation (레이어 분리)
+- **Rule**: 모든 코드는 Presentation / Logic / Data 3개 레이어 중 하나에 속해야 한다. Presentation은 Data를 직접 접근할 수 없다.
+- **Why**: 레이어를 건너뛰면 숨은 의존성이 생기고, 테스트가 불가능해지며, 한 곳의 변경이 전체를 깨뜨린다.
+- **Violation example**: `src/components/UserList.tsx`에서 `PrismaClient`를 직접 import하는 경우
+
+### 2. Service as Layer Boundary (서비스가 레이어 경계)
+- **Rule**: 모든 비즈니스 로직은 Service/Domain 레이어를 경유한다. Controller/Route는 요청을 라우팅하고, Service가 비즈니스 규칙을 실행하며, Repository가 데이터에 접근한다.
+- **Why**: Controller는 프레임워크 종속적이고, Service는 재사용 가능하다. 관심사를 섞으면 모듈성이 깨진다.
+- **Violation example**: NestJS Controller에서 `prisma.user.findUnique()`를 Service 없이 직접 호출하는 경우
+
+### 3. Layer Communication via Contracts (계약 기반 레이어 통신)
+- **Rule**: 레이어 간 통신은 DTO/Interface를 통해서만 한다. Presentation은 DTO를 받고, Logic은 Domain Model로 작업하고, Data는 Query Object를 받는다.
+- **Why**: Domain 객체를 직접 노출하면 내부 구조가 유출되고, DTO는 계약 안정성과 레이어 독립 진화를 보장한다.
+- **Violation example**: API 엔드포인트가 ORM Entity를 그대로 반환하여 내부 타임스탬프와 캐시 필드가 노출되는 경우
+
+### 4. [TODO: Add project-specific invariant]
+- **Rule**: [What must never change]
+- **Why**: [Why this is critical]
+- **Violation example**: [What would breaking this look like]
+
+---
+
+## Part 2: Dependency Boundaries
+
+> AI 에이전트가 가장 많이 위반하는 규칙입니다. 게이트로 자동 강제됩니다.
+
+| From | Cannot Import | Reason |
+|------|--------------|--------|
+{{#IF_HAS_NEXTJS}}
+| frontend components | DB clients (prisma, pg, mysql) | 프론트엔드에서 DB 직접 접근 금지 |
+| shared lib | react, next/navigation | 공유 라이브러리에서 UI 의존 금지 |
+{{/IF_HAS_NEXTJS}}
+{{#IF_HAS_FASTAPI}}
+| API routes | sqlalchemy.orm.Session (direct) | 라우트에서 DB 세션 직접 생성 금지 |
+{{/IF_HAS_FASTAPI}}
+{{#IF_HAS_NESTJS}}
+| Controllers | Repository/ORM (direct) | 컨트롤러에서 DB 직접 접근 금지 |
+{{/IF_HAS_NESTJS}}
+{{#IF_HAS_DJANGO}}
+| frontend | django.*, models.* | 프론트엔드에서 Django 의존 금지 |
+{{/IF_HAS_DJANGO}}
+
+> 상세 규칙: `.harness/gates/rules/boundaries.yaml`
+
+---
+
+## Part 3: Work Guidelines
+
+### New Feature Checklist
+- [ ] ARCHITECTURE_INVARIANTS.md 확인
+- [ ] 관련 ADR 확인 (`docs/adr.yaml`)
+- [ ] 의존성 경계 준수 확인
+- [ ] 테스트 작성
+- [ ] 게이트 통과 확인
+
+### When Adding Dependencies
+1. 기존 의존성으로 해결 가능한지 먼저 확인
+2. 불가피한 경우 팀에 사전 공유
+3. `docs/adr.yaml`에 결정 기록
+
+### When Modifying Architecture
+1. 이 문서의 Part 1 항목과 충돌하는지 확인
+2. 충돌하면 **작업을 중단**하고 팀과 논의
+3. 변경이 승인되면 이 문서를 먼저 업데이트
+
+---
+
+## Part 4: CI/CD Rules
+
+- 모든 PR은 게이트 검사를 통과해야 함
+- 게이트 실패 시 커밋 차단
+- 게이트를 우회하는 `--no-verify`는 원칙적으로 금지
+
+---
+
+## Part 5: Document Maintenance
+
+- 이 문서는 **살아있는 문서**입니다
+- 새로운 아키텍처 결정이 내려지면 즉시 업데이트
+- 분기 1회 리뷰하여 폐기된 규칙 정리
+- 변경 시 팀 전체에 공유

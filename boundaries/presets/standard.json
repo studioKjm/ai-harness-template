@@ -1,0 +1,58 @@
+{
+  "$schema": "https://claude.ai/settings-schema",
+  "_comment": "STANDARD preset — Regular development. Balanced restrictions.",
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(DROP DATABASE:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(sudo rm:*)",
+      "Bash(chmod 777:*)",
+      "Bash(curl * | sh:*)"
+    ],
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(pnpm:*)",
+      "Bash(yarn:*)",
+      "Bash(bun:*)",
+      "Bash(pip:*)",
+      "Bash(python:*)",
+      "Bash(pytest:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": { "tool": "Edit" },
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".harness/hooks/post-edit-lint.sh $CLAUDE_FILE_PATH"
+          }
+        ]
+      }
+    ],
+    "PreCommit": [
+      {
+        "type": "command",
+        "command": ".harness/hooks/pre-commit-gate.sh"
+      }
+    ]
+  }
+}

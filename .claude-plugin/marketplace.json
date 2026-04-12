@@ -1,0 +1,12 @@
+{
+  "name": "studioKjm-harness",
+  "version": "1.0.0",
+  "description": "AI Harness + Ouroboros: Specification-first development with structural guardrails",
+  "plugins": [
+    {
+      "name": "harness",
+      "source": ".",
+      "description": "Specification-first AI harness with 11 gates, 10 commands, 9 agents, and 3-tier architecture enforcement"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://claude.ai/settings-schema",
+  "_comment": "PERMISSIVE preset — Prototyping. Minimal restrictions, secret checks only.",
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(sudo rm -rf:*)",
+      "Bash(DROP DATABASE:*)",
+      "Bash(git push --force origin main:*)",
+      "Bash(git push --force origin master:*)"
+    ],
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(*)"
+    ]
+  },
+  "hooks": {
+    "PreCommit": [
+      {
+        "type": "command",
+        "command": ".harness/gates/check-secrets.sh . --staged"
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "harness",
+  "version": "1.0.0",
+  "description": "Specification-first AI harness: 11 structural gates, 10 Ouroboros commands, 9 agent personas, and 3-tier architecture enforcement. Blocks sloppy AI-generated code at commit time.",
+  "author": "studioKjm",
+  "license": "MIT",
+  "homepage": "https://github.com/studioKjm/ai-harness-template",
+  "repository": "https://github.com/studioKjm/ai-harness-template",
+  "keywords": [
+    "harness",
+    "ouroboros",
+    "specification-first",
+    "guardrails",
+    "3-tier-architecture",
+    "clean-architecture",
+    "ai-agent",
+    "claude-code"
+  ]
+}

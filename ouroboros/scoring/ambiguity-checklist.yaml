@@ -1,0 +1,76 @@
+# Ambiguity Scoring Checklist
+# Used by /interview command to measure clarity
+# Each dimension has weight and sub-criteria scored 0.0-1.0
+
+dimensions:
+  goal_clarity:
+    weight: 0.40
+    criteria:
+      - id: "G1"
+        question: "목표가 한 문장으로 설명 가능한가?"
+        score: 0.0  # 0.0 = unclear, 1.0 = crystal clear
+      - id: "G2"
+        question: "최종 사용자가 명확한가?"
+        score: 0.0
+      - id: "G3"
+        question: "성공 시나리오를 구체적으로 설명할 수 있는가?"
+        score: 0.0
+      - id: "G4"
+        question: "이것이 없으면 어떤 문제가 생기는지 명확한가?"
+        score: 0.0
+      - id: "G5"
+        question: "범위(MVP vs Future)가 확정되었는가?"
+        score: 0.0
+
+  constraint_clarity:
+    weight: 0.30
+    criteria:
+      - id: "C1"
+        question: "절대 해서는 안 되는 것이 정의되었는가?"
+        score: 0.0
+      - id: "C2"
+        question: "기술 스택 제약이 확인되었는가?"
+        score: 0.0
+      - id: "C3"
+        question: "외부 시스템 연동이 식별되었는가?"
+        score: 0.0
+      - id: "C4"
+        question: "성능/보안/비용 우선순위가 정해졌는가?"
+        score: 0.0
+
+  success_criteria:
+    weight: 0.30
+    criteria:
+      - id: "S1"
+        question: "완료 기준이 테스트 가능한가?"
+        score: 0.0
+      - id: "S2"
+        question: "엣지 케이스가 식별되었는가?"
+        score: 0.0
+      - id: "S3"
+        question: "검증 방법이 정해졌는가? (수동/자동)"
+        score: 0.0
+      - id: "S4"
+        question: "실패 시나리오가 정의되었는가?"
+        score: 0.0
+
+  # Brownfield only (activated when existing code detected)
+  context_clarity:
+    weight: 0.15  # When active, others reweight to: G=0.35, C=0.25, S=0.25
+    criteria:
+      - id: "X1"
+        question: "기존 코드 구조를 이해하고 있는가?"
+        score: 0.0
+      - id: "X2"
+        question: "영향 범위가 식별되었는가?"
+        score: 0.0
+      - id: "X3"
+        question: "기존 테스트가 파악되었는가?"
+        score: 0.0
+
+# Calculation:
+#   dimension_score = mean(criteria.score)
+#   total_clarity = sum(dimension.weight * dimension_score)
+#   ambiguity = 1.0 - total_clarity
+#
+# Gate: ambiguity <= 0.2 to proceed to Seed

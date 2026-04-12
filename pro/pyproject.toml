@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-harness-pro"
+version = "0.1.0"
+description = "AI Harness + Ouroboros: Specification-first development with structural guardrails"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "studioKjm" },
+]
+keywords = [
+    "ai-agent", "harness", "ouroboros", "specification",
+    "claude-code", "guardrails", "developer-tools",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "rich>=13.0",
+    "typer>=0.9",
+]
+
+[project.optional-dependencies]
+advanced = ["pydantic>=2.0"]
+mcp = ["mcp>=1.0"]
+llm = ["litellm>=1.0"]
+all = ["ai-harness-pro[advanced,mcp,llm]"]
+
+[project.scripts]
+harness = "harness_pro.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/harness_pro"]

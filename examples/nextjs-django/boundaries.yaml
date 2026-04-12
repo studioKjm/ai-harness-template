@@ -1,0 +1,19 @@
+django:
+  - from: "frontend"
+    cannot_import: ["django", "from models", "import models"]
+    reason: "프론트엔드에서 Django 모듈 import 금지"
+    stacks: [django]
+    file_patterns: ["*.ts", "*.tsx", "*.js"]
+
+  - from: "backend/views"
+    cannot_import: ["cursor.execute", "raw("]
+    reason: "View에서 Raw SQL 금지. ORM 사용"
+    stacks: [django]
+    file_patterns: ["*.py"]
+
+nextjs:
+  - from: "frontend/src/components"
+    cannot_import: ["pg", "mysql2", "sqlite3"]
+    reason: "프론트엔드에서 DB 직접 접근 금지"
+    stacks: [nextjs]
+    file_patterns: ["*.tsx", "*.ts"]

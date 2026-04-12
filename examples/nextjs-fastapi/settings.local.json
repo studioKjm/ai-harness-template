@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(DROP DATABASE:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)"
+    ],
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(pytest:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker logs:*)",
+      "Bash(alembic:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": { "tool": "Edit" },
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".harness/hooks/post-edit-lint.sh $CLAUDE_FILE_PATH"
+          }
+        ]
+      }
+    ],
+    "PreCommit": [
+      {
+        "type": "command",
+        "command": ".harness/hooks/pre-commit-gate.sh"
+      }
+    ]
+  }
+}

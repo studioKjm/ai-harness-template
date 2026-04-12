@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(DROP DATABASE:*)",
+      "Bash(git push --force:*)",
+      "Bash(sudo:*)"
+    ],
+    "allow": [
+      "Read", "Glob", "Grep",
+      "Bash(git:*)",
+      "Bash(python:*)", "Bash(pip:*)", "Bash(pytest:*)",
+      "Bash(docker compose:*)", "Bash(docker ps:*)", "Bash(docker logs:*)",
+      "Bash(alembic:*)", "Bash(ruff:*)", "Bash(black:*)"
+    ]
+  },
+  "hooks": {
+    "PreCommit": [
+      { "type": "command", "command": ".harness/hooks/pre-commit-gate.sh" }
+    ]
+  }
+}

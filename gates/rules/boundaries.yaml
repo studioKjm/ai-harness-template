@@ -1,0 +1,128 @@
+# Dependency Boundary Rules
+# check-boundaries.sh가 이 파일을 읽어서 import 위반을 검사합니다.
+#
+# 규칙 형식:
+#   - from: "소스 디렉토리 패턴"
+#     cannot_import: ["금지된 모듈/패키지 이름"]
+#     reason: "위반 이유"
+#     stacks: [적용 스택]
+#     file_patterns: ["검사할 파일 확장자"]  (선택)
+
+# ─── General ──────────────────────────────────────────────────────
+general:
+  - from: "."
+    cannot_import: ["os.system", "subprocess.call"]
+    reason: "명령어 인젝션 위험. subprocess.run with shell=False 사용"
+    stacks: [python]
+    file_patterns: ["*.py"]
+
+# ─── Next.js ──────────────────────────────────────────────────────
+nextjs:
+  - from: "src/components"
+    cannot_import: ["prisma", "@prisma/client", "drizzle-orm", "pg", "mysql2", "better-sqlite3", "mongoose"]
+    reason: "프론트엔드 컴포넌트에서 DB 직접 접근 금지. Server Action 또는 API를 경유하세요."
+    stacks: [nextjs]
+    file_patterns: ["*.tsx", "*.ts", "*.jsx", "*.js"]
+
+  - from: "src/components"
+    cannot_import: ["fs", "child_process", "crypto"]
+    reason: "클라이언트 컴포넌트에서 Node.js 내장 모듈 사용 금지"
+    stacks: [nextjs]
+    file_patterns: ["*.tsx", "*.ts"]
+
+  - from: "src/lib"
+    cannot_import: ["react", "next/navigation", "next/router"]
+    reason: "공유 라이브러리에서 React/Next.js UI 의존 금지. 프레임워크 독립적으로 유지"
+    stacks: [nextjs]
+    file_patterns: ["*.ts", "*.js"]
+
+# ─── NestJS ──────────────────────────────────────────────────────
+nestjs:
+  - from: "src/controllers"
+    cannot_import: ["TypeOrmModule", "PrismaClient", "Repository"]
+    reason: "Controller에서 ORM 직접 사용 금지. Service를 통해 접근"
+    stacks: [nestjs]
+    file_patterns: ["*.ts"]
+
+  - from: "src/dto"
+    cannot_import: ["TypeOrmModule", "PrismaClient", "Repository"]
+    reason: "DTO에서 ORM 의존 금지"
+    stacks: [nestjs]
+    file_patterns: ["*.ts"]
+
+# ─── FastAPI ──────────────────────────────────────────────────────
+fastapi:
+  - from: "src/api/routes"
+    cannot_import: ["create_engine", "sessionmaker", "Session("]
+    reason: "라우트에서 DB 세션 직접 생성 금지. Depends()를 통해 주입"
+    stacks: [fastapi]
+    file_patterns: ["*.py"]
+
+  - from: "src/api/routes"
+    cannot_import: ["open(", "os.path", "pathlib.Path"]
+    reason: "라우트에서 파일 시스템 직접 접근 금지. 서비스 레이어 경유"
+    stacks: [fastapi]
+    file_patterns: ["*.py"]
+
+# ─── Django ──────────────────────────────────────────────────────
+django:
+  - from: "frontend"
+    cannot_import: ["django", "from models", "import models"]
+    reason: "[LAYER:P→D] 프론트엔드에서 Django 모듈 import 금지"
+    stacks: [django]
+    file_patterns: ["*.ts", "*.tsx", "*.js", "*.jsx"]
+
+  - from: "views"
+    cannot_import: ["cursor.execute", "raw("]
+    reason: "[LAYER:P→D] View에서 Raw SQL 사용 금지. ORM 또는 Manager 메서드 사용"
+    stacks: [django]
+    file_patterns: ["*.py"]
+
+# ─── 3-Tier Layer Enforcement (역방향 의존 차단) ────────────────────
+# Logic → Presentation 역참조 금지
+layer_logic:
+  - from: "src/services"
+    cannot_import: ["react", "next/", "vue", "@angular", "express.Request", "express.Response", "fastapi.Request"]
+    reason: "[LAYER:L→P] Logic 레이어에서 Presentation 프레임워크 import 금지. 프레임워크 독립적으로 유지"
+    stacks: [nextjs, nestjs, react, vue]
+    file_patterns: ["*.ts", "*.tsx", "*.js"]
+
+  - from: "src/services"
+    cannot_import: ["flask.request", "django.http", "starlette.requests"]
+    reason: "[LAYER:L→P] Logic 레이어에서 HTTP 요청 객체 직접 접근 금지"
+    stacks: [fastapi, django, flask]
+    file_patterns: ["*.py"]
+
+  - from: "src/domain"
+    cannot_import: ["react", "next/", "vue", "@angular", "express", "flask", "django.http", "fastapi"]
+    reason: "[LAYER:L→P] Domain 모델에서 Presentation 의존 금지"
+    stacks: [all]
+    file_patterns: ["*.ts", "*.py", "*.js"]
+
+# Data → Logic 역참조 금지
+layer_data:
+  - from: "src/repositories"
+    cannot_import: ["react", "next/", "vue", "@angular", "express"]
+    reason: "[LAYER:D→P] Data 레이어에서 Presentation 프레임워크 import 금지"
+    stacks: [nextjs, nestjs, react, vue]
+    file_patterns: ["*.ts", "*.js"]
+
+  - from: "src/repositories"
+    cannot_import: ["flask", "django.views", "django.http", "fastapi.routing"]
+    reason: "[LAYER:D→P] Data 레이어에서 Presentation 프레임워크 import 금지"
+    stacks: [fastapi, django, flask]
+    file_patterns: ["*.py"]
+
+# Presentation → Data 레이어 스킵 금지 (cross-stack)
+layer_skip:
+  - from: "src/pages"
+    cannot_import: ["prisma", "@prisma/client", "drizzle-orm", "typeorm", "sequelize", "mongoose"]
+    reason: "[LAYER:P→D] 페이지에서 DB 직접 접근 금지. Logic 레이어(서비스)를 경유"
+    stacks: [nextjs, react]
+    file_patterns: ["*.tsx", "*.ts", "*.jsx", "*.js"]
+
+  - from: "src/routes"
+    cannot_import: ["create_engine", "sessionmaker", "AsyncSession"]
+    reason: "[LAYER:P→D] 라우트에서 DB 엔진/세션 직접 생성 금지. DI를 통해 주입"
+    stacks: [fastapi]
+    file_patterns: ["*.py"]

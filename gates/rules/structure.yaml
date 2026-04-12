@@ -1,0 +1,51 @@
+# Project Structure Rules
+# check-structure.sh가 이 파일을 읽어서 파일 위치 규칙을 검사합니다.
+#
+# 규칙 형식:
+#   - pattern: "파일 glob 패턴"
+#     must_be_in: "허용된 디렉토리"
+#     reason: "규칙 이유"
+#     stacks: [적용 스택]
+
+# ─── Next.js ──────────────────────────────────────────────────────
+nextjs:
+  - pattern: "*.test.tsx"
+    must_be_in: "__tests__|*.test.*"
+    reason: "테스트 파일은 __tests__/ 디렉토리 또는 .test. 접미사"
+    stacks: [nextjs]
+
+  - pattern: "page.tsx"
+    must_be_in: "app/"
+    reason: "페이지 컴포넌트는 app/ 디렉토리 내에만 위치"
+    stacks: [nextjs]
+
+# ─── NestJS ──────────────────────────────────────────────────────
+nestjs:
+  - pattern: "*.controller.ts"
+    must_be_in: "src/"
+    reason: "Controller 파일은 src/ 내에 위치"
+    stacks: [nestjs]
+
+  - pattern: "*.service.ts"
+    must_be_in: "src/"
+    reason: "Service 파일은 src/ 내에 위치"
+    stacks: [nestjs]
+
+# ─── FastAPI ──────────────────────────────────────────────────────
+fastapi:
+  - pattern: "routes_*.py"
+    must_be_in: "routes/|api/"
+    reason: "라우트 파일은 routes/ 또는 api/ 디렉토리에 위치"
+    stacks: [fastapi]
+
+# ─── General ──────────────────────────────────────────────────────
+general:
+  - pattern: ".env"
+    must_not_exist_in_git: true
+    reason: ".env 파일은 절대 git에 커밋하지 않음"
+    stacks: [all]
+
+  - pattern: "*.sql"
+    must_be_in: "migrations/|alembic/|prisma/"
+    reason: "SQL 파일은 마이그레이션 디렉토리에만 위치"
+    stacks: [all]

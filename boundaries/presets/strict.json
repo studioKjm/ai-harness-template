@@ -1,0 +1,57 @@
+{
+  "$schema": "https://claude.ai/settings-schema",
+  "_comment": "STRICT preset — Production/client projects. Maximum restrictions.",
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(rm -r:*)",
+      "Bash(DROP TABLE:*)",
+      "Bash(DROP DATABASE:*)",
+      "Bash(DELETE FROM:*)",
+      "Bash(TRUNCATE:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -f:*)",
+      "Bash(chmod 777:*)",
+      "Bash(curl * | sh:*)",
+      "Bash(wget * | sh:*)",
+      "Bash(eval:*)",
+      "Bash(sudo:*)"
+    ],
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(ls:*)",
+      "Bash(pwd:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": { "tool": "Edit" },
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".harness/hooks/post-edit-lint.sh $CLAUDE_FILE_PATH"
+          }
+        ]
+      }
+    ],
+    "PreCommit": [
+      {
+        "type": "command",
+        "command": ".harness/hooks/pre-commit-gate.sh"
+      }
+    ]
+  }
+}

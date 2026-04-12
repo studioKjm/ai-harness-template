@@ -1,0 +1,154 @@
+# Agent Orchestration Topology
+# Defines how 9 agents coordinate across the Ouroboros workflow.
+#
+# Patterns:
+#   pipeline    — Sequential execution, output of one feeds next
+#   fan-out     — Parallel execution, results merged
+#   expert-pool — Best agent selected based on context
+#   producer-reviewer — One creates, another validates
+#   supervisor  — One agent delegates to others
+
+# ─── Ouroboros Workflow Topology ────────────────────────────────────
+workflows:
+  interview:
+    pattern: "pipeline"
+    agents: [interviewer]
+    description: "Single agent asks questions sequentially"
+    flow:
+      - agent: interviewer
+        input: "user topic"
+        output: ".ouroboros/interviews/*.yaml"
+
+  seed:
+    pattern: "pipeline"
+    agents: [ontologist, seed-architect]
+    description: "Ontologist extracts domain model, Seed Architect crystallizes spec"
+    flow:
+      - agent: ontologist
+        input: "interview data"
+        output: "ontology (entities, actions, relationships)"
+      - agent: seed-architect
+        input: "ontology + interview"
+        output: ".ouroboros/seeds/seed-v*.yaml"
+
+  run:
+    pattern: "pipeline"
+    agents: [architect, seed-architect]
+    description: "Architect designs, then executes Double Diamond"
+    flow:
+      - agent: architect
+        phase: "design"
+        input: "seed spec"
+        output: "implementation plan"
+      - agent: seed-architect
+        phase: "deliver"
+        input: "plan + seed spec"
+        output: "implemented code"
+
+  evaluate:
+    pattern: "producer-reviewer"
+    agents: [evaluator]
+    description: "Evaluator verifies implementation against seed"
+    flow:
+      - agent: evaluator
+        role: "reviewer"
+        input: "code + seed spec"
+        output: ".ouroboros/evaluations/*.yaml"
+
+  evolve:
+    pattern: "fan-out"
+    agents: [contrarian, simplifier, researcher]
+    description: "Multiple perspectives analyze failures in parallel"
+    flow:
+      - agent: contrarian
+        role: "challenge assumptions"
+        parallel: true
+      - agent: simplifier
+        role: "find unnecessary complexity"
+        parallel: true
+      - agent: researcher
+        role: "gather evidence"
+        parallel: true
+    merge: "synthesis of all perspectives → new seed version"
+
+  unstuck:
+    pattern: "expert-pool"
+    agents: [contrarian, simplifier, researcher, architect, hacker]
+    description: "5 agents each analyze from their perspective"
+    selection: "all — user picks best approach"
+    flow:
+      - agent: contrarian
+        question: "What if the opposite were true?"
+      - agent: simplifier
+        question: "What can be removed?"
+      - agent: researcher
+        question: "What does the evidence say?"
+      - agent: architect
+        question: "Is this a structural problem?"
+      - agent: hacker
+        question: "Is there a creative workaround?"
+
+# ─── Orchestration Patterns Reference ──────────────────────────────
+patterns:
+  pipeline:
+    description: "순차 실행. 이전 에이전트의 출력이 다음의 입력"
+    when: "단계별 정제가 필요할 때 (interview → seed)"
+    risk: "한 단계 실패 시 전체 중단"
+
+  fan-out:
+    description: "병렬 실행. 여러 에이전트가 동시에 분석 후 결과 병합"
+    when: "다양한 관점이 필요할 때 (/evolve, /unstuck)"
+    risk: "상충되는 결과 병합이 필요"
+
+  expert-pool:
+    description: "전문가 풀에서 상황에 맞는 에이전트 선택 또는 전원 투입"
+    when: "문제 유형이 불명확할 때 (/unstuck)"
+    risk: "선택 기준이 모호할 수 있음"
+
+  producer-reviewer:
+    description: "생산자-검토자 분리. 한 에이전트가 만들고 다른 에이전트가 검증"
+    when: "품질 검증이 필요할 때 (/run → /evaluate)"
+    risk: "검토자가 생산자의 맥락을 놓칠 수 있음"
+
+  supervisor:
+    description: "감독 에이전트가 다른 에이전트에게 작업을 위임"
+    when: "복잡한 멀티에이전트 작업 조율 시"
+    risk: "감독 에이전트가 병목이 될 수 있음"
+
+# ─── Agent Capabilities Matrix ─────────────────────────────────────
+capabilities:
+  interviewer:
+    can: [ask_questions, track_ambiguity, discover_assumptions]
+    cannot: [write_code, give_solutions, make_decisions]
+
+  ontologist:
+    can: [extract_entities, define_relationships, model_domain]
+    cannot: [write_code, make_tech_decisions]
+
+  seed-architect:
+    can: [crystallize_spec, version_seeds, validate_completeness]
+    cannot: [skip_constraints, modify_existing_seeds]
+
+  evaluator:
+    can: [run_gates, verify_ac, measure_drift, judge_quality]
+    cannot: [fix_code, modify_spec]
+
+  contrarian:
+    can: [challenge_assumptions, propose_alternatives, question_decisions]
+    cannot: [implement_solutions]
+
+  simplifier:
+    can: [identify_complexity, suggest_removal, find_abstractions]
+    cannot: [add_features]
+
+  researcher:
+    can: [investigate_facts, find_evidence, compare_approaches]
+    cannot: [make_decisions, write_code]
+
+  architect:
+    can: [analyze_structure, identify_patterns, design_systems]
+    cannot: [implement_details]
+
+  hacker:
+    can: [find_workarounds, bypass_constraints_safely, prototype]
+    cannot: [make_permanent_decisions]

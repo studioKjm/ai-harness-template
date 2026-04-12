@@ -1,0 +1,26 @@
+{
+  "hooks": [
+    {
+      "type": "UserPromptSubmit",
+      "command": "python3 $HARNESS_PRO/hooks/keyword-detector.py \"$USER_PROMPT\"",
+      "description": "Detect ooo/harness keywords and route to appropriate skill"
+    },
+    {
+      "type": "PostToolUse",
+      "tool": "Edit",
+      "command": "python3 $HARNESS_PRO/hooks/drift-monitor.py \"$FILE_PATH\"",
+      "description": "Measure drift from seed spec after file edit"
+    },
+    {
+      "type": "PostToolUse",
+      "tool": "Write",
+      "command": "python3 $HARNESS_PRO/hooks/drift-monitor.py \"$FILE_PATH\"",
+      "description": "Measure drift from seed spec after file write"
+    },
+    {
+      "type": "SessionStart",
+      "command": "python3 $HARNESS_PRO/hooks/session-start.py",
+      "description": "Initialize or resume session tracking"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+nextjs:
+  - from: "frontend/src/components"
+    cannot_import: ["@prisma/client", "pg", "typeorm"]
+    reason: "프론트엔드에서 DB 직접 접근 금지"
+    stacks: [nextjs]
+    file_patterns: ["*.tsx", "*.ts"]
+
+nestjs:
+  - from: "backend/src/controllers"
+    cannot_import: ["PrismaClient", "Repository", "TypeOrmModule"]
+    reason: "Controller에서 ORM 직접 사용 금지. Service 경유"
+    stacks: [nestjs]
+    file_patterns: ["*.ts"]
+
+  - from: "backend/src/dto"
+    cannot_import: ["PrismaClient", "Repository"]
+    reason: "DTO에서 ORM 의존 금지"
+    stacks: [nestjs]
+    file_patterns: ["*.ts"]

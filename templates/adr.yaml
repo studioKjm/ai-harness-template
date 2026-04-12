@@ -1,0 +1,31 @@
+# Architecture Decision Records (ADR)
+#
+# 새 항목 추가 시 아래 스키마를 따릅니다:
+#
+# - id: ADR-XXX
+#   title: 결정 제목
+#   status: adopted | deprecated | superseded
+#   date: YYYY-MM-DD
+#   stacks: [적용 스택 목록]
+#   context: |
+#     (구체적인 상황 서술 — 이것만 읽고도 "왜 이 결정이 필요했는가"를 이해할 수 있어야 함)
+#     나쁜 예: "에러 처리가 비일관적이라 통일함"
+#     좋은 예: "각 서비스에서 에러를 자체적으로 catch하고 임의 형식으로 반환하고 있었다.
+#              엔드포인트 A는 { message: "..." }를, B는 { error: "...", code: 500 }을 반환했다.
+#              프론트엔드에서 공통 에러 핸들링이 불가능했고, 토스트 메시지 출력조차 불가능했다."
+#   decision: 채택한 결정
+#   consequence: 이 결정의 결과와 후속 영향
+
+# ─── Example ADR (프로젝트에 맞게 수정하세요) ──────────────────────────
+
+- id: ADR-001
+  title: "[Example] API 응답 형식 통일"
+  status: adopted
+  date: 2026-01-01
+  stacks: [all]
+  context: |
+    [TODO: 어떤 문제가 있었는지 구체적으로 서술하세요]
+    예시: 프론트엔드 클라이언트가 각각 다른 API 응답 형식을 파싱하고 있었다.
+    신규 API를 추가할 때마다 클라이언트별 파싱 로직을 별도로 작성해야 했다.
+  decision: "[TODO: 어떤 결정을 내렸는지]"
+  consequence: "[TODO: 이 결정의 결과]"
