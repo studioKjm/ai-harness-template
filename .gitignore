@@ -11,6 +11,12 @@ Thumbs.db
 # Review artifacts (from code review plugin)
 .review-artifacts/
 
+# Local Claude Code settings (user-specific)
+.claude/settings.local.json
+
+# Ouroboros runtime data (Pro)
+.ouroboros/session.db
+
 # Environment
 .env
 .env.local
