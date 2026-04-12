@@ -84,7 +84,7 @@ class AgentTracer:
 
     def __init__(self, project_root: Path = Path(".")):
         self.project_root = Path(project_root)
-        self.db_path = self.project_root / ".ouroboros" / "session.db"
+        self.db_path = self.project_root / ".harness" / "ouroboros" / "session.db"
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.trace_id = str(uuid.uuid4())[:12]
         self._init_db()

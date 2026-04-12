@@ -30,7 +30,7 @@ def create_server(project_root: Path | None = None):
 
     root = Path(project_root) if project_root else Path(".")
     harness_dir = root / ".harness"
-    ouroboros_dir = root / ".ouroboros"
+    ouroboros_dir = harness_dir / "ouroboros"
 
     mcp = FastMCP(
         "AI Harness",

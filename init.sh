@@ -270,12 +270,12 @@ fi
 
 # Install Ouroboros templates (seeds/interviews/evaluations dirs are created lazily by commands)
 if [ -d "$HARNESS_DIR/ouroboros/templates" ]; then
-  mkdir -p "$TARGET/.ouroboros/templates"
-  cp "$HARNESS_DIR/ouroboros/templates/"* "$TARGET/.ouroboros/templates/" 2>/dev/null || true
+  mkdir -p "$TARGET/.harness/ouroboros/templates"
+  cp "$HARNESS_DIR/ouroboros/templates/"* "$TARGET/.harness/ouroboros/templates/" 2>/dev/null || true
 fi
 if [ -d "$HARNESS_DIR/ouroboros/scoring" ]; then
-  mkdir -p "$TARGET/.ouroboros/scoring"
-  cp "$HARNESS_DIR/ouroboros/scoring/"* "$TARGET/.ouroboros/scoring/" 2>/dev/null || true
+  mkdir -p "$TARGET/.harness/ouroboros/scoring"
+  cp "$HARNESS_DIR/ouroboros/scoring/"* "$TARGET/.harness/ouroboros/scoring/" 2>/dev/null || true
 fi
 success "Ouroboros templates installed"
 
@@ -374,7 +374,7 @@ fi
 header "Step 12: Updating .gitignore"
 
 GITIGNORE="$TARGET/.gitignore"
-ENTRIES=(".env" ".env.local" ".env.*.local" ".review-artifacts/" ".ouroboros/session.db")
+ENTRIES=(".env" ".env.local" ".env.*.local" ".review-artifacts/" ".harness/ouroboros/session.db")
 
 touch "$GITIGNORE"
 for entry in "${ENTRIES[@]}"; do
@@ -396,8 +396,7 @@ echo "    docs/adr.yaml                   - Architecture Decision Records"
 echo "    .claude/settings.local.json     - Claude Code permissions ($PRESET)"
 echo "    .claude/commands/               - Ouroboros slash commands"
 echo "    .claude/agents/                 - 9 agent personas"
-echo "    .harness/                       - Gates (7 default), hooks, and tools"
-echo "    .ouroboros/templates/           - Seed spec templates (see .harness/gates/GATES.md for opt-in gates)"
+echo "    .harness/                       - Gates (7 default), hooks, tools, and Ouroboros workspace"
 echo ""
 echo "  Ouroboros Workflow:"
 echo "    /interview 'topic'  → Socratic interview (clarify requirements)"

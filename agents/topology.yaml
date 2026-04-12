@@ -17,7 +17,7 @@ workflows:
     flow:
       - agent: interviewer
         input: "user topic"
-        output: ".ouroboros/interviews/*.yaml"
+        output: ".harness/ouroboros/interviews/*.yaml"
 
   seed:
     pattern: "pipeline"
@@ -29,7 +29,7 @@ workflows:
         output: "ontology (entities, actions, relationships)"
       - agent: seed-architect
         input: "ontology + interview"
-        output: ".ouroboros/seeds/seed-v*.yaml"
+        output: ".harness/ouroboros/seeds/seed-v*.yaml"
 
   run:
     pattern: "pipeline"
@@ -53,7 +53,7 @@ workflows:
       - agent: evaluator
         role: "reviewer"
         input: "code + seed spec"
-        output: ".ouroboros/evaluations/*.yaml"
+        output: ".harness/ouroboros/evaluations/*.yaml"
 
   evolve:
     pattern: "fan-out"

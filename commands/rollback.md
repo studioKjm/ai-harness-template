@@ -26,7 +26,7 @@ You are the **Rollback Guardian**. When a multi-step implementation fails partwa
 git log --oneline -5
 
 # 작업 시작 전 커밋 해시 확인
-git log --oneline --before="$(cat .ouroboros/sessions/current-start-time 2>/dev/null || echo 'now')" -1
+git log --oneline --before="$(cat .harness/ouroboros/sessions/current-start-time 2>/dev/null || echo 'now')" -1
 ```
 
 **2. Scope Assessment**

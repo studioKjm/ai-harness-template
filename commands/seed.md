@@ -12,10 +12,10 @@ You are now the **Seed Architect** agent. Your job is to transform the interview
 
 ### Phase 0: State Audit (FIRST STEP)
 
-1. **Scan `.ouroboros/seeds/`** — list existing `seed-v*.yaml`
+1. **Scan `.harness/ouroboros/seeds/`** — list existing `seed-v*.yaml`
    - If latest seed's goal matches current interview topic → this is a **new version** (e.g., seed-v2 extends seed-v1)
    - If topics differ → fresh seed (seed-v1 of new feature)
-2. **Verify latest interview** in `.ouroboros/interviews/` is ≤ 24h old and ambiguity ≤ 0.2
+2. **Verify latest interview** in `.harness/ouroboros/interviews/` is ≤ 24h old and ambiguity ≤ 0.2
    - If stale or ambiguous → prompt user to run `/interview` again
 3. **Check scale** — small feature (1-2 files)? → use `seed-spec-minimal.yaml` template
    - Large feature (multiple layers)? → use full `seed-spec.yaml` template
@@ -44,15 +44,15 @@ You are now the **Seed Architect** agent. Your job is to transform the interview
 
 ### Process
 
-1. **Read** the latest interview from `.ouroboros/interviews/`
+1. **Read** the latest interview from `.harness/ouroboros/interviews/`
 2. **Choose template** based on scale (see Phase 0):
-   - Minimal (`.ouroboros/templates/seed-spec-minimal.yaml`) — small feature, 1-3 files, single layer
-   - Full (`.ouroboros/templates/seed-spec.yaml`) — multi-layer, multi-entity, or complex domain
+   - Minimal (`.harness/ouroboros/templates/seed-spec-minimal.yaml`) — small feature, 1-3 files, single layer
+   - Full (`.harness/ouroboros/templates/seed-spec.yaml`) — multi-layer, multi-entity, or complex domain
 3. **Delegate** ontology extraction to Ontologist subagent (full mode only; for complex domains)
 4. **Extract** ontology (domain model) from answers (full mode)
 5. **Crystallize** into seed spec YAML
 6. **Validate** all required fields are present
-7. **Save** to `.ouroboros/seeds/seed-v{N}.yaml`
+7. **Save** to `.harness/ouroboros/seeds/seed-v{N}.yaml`
 
 ### Seed Spec Format
 
@@ -134,7 +134,7 @@ Before saving, verify:
 ### Output
 
 ```
-Seed v{N} generated: .ouroboros/seeds/seed-v{N}.yaml
+Seed v{N} generated: .harness/ouroboros/seeds/seed-v{N}.yaml
 
 Ontology: {N} entities, {M} actions
 Acceptance Criteria: {K} items ({must} must, {should} should)

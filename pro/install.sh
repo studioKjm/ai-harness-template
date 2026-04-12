@@ -56,21 +56,21 @@ success "harness-pro package installed"
 # ─── Setup Ouroboros directories ─────────────────────────────────
 header "Step 4: Setting up Ouroboros structure"
 
-mkdir -p "$TARGET/.ouroboros/seeds"
-mkdir -p "$TARGET/.ouroboros/interviews"
-mkdir -p "$TARGET/.ouroboros/evaluations"
+mkdir -p "$TARGET/.harness/ouroboros/seeds"
+mkdir -p "$TARGET/.harness/ouroboros/interviews"
+mkdir -p "$TARGET/.harness/ouroboros/evaluations"
 
 # Copy scoring checklist
-if [ ! -f "$TARGET/.ouroboros/scoring/ambiguity-checklist.yaml" ]; then
-  mkdir -p "$TARGET/.ouroboros/scoring"
-  cp "$HARNESS_DIR/ouroboros/scoring/ambiguity-checklist.yaml" "$TARGET/.ouroboros/scoring/"
+if [ ! -f "$TARGET/.harness/ouroboros/scoring/ambiguity-checklist.yaml" ]; then
+  mkdir -p "$TARGET/.harness/ouroboros/scoring"
+  cp "$HARNESS_DIR/ouroboros/scoring/ambiguity-checklist.yaml" "$TARGET/.harness/ouroboros/scoring/"
   success "Installed ambiguity checklist"
 fi
 
 # Copy seed template
-if [ ! -f "$TARGET/.ouroboros/templates/seed-spec.yaml" ]; then
-  mkdir -p "$TARGET/.ouroboros/templates"
-  cp "$HARNESS_DIR/ouroboros/templates/seed-spec.yaml" "$TARGET/.ouroboros/templates/"
+if [ ! -f "$TARGET/.harness/ouroboros/templates/seed-spec.yaml" ]; then
+  mkdir -p "$TARGET/.harness/ouroboros/templates"
+  cp "$HARNESS_DIR/ouroboros/templates/seed-spec.yaml" "$TARGET/.harness/ouroboros/templates/"
   success "Installed seed template"
 fi
 
@@ -121,7 +121,7 @@ success "Spec completeness gate installed"
 
 # ─── Update .gitignore ───────────────────────────────────────────
 GITIGNORE="$TARGET/.gitignore"
-ENTRIES=(".ouroboros/session.db" ".ouroboros/interviews/" ".ouroboros/evaluations/")
+ENTRIES=(".harness/ouroboros/session.db" ".harness/ouroboros/interviews/" ".harness/ouroboros/evaluations/")
 
 touch "$GITIGNORE"
 for entry in "${ENTRIES[@]}"; do

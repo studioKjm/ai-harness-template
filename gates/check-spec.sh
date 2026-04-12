@@ -25,12 +25,12 @@ fi
 
 header "Spec Completeness Check"
 
-SEEDS_DIR="$PROJECT_ROOT/.ouroboros/seeds"
+SEEDS_DIR="$PROJECT_ROOT/.harness/ouroboros/seeds"
 VIOLATIONS=0
 
 # Check if seeds directory exists
 if [ ! -d "$SEEDS_DIR" ]; then
-  warn "No .ouroboros/seeds/ directory found"
+  warn "No .harness/ouroboros/seeds/ directory found"
   warn "Run /interview then /seed to create a specification"
   exit 0  # Not a hard failure — spec is optional
 fi

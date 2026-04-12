@@ -14,7 +14,7 @@ description: Generate layer-aware technical design document from seed spec. USE 
 ### Phase 1: 탐색 (Explore)
 
 1. **프로젝트 현황 파악**
-   - 관련 문서 확인: `docs/`, `ARCHITECTURE_INVARIANTS.md`, seed spec (`.ouroboros/seeds/`)
+   - 관련 문서 확인: `docs/`, `ARCHITECTURE_INVARIANTS.md`, seed spec (`.harness/ouroboros/seeds/`)
    - 현재 코드베이스 구조와 상태를 파악합니다
    - 기존 레이어 분리 상태를 점검합니다
 

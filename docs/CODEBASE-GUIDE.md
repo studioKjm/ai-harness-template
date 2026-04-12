@@ -148,7 +148,7 @@ ambiguity = 1.0 - Σ(clarity_i × weight_i)
 게이트: ambiguity ≤ 0.2 이어야 /seed 진행 가능
 ```
 
-**출력**: `.ouroboros/interviews/YYYY-MM-DD-HH-MM.yaml`
+**출력**: `.harness/ouroboros/interviews/YYYY-MM-DD-HH-MM.yaml`
 
 ### 3.2 /seed — 불변 명세 생성
 
@@ -237,7 +237,7 @@ Stage 3: Judgment (선택적)
 └── 리뷰 준비 (YES / NO)
 ```
 
-**출력**: `.ouroboros/evaluations/eval-{seed-version}-{date}.yaml`
+**출력**: `.harness/ouroboros/evaluations/eval-{seed-version}-{date}.yaml`
 
 ### 3.6 /evolve — 진화 루프
 
@@ -545,7 +545,7 @@ harness test-scaffold --stack  # AC → 테스트 스캐폴드 생성
 - **명확도 자동 점수화**: 답변 길이, 시그널 키워드, 구체성 휴리스틱으로 0~1 점수 계산
 - **감쇠 수익**: 같은 차원에 답변이 쌓일수록 기여도 감소 (`remaining × delta`)
 - **의사결정/가정 자동 추출**: 정규식 패턴으로 "will use", "assuming" 등 감지
-- **출력**: `.ouroboros/interviews/YYYY-MM-DD-HH-MM.yaml`
+- **출력**: `.harness/ouroboros/interviews/YYYY-MM-DD-HH-MM.yaml`
 
 #### Ontology Extractor (`ontology/extractor.py`)
 
@@ -767,7 +767,7 @@ my-project/
 │   ├── gates/rules/*.yaml          # 게이트 규칙
 │   ├── hooks/*.sh                  # Git hooks
 │   └── detect-violations.sh        # 통합 스캐너
-├── .ouroboros/
+├── .harness/ouroboros/
 │   ├── seeds/seed-v*.yaml          # 불변 시드 스펙 (버전별)
 │   ├── interviews/*.yaml           # 인터뷰 기록
 │   ├── evaluations/*.yaml          # 평가 결과
@@ -792,13 +792,13 @@ my-project/
     │           질문 → 답변 → 차원별 명확도 추적
     │           ambiguity ≤ 0.2 → 통과
     ▼
-.ouroboros/interviews/YYYY-MM-DD.yaml
+.harness/ouroboros/interviews/YYYY-MM-DD.yaml
     │
     ▼
 /seed ──────── Seed Architect 에이전트
     │           인터뷰 → 온톨로지 추출 → 불변 명세
     ▼
-.ouroboros/seeds/seed-v1.yaml
+.harness/ouroboros/seeds/seed-v1.yaml
     │
     ▼
 /trd ───────── 논의 먼저 → 레이어별 설계 → 최종 문서
@@ -821,7 +821,7 @@ docs/TRD.md
 /evaluate ──── Evaluator 에이전트
     │           Stage 1 (Mechanical) → Stage 2 (Semantic) → Stage 3 (Judgment)
     ▼
-.ouroboros/evaluations/eval-seed-v1-date.yaml
+.harness/ouroboros/evaluations/eval-seed-v1-date.yaml
     │
     ├── PASS → git commit → pre-commit 게이트 → push → CI 게이트
     │
@@ -887,7 +887,7 @@ drift_score: 0.0 (정합) ~ 1.0 (완전 이탈)
 | `gates/check-layers.sh` | 3-tier 레이어 분리 검사 | lib/colors.sh |
 | `gates/check-secrets.sh` | 시크릿 패턴 탐지 | lib/colors.sh |
 | `gates/check-structure.sh` | 파일 배치 규칙 검사 | gates/rules/structure.yaml, lib/colors.sh |
-| `gates/check-spec.sh` | 시드 스펙 완성도 | .ouroboros/seeds/*.yaml |
+| `gates/check-spec.sh` | 시드 스펙 완성도 | .harness/ouroboros/seeds/*.yaml |
 | `gates/check-complexity.sh` | 코드 복잡도 측정 | lib/colors.sh |
 | `gates/check-deps.sh` | 의존성 취약점 위임 | npm/pip-audit/govulncheck/cargo |
 | `gates/install-hooks.sh` | git pre-commit 설치 | .git/hooks/ |
@@ -912,11 +912,11 @@ drift_score: 0.0 (정합) ~ 1.0 (완전 이탈)
 
 | 파일 | 커맨드 | 에이전트 | 출력물 |
 |------|--------|---------|--------|
-| `interview.md` | `/interview` | Interviewer | `.ouroboros/interviews/*.yaml` |
-| `seed.md` | `/seed` | Seed Architect | `.ouroboros/seeds/seed-v*.yaml` |
+| `interview.md` | `/interview` | Interviewer | `.harness/ouroboros/interviews/*.yaml` |
+| `seed.md` | `/seed` | Seed Architect | `.harness/ouroboros/seeds/seed-v*.yaml` |
 | `trd.md` | `/trd` | (Executor) | `docs/TRD.md` |
 | `run.md` | `/run` | Executor | 구현 코드 + 테스트 |
-| `evaluate.md` | `/evaluate` | Evaluator | `.ouroboros/evaluations/*.yaml` |
+| `evaluate.md` | `/evaluate` | Evaluator | `.harness/ouroboros/evaluations/*.yaml` |
 | `evolve.md` | `/evolve` | Evolver | 규칙 업데이트 + seed-v{N+1} |
 | `unstuck.md` | `/unstuck` | 5개 에이전트 | 다관점 분석 |
 | `pm.md` | `/pm` | PM | PRD 문서 |

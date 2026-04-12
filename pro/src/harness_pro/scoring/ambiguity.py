@@ -141,7 +141,7 @@ class AmbiguityScorer:
         self.console.print(table)
 
     def _load_latest_interview(self) -> dict | None:
-        interviews_dir = self.project_root / ".ouroboros" / "interviews"
+        interviews_dir = self.project_root / ".harness" / "ouroboros" / "interviews"
         if not interviews_dir.exists():
             return None
         files = sorted(interviews_dir.glob("*.yaml"), reverse=True)
@@ -154,8 +154,8 @@ class AmbiguityScorer:
         if self.CHECKLIST_PATH.exists():
             with open(self.CHECKLIST_PATH) as f:
                 return yaml.safe_load(f)
-        # Fallback: look in project's .ouroboros
-        alt = self.project_root / ".ouroboros" / "scoring" / "ambiguity-checklist.yaml"
+        # Fallback: look in project's .harness/ouroboros
+        alt = self.project_root / ".harness" / "ouroboros" / "scoring" / "ambiguity-checklist.yaml"
         if alt.exists():
             with open(alt) as f:
                 return yaml.safe_load(f)

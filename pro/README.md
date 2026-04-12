@@ -57,15 +57,6 @@ harness status
 ```
 your-project/
 ├── (Lite harness files)
-├── .ouroboros/
-│   ├── seeds/                    # Immutable seed specs (YAML)
-│   ├── interviews/               # Interview records
-│   ├── evaluations/              # Evaluation results
-│   ├── scoring/
-│   │   └── ambiguity-checklist.yaml
-│   ├── templates/
-│   │   └── seed-spec.yaml
-│   └── session.db                # SQLite session store
 ├── .claude/
 │   ├── commands/                 # Slash commands
 │   │   ├── interview.md
@@ -80,13 +71,22 @@ your-project/
 │       ├── ontologist.md
 │       └── ...
 └── .harness/
-    ├── (Lite gates)
     ├── gates/
+    │   ├── (Lite gates)
     │   └── check-spec.sh         # Spec completeness gate
-    └── pro-hooks/
-        ├── keyword-detector.py
-        ├── drift-monitor.py
-        └── session-start.py
+    ├── pro-hooks/
+    │   ├── keyword-detector.py
+    │   ├── drift-monitor.py
+    │   └── session-start.py
+    └── ouroboros/
+        ├── seeds/                # Immutable seed specs (YAML)
+        ├── interviews/           # Interview records
+        ├── evaluations/          # Evaluation results
+        ├── scoring/
+        │   └── ambiguity-checklist.yaml
+        ├── templates/
+        │   └── seed-spec.yaml
+        └── session.db            # SQLite session store
 ```
 
 ## Python Package

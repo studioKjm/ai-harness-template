@@ -201,7 +201,7 @@ class EvaluationPipeline:
     def _collect_source_files(self) -> list[Path]:
         """Collect all source code files in the project."""
         extensions = {".py", ".ts", ".tsx", ".js", ".jsx", ".go", ".rs", ".java", ".kt"}
-        exclude_dirs = {".git", "node_modules", "__pycache__", ".next", "dist", "build", ".harness", ".ouroboros"}
+        exclude_dirs = {".git", "node_modules", "__pycache__", ".next", "dist", "build", ".harness"}
         files = []
 
         for ext in extensions:
@@ -399,7 +399,7 @@ class EvaluationPipeline:
             self.console.print(f"    [red]- {issue}[/red]")
 
     def _load_latest_seed(self) -> dict | None:
-        seeds_dir = self.project_root / ".ouroboros" / "seeds"
+        seeds_dir = self.project_root / ".harness" / "ouroboros" / "seeds"
         if not seeds_dir.exists():
             return None
         files = sorted(seeds_dir.glob("seed-v*.yaml"), reverse=True)
@@ -426,7 +426,7 @@ class EvaluationPipeline:
             pass  # Audit logging should never break the pipeline
 
     def _save_result(self, result: EvaluationResult) -> None:
-        evals_dir = self.project_root / ".ouroboros" / "evaluations"
+        evals_dir = self.project_root / ".harness" / "ouroboros" / "evaluations"
         evals_dir.mkdir(parents=True, exist_ok=True)
 
         filename = f"eval-{result.seed_ref}-{datetime.now().strftime('%Y%m%d-%H%M')}.yaml"

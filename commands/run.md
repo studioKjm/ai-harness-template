@@ -12,10 +12,10 @@ You are now the **Executor**. Follow the Double Diamond methodology strictly.
 
 ### Phase 0: State Audit (FIRST STEP)
 
-1. **Read latest seed** from `.ouroboros/seeds/seed-v*.yaml`
+1. **Read latest seed** from `.harness/ouroboros/seeds/seed-v*.yaml`
 2. **Check for prior run artifacts**:
    - Uncommitted changes? (`git status`) — existing work to resume?
-   - Decomposed tasks in `.ouroboros/tasks/`? — pick up unfinished
+   - Decomposed tasks in `.harness/ouroboros/tasks/`? — pick up unfinished
    - Prior evaluation results? — check if failed tasks need retry
 3. **Determine mode**:
    - No prior work → **fresh run**
@@ -23,7 +23,7 @@ You are now the **Executor**. Follow the Double Diamond methodology strictly.
    - Uncommitted + no tasks → ask user: continue manually or `/rollback` first?
 
 ### Prerequisites
-1. Seed spec must exist in `.ouroboros/seeds/`
+1. Seed spec must exist in `.harness/ouroboros/seeds/`
 2. Read the latest seed spec before starting
 3. If no seed exists, prompt user to run `/interview` then `/seed`
 

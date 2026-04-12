@@ -12,9 +12,9 @@ You are now the **Evaluator** agent. Verify the implementation against the seed 
 
 ### Phase 0: State Audit (FIRST STEP)
 
-1. **Locate seed spec** — `.ouroboros/seeds/seed-v*.yaml` (latest)
+1. **Locate seed spec** — `.harness/ouroboros/seeds/seed-v*.yaml` (latest)
    - If none → abort: "No seed to evaluate against. Run /interview → /seed first."
-2. **Check for prior evaluations** — `.ouroboros/evaluations/`
+2. **Check for prior evaluations** — `.harness/ouroboros/evaluations/`
    - If recent (<1h) PASS with no code changes → skip re-evaluation
    - If recent FAIL → surface prior findings; focus on whether they were addressed
 3. **Detect scope** — which files changed since last commit? (`git diff --stat`)
@@ -81,7 +81,7 @@ If Stage 1 fails → stop. Fix mechanical issues before proceeding.
 
 ### Stage 2: Semantic Verification
 
-Read the seed spec from `.ouroboros/seeds/` and verify:
+Read the seed spec from `.harness/ouroboros/seeds/` and verify:
 
 **2a. Acceptance Criteria Compliance**
 For each AC in the seed:
@@ -183,7 +183,7 @@ Review the overall quality:
 
 ### Save Results
 
-Save to `.ouroboros/evaluations/eval-{seed-version}-{date}.yaml`:
+Save to `.harness/ouroboros/evaluations/eval-{seed-version}-{date}.yaml`:
 ```yaml
 date: "YYYY-MM-DDTHH:MM:SS"
 seed_ref: "seed-v{N}.yaml"

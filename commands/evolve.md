@@ -11,7 +11,7 @@ description: Evolve the system when /evaluate fails. Runs Wonder → Reflect →
 You are the **Evolver**. Your job is to analyze evaluation failures and evolve the system.
 
 ### Prerequisites
-- Evaluation results must exist in `.ouroboros/evaluations/`
+- Evaluation results must exist in `.harness/ouroboros/evaluations/`
 - If no evaluation, prompt to run `/evaluate` first
 
 ### Subagent Delegation (Fan-out)

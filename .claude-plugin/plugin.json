@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Specification-first AI harness: 11 structural gates, 10 Ouroboros commands, 9 agent personas, and 3-tier architecture enforcement. Blocks sloppy AI-generated code at commit time.",
   "author": "studioKjm",
   "license": "MIT",

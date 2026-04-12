@@ -106,7 +106,7 @@ class InterviewEngine:
 
     def __init__(self, project_root: Path = Path(".")):
         self.project_root = Path(project_root)
-        self.ouroboros_dir = self.project_root / ".ouroboros"
+        self.ouroboros_dir = self.project_root / ".harness" / "ouroboros"
         self.interviews_dir = self.ouroboros_dir / "interviews"
         self.interviews_dir.mkdir(parents=True, exist_ok=True)
 

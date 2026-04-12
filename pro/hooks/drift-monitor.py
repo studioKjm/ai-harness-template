@@ -21,14 +21,14 @@ def main():
     if file_path.suffix not in code_extensions:
         return
 
-    # Find project root (walk up looking for .ouroboros/)
+    # Find project root (walk up looking for .harness/)
     project_root = file_path.parent
     for _ in range(10):
-        if (project_root / ".ouroboros").is_dir():
+        if (project_root / ".harness").is_dir():
             break
         parent = project_root.parent
         if parent == project_root:
-            return  # No .ouroboros found
+            return  # No .harness found
         project_root = parent
     else:
         return
@@ -44,7 +44,7 @@ def main():
             print(f"[Harness] Moderate drift: {score:.2f} — {file_path.name}")
     except ImportError:
         # harness_pro not installed, try lightweight check
-        seeds_dir = project_root / ".ouroboros" / "seeds"
+        seeds_dir = project_root / ".harness" / "ouroboros" / "seeds"
         if seeds_dir.exists() and list(seeds_dir.glob("seed-v*.yaml")):
             # Basic check: just note that drift monitoring is available
             pass

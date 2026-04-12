@@ -221,7 +221,7 @@ class OntologyExtractor:
 
     def generate_seed(self, interview_data: dict, project_root: Path) -> Path:
         """Generate a seed spec YAML from interview data."""
-        seeds_dir = project_root / ".ouroboros" / "seeds"
+        seeds_dir = project_root / ".harness" / "ouroboros" / "seeds"
         seeds_dir.mkdir(parents=True, exist_ok=True)
 
         # Determine version

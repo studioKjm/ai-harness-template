@@ -46,7 +46,7 @@ jobs:
 
       - name: Spec completeness
         run: |
-          if [ -d ".ouroboros/seeds" ]; then
+          if [ -d ".harness/ouroboros/seeds" ]; then
             bash .harness/gates/check-spec.sh .
           else
             echo "::notice::No seeds found — skipping spec gate."

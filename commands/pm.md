@@ -8,7 +8,7 @@ description: Generate a stakeholder-facing PRD from interview results. USE WHEN 
 
 ## Instructions
 
-Read the latest interview from `.ouroboros/interviews/` and generate a PRD.
+Read the latest interview from `.harness/ouroboros/interviews/` and generate a PRD.
 
 ### PRD Structure
 

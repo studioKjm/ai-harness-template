@@ -16,7 +16,7 @@ def main():
     cwd = Path.cwd()
     project_root = cwd
     for _ in range(10):
-        if (project_root / ".ouroboros").is_dir():
+        if (project_root / ".harness").is_dir():
             break
         parent = project_root.parent
         if parent == project_root:
@@ -40,7 +40,7 @@ def main():
 
     except ImportError:
         # harness_pro not installed
-        ouroboros_dir = project_root / ".ouroboros"
+        ouroboros_dir = project_root / ".harness" / "ouroboros"
         if ouroboros_dir.exists():
             seeds = list((ouroboros_dir / "seeds").glob("seed-v*.yaml")) if (ouroboros_dir / "seeds").exists() else []
             if seeds:

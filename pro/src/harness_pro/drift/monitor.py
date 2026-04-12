@@ -161,7 +161,7 @@ class DriftMonitor:
         return 0.0
 
     def _load_latest_seed(self) -> dict | None:
-        seeds_dir = self.project_root / ".ouroboros" / "seeds"
+        seeds_dir = self.project_root / ".harness" / "ouroboros" / "seeds"
         if not seeds_dir.exists():
             return None
         files = sorted(seeds_dir.glob("seed-v*.yaml"), reverse=True)

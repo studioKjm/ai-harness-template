@@ -39,7 +39,7 @@ get_source_files() {
     -not -path "*/node_modules/*" -not -path "*/.next/*" \
     -not -path "*/dist/*" -not -path "*/build/*" \
     -not -path "*/__pycache__/*" -not -path "*/.harness/*" \
-    -not -path "*/.ouroboros/*" -not -name "*.min.*" \
+    -not -name "*.min.*" \
     2>/dev/null
 }
 

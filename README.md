@@ -488,27 +488,26 @@ my-project/
 │       ├── interviewer.md ... hacker.md
 │       └── topology.yaml            # 에이전트 협업 패턴
 ├── .harness/
-│   ├── gates/                       # 게이트 스크립트 (11개)
+│   ├── gates/                       # 게이트 스크립트 (기본 7 + opt-in 4)
 │   │   ├── check-boundaries.sh      check-layers.sh
 │   │   ├── check-secrets.sh         check-security.sh
 │   │   ├── check-structure.sh       check-spec.sh
-│   │   ├── check-complexity.sh      check-deps.sh
-│   │   ├── check-mutation.sh        check-performance.sh
-│   │   ├── check-ai-antipatterns.sh
+│   │   ├── check-deps.sh
+│   │   ├── GATES.md                  # 기본/옵션 게이트 설명
 │   │   └── rules/
 │   │       ├── boundaries.yaml      # 의존성 + 레이어 규칙
 │   │       └── structure.yaml       # 파일 배치 규칙
 │   ├── hooks/
 │   │   ├── post-edit-lint.sh        # 편집 후 자동 린트
 │   │   └── pre-commit-gate.sh       # 커밋 전 게이트
-│   └── detect-violations.sh         # 전체 게이트 통합 실행
-├── .ouroboros/
-│   ├── seeds/seed-v*.yaml           # 불변 시드 스펙 (버전별)
-│   ├── interviews/*.yaml            # 인터뷰 기록
-│   ├── evaluations/*.yaml           # 평가 결과
-│   ├── templates/seed-spec.yaml
-│   ├── scoring/ambiguity-checklist.yaml
-│   └── session.db                   # Pro: SQLite EventStore
+│   ├── detect-violations.sh         # 전체 게이트 통합 실행
+│   └── ouroboros/                   # Ouroboros 워크스페이스 (v2)
+│       ├── seeds/seed-v*.yaml       # 불변 시드 스펙 (버전별)
+│       ├── interviews/*.yaml        # 인터뷰 기록
+│       ├── evaluations/*.yaml       # 평가 결과
+│       ├── templates/seed-spec.yaml
+│       ├── scoring/ambiguity-checklist.yaml
+│       └── session.db               # Pro: SQLite EventStore
 └── .github/
     └── workflows/harness-gates.yaml  # CI 워크플로우 (선택)
 ```

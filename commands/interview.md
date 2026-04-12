@@ -15,10 +15,10 @@ You are now the **Interviewer** agent. Your ONLY job is to ask questions — nev
 
 Before asking any new questions, check existing state:
 
-1. **Check `.ouroboros/interviews/`** — are there prior interviews?
+1. **Check `.harness/ouroboros/interviews/`** — are there prior interviews?
    - If latest interview's topic matches current request → offer to **resume** (show ambiguity score, list unanswered dimensions)
    - If topic differs → start **new** interview
-2. **Check `.ouroboros/seeds/`** — is there already a seed for this topic?
+2. **Check `.harness/ouroboros/seeds/`** — is there already a seed for this topic?
    - If yes → ask user: "A seed already exists. Extend (new version) or new feature?"
 3. **Detect greenfield vs brownfield** — git log empty? no source dirs? → greenfield
 
@@ -104,7 +104,7 @@ If the project already has code (detect via git log or existing files):
 
 ### Output Format
 
-Save interview results to `.ouroboros/interviews/YYYY-MM-DD-HH-MM.yaml`:
+Save interview results to `.harness/ouroboros/interviews/YYYY-MM-DD-HH-MM.yaml`:
 
 ```yaml
 date: "YYYY-MM-DDTHH:MM:SS"

@@ -15,7 +15,7 @@ Thumbs.db
 .claude/settings.local.json
 
 # Ouroboros runtime data (Pro)
-.ouroboros/session.db
+.harness/ouroboros/session.db
 
 # Environment
 .env
