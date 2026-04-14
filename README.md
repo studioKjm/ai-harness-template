@@ -12,6 +12,12 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 [![AI Harness Engineering Template 데모](https://img.youtube.com/vi/bMjHYh0FZZI/maxresdefault.jpg)](https://youtu.be/bMjHYh0FZZI)
 
+https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
+
+
+
+
+
 ▶️ [YouTube에서 보기](https://youtu.be/bMjHYh0FZZI)
 
 ---
