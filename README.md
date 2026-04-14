@@ -8,6 +8,12 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 > "프롬프트는 부탁이고, 하네스는 강제다."
 > "프롬프팅을 멈추고, 명세부터 시작하라."
 
+## 데모 영상
+
+[![AI Harness Engineering Template 데모](https://img.youtube.com/vi/bMjHYh0FZZI/maxresdefault.jpg)](https://youtu.be/bMjHYh0FZZI)
+
+▶️ [YouTube에서 보기](https://youtu.be/bMjHYh0FZZI)
+
 ---
 
 ## 목차
