@@ -3,7 +3,7 @@
 > 한국어 · [English](./README.en.md)
 
 AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 환경을 만드는 템플릿.
-**Harness(구조적 가드레일) + Ouroboros(명세 기반 개발) + 3-Tier Architecture(클린 아키텍처)**를 통합.
+**Harness(구조적 가드레일) + Ouroboros(명세 기반 개발) + 3-Tier Layered Architecture**를 통합.
 
 > "프롬프트는 부탁이고, 하네스는 강제다."
 > "프롬프팅을 멈추고, 명세부터 시작하라."

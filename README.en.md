@@ -3,7 +3,7 @@
 > [한국어 README](./README.md) · English
 
 A template that lets AI agents work autonomously — safely and within structural boundaries.
-Combines **Harness (structural guardrails) + Ouroboros (spec-first development) + 3-Tier Architecture (clean architecture)**.
+Combines **Harness (structural guardrails) + Ouroboros (spec-first development) + 3-Tier Layered Architecture**.
 
 > "Prompts are requests. Harnesses are enforcement."
 > "Stop prompting. Start specifying."
