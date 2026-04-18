@@ -112,6 +112,33 @@ AC-003: Presentation (UI component) + Logic (formatting)
 
 **Output**: Design decisions with layer mapping (inline)
 
+### Pair Mode (opt-in)
+
+> `HARNESS_ENABLE_PAIR_MODE=1` 환경변수 설정 시에만 활성화.
+> 미설정 시 아래 기존 Deliver 방식으로 동작 (v2.0.0 호환).
+
+Pair Mode 활성 시 Phase 4를 다음으로 대체:
+
+1. **Navigator** 에이전트가 현재 AC에 대한 플랜 3개 생성
+2. Navigator가 최적 플랜 선택 후 Driver(메인 에이전트)에게 지시
+3. Driver가 구현 + 테스트
+4. **Test Designer** 에이전트가 AC 기반으로 독립 테스트 설계 (구현 코드 미참조)
+5. Navigator가 결과 검토:
+   - Pass → 다음 AC
+   - Fail → 다른 플랜 선택 (최대 5회 왕복)
+6. **AC 3개 완료마다 자동 `/review` 실행** (드리프트 조기 발견)
+
+```
+Navigator ──(플랜 선택)──▶ Driver ──(구현)──▶ Navigator
+    ▲                                           │
+    └───────────(피드백: Pass/Fail/Redirect)─────┘
+
+별도: Test Designer ──(AC 기반 독립 테스트)──▶ tests/
+```
+
+Pair Mode 비활성 시 (기본):
+- 아래 기존 Phase 4 Deliver 그대로 실행
+
 ### Phase 4: Deliver (구현)
 
 실제 코드를 작성합니다:

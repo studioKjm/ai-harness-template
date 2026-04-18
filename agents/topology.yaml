@@ -71,6 +71,28 @@ workflows:
         parallel: true
     merge: "synthesis of all perspectives → new seed version"
 
+  # Pair Mode workflows (opt-in: HARNESS_ENABLE_PAIR_MODE=1)
+  run-pair:
+    pattern: "navigator-driver"
+    agents: [navigator, architect, test-designer]
+    description: "Navigator plans, Driver implements, Test Designer validates independently. PairCoder-inspired."
+    condition: "HARNESS_ENABLE_PAIR_MODE=1"
+    flow:
+      - agent: navigator
+        role: "plan generation (3 plans per AC) + selection + review"
+        input: "AC + seed spec + failure history"
+        output: "selected plan + driver instructions"
+      - agent: architect
+        role: "driver — implements code following navigator's plan"
+        input: "navigator instructions + seed spec"
+        output: "implemented code"
+      - agent: test-designer
+        role: "independent test design from AC only (no implementation access)"
+        input: "AC + seed spec (NOT implementation code)"
+        output: "tests/"
+    feedback: "Driver result → Navigator review → next AC or plan switch (max 5 rounds)"
+    auto-review: "every 3 ACs → /review (lightweight gate check)"
+
   unstuck:
     pattern: "expert-pool"
     agents: [contrarian, simplifier, researcher, architect, hacker]
@@ -115,6 +137,12 @@ patterns:
     when: "복잡한 멀티에이전트 작업 조율 시"
     risk: "감독 에이전트가 병목이 될 수 있음"
 
+  navigator-driver:
+    description: "짝 프로그래밍 패턴. Navigator가 플랜 3개 생성 → 최적 선택 → Driver 지시 → 결과 검토 → 반복"
+    when: "HARNESS_ENABLE_PAIR_MODE=1 일 때 /run 내부에서"
+    risk: "플랜 생성에 토큰이 추가 소모됨. 단순 태스크에서는 오버헤드"
+    reference: "PairCoder (ASE 2024) + AgentCoder (2024)"
+
 # ─── Agent Capabilities Matrix ─────────────────────────────────────
 capabilities:
   interviewer:
@@ -152,3 +180,11 @@ capabilities:
   hacker:
     can: [find_workarounds, bypass_constraints_safely, prototype]
     cannot: [make_permanent_decisions]
+
+  navigator:
+    can: [generate_plans, select_optimal_plan, review_results, direct_driver]
+    cannot: [write_code, modify_files, run_tests]
+
+  test-designer:
+    can: [design_tests, write_test_files, analyze_ac]
+    cannot: [read_implementation_code, modify_source, make_design_decisions]
