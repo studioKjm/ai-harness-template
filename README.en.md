@@ -12,8 +12,8 @@ Combines **Harness (structural guardrails) + Ouroboros (spec-first development) 
 
 | Version | Date | Highlights |
 |---------|------|-----------|
-| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-18 | **Pair Mode** — Navigator-Driver pair programming + independent Test Designer + `/review` lightweight mid-run verification. Opt-in via `HARNESS_ENABLE_PAIR_MODE=1`. Based on PairCoder (ASE 2024) + AgentCoder. |
-| [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | **Unified layout** — `.ouroboros/` merged under `.harness/ouroboros/`. Opt-in gates separated. (BREAKING) |
+| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-18 | `experimental` **Pair Mode** — Navigator-Driver pair programming + independent Test Designer + `/review` lightweight mid-run verification. Opt-in via `HARNESS_ENABLE_PAIR_MODE=1`. Based on PairCoder (ASE 2024) + AgentCoder. |
+| [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` **Unified layout** — `.ouroboros/` merged under `.harness/ouroboros/`. Opt-in gates separated. (BREAKING) |
 | [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | Initial release — 11 gates, 10 commands, 9 agents, 3-tier architecture enforcement. |
 
 ---
