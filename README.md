@@ -8,6 +8,14 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 > "프롬프트는 부탁이고, 하네스는 강제다."
 > "프롬프팅을 멈추고, 명세부터 시작하라."
 
+## Releases
+
+| 버전 | 날짜 | 주요 변경 |
+|------|------|----------|
+| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-18 | **Pair Mode** — Navigator-Driver 짝 프로그래밍 + 독립 Test Designer + `/review` 경량 중간 검증 커맨드. `HARNESS_ENABLE_PAIR_MODE=1`로 opt-in. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
+| [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
+| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
+
 ## 데모 영상
 
 **1분 요약**
