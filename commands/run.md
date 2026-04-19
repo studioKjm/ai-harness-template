@@ -129,9 +129,15 @@ seed spec의 각 AC에 `complexity` 필드가 있으면:
 | `medium` | **ON** — Navigator 플랜 요청 | 대안 비교의 가치가 있음 |
 | `high` | **ON** — Navigator 필수 + Test Designer 필수 | 결함 방지가 중요 |
 
-`complexity` 필드가 없으면:
+`complexity` 필드가 없는 AC는 **low로 간주**한다 (Direct 구현).
+
+seed spec 전체에 complexity 필드가 하나도 없으면:
 - AC 수 ≤ 3 → 전부 직접 구현 (Pair Mode OFF)
 - AC 수 ≥ 4 → 사용자에게 Pair Mode 사용 여부를 묻는다
+
+`HARNESS_ENABLE_PAIR_MODE=1` 환경변수가 설정된 경우:
+- complexity 필드와 관계없이 **모든 AC에 Pair Mode 적용** (하위 호환)
+- 단, 이 방식은 비권장. AC별 complexity 지정을 권장한다
 
 ### Pair Mode 진행 시 — 사용자에게 안내
 
@@ -241,6 +247,7 @@ SendMessage({
 - **RETRY** → Navigator의 수정 지시에 따라 코드 수정 → 2c로 돌아감
 - **SWITCH** → Navigator가 제시한 새 플랜으로 재구현 → 2b로 돌아감
 - **ESCALATE** → `/unstuck` 실행 또는 사용자에게 판단 요청
+- **무응답/에러** → Navigator가 응답하지 않으면 해당 AC를 Direct 모드로 전환하고 사용자에게 알림
 
 ### Step 3: Test Designer 스폰 (high complexity AC가 1개 이상일 때)
 

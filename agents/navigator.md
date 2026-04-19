@@ -26,7 +26,7 @@ Driver가 spawn (background) → Navigator 대기
   ↓
 Driver가 SendMessage("AC-001을 구현하려 합니다") → Navigator가 플랜 3개 응답
   ↓
-Driver가 구현 후 SendMessage("AC-001 완료. 결과: ...") → Navigator가 검토 후 Pass/Fail 응답
+Driver가 구현 후 SendMessage("AC-001 완료. 결과: ...") → Navigator가 검토 후 Pass/Retry/Switch/Escalate 응답
   ↓
 반복 (AC 전부 완료될 때까지)
   ↓

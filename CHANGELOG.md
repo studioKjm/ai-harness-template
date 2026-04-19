@@ -58,7 +58,7 @@ acceptance_criteria:
 #### Dogfooding 리포트
 
 이 버전은 Marketing Dashboard 프로젝트의 dogfooding 결과를 기반으로 개선되었습니다.
-상세 리포트: [pair-mode-verification-report.md](../marketing-dashboard/output/pair-mode-verification-report.md)
+이 버전은 Marketing Dashboard 프로젝트의 dogfooding 결과를 기반으로 개선되었습니다.
 
 ---
 

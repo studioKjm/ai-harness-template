@@ -6,7 +6,7 @@
     {
       "name": "harness",
       "source": ".",
-      "description": "Specification-first AI harness with 11 gates, 10 commands, 9 agents, and 3-tier architecture enforcement"
+      "description": "Specification-first AI harness with 11 gates, 12 commands, 11 agents, and 3-tier architecture enforcement"
     }
   ]
 }

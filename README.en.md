@@ -106,7 +106,7 @@ Commands and agents are included; the wizard handles gates, hooks, and templates
 
 ## Core Components
 
-### Ouroboros Workflow (10 commands)
+### Ouroboros Workflow (12 commands)
 
 ```
 /interview → /seed → /trd → /decompose → /run → /evaluate
@@ -185,7 +185,7 @@ Upgrade to Pro when 2+ apply:
 | Feature | Lite | Pro |
 |---|:---:|:---:|
 | Zero deps (bash only) | ✓ | - |
-| 11 gates, 10 commands, 11 agents | ✓ | ✓ |
+| 11 gates, 12 commands, 11 agents | ✓ | ✓ |
 | Ambiguity score engine | - | ✓ |
 | Ontology similarity tracking | - | ✓ |
 | SQLite session persistence | - | ✓ |
@@ -218,7 +218,7 @@ harness/
 ├── .claude-plugin/     # Plugin manifest (for /plugin install)
 ├── init.sh             # Lite installer
 ├── commands/           # 10 Ouroboros slash commands
-├── agents/             # 9 agent personas + topology.yaml
+├── agents/             # 11 agent personas + topology.yaml
 ├── gates/              # 11 gate scripts + rules + GATES.md
 ├── boundaries/         # Permission presets + hooks
 ├── ouroboros/          # Seed spec templates (full + minimal)

@@ -59,8 +59,9 @@ esac
 
 # Pair mode requires experimental
 if [ "$PAIR_MODE" != "off" ] && [ "$VERSION" = "stable" ]; then
-  warn "Pair Mode requires --version experimental. Setting version to experimental."
-  VERSION="experimental"
+  error "Pair Mode requires --version experimental."
+  error "Use: --version experimental --pair-mode $PAIR_MODE"
+  exit 1
 fi
 
 # ─── Preflight checks ───────────────────────────────────────────────
@@ -379,6 +380,8 @@ if [ -n "$EXTRA_GATES" ]; then
     if [ -f "$HARNESS_DIR/$gate_file" ]; then
       cp "$HARNESS_DIR/$gate_file" "$HARNESS_TARGET/gates/"
       step "Installed opt-in gate: check-${gate_name}.sh"
+    else
+      warn "Unknown gate: '${gate_name}'. Available opt-in gates: complexity, mutation, performance, ai-antipatterns"
     fi
   done
 fi

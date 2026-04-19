@@ -14,11 +14,15 @@ argument-hint: [target-project-path]
 
 ### Phase 0: 사전 확인
 
-1. 인자로 받은 경로(없으면 현재 디렉토리)를 `TARGET_PATH`로 설정
+1. 인자로 받은 경로를 `TARGET_PATH`로 설정
+   - **인자가 없으면**: "설치할 프로젝트 경로를 입력해주세요." 라고 AskUserQuestion으로 묻는다
+   - **현재 디렉토리가 하네스 레포 자체**이면: 반드시 대상 경로를 묻는다 (하네스 레포에 자기 자신을 설치하면 안 됨)
 2. 해당 경로에 이미 `.harness/` 디렉토리가 있는지 확인
-   - 있으면: "이미 설치되어 있습니다. 재설치하시겠습니까?" 확인
+   - 있으면: "이미 설치되어 있습니다. 재설치(설정 변경) / 취소 중 선택하세요." 확인
+   - 기존 `.harness/ouroboros/seeds/`의 시드 스펙은 보존한다 (불변 원칙)
 3. 하네스 저장소 경로를 탐색 (보통 상위 디렉토리 또는 별도 위치)
    - `init.sh` 파일이 있는 디렉토리를 `HARNESS_REPO`로 기록
+   - 찾지 못하면: "하네스 저장소 경로를 입력해주세요." 라고 묻는다
 
 ### Phase 1: 핵심 선택 (Round 1)
 
@@ -29,7 +33,7 @@ AskUserQuestion을 호출하여 다음 3개 질문을 **한 번에** 묻는다:
   header: "Version"
   options:
     - label: "Stable (v2.0.0) (Recommended)"
-      description: "검증된 안정 버전. 11 게이트, 10 커맨드, 9 에이전트, 3-tier 강제."
+      description: "검증된 안정 버전. 11 게이트, 12 커맨드, 9 에이전트, 3-tier 강제."
     - label: "Experimental (v2.1.0)"
       description: "Stable + Pair Mode (Navigator-Driver 짝프로그래밍, 독립 Test Designer). AC complexity 기반 선택적 활성화."
 

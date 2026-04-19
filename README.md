@@ -37,7 +37,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 - [Ouroboros 워크플로우](#ouroboros-워크플로우)
 - [11개 게이트](#11개-게이트)
 - [3-Tier Layered Architecture](#3-tier-layered-architecture)
-- [9개 에이전트 페르소나 + Orchestration](#9개-에이전트-페르소나)
+- [11개 에이전트 페르소나 + Orchestration](#11개-에이전트-페르소나)
 - [Lite vs Pro 비교](#lite-vs-pro)
 - [Pro 버전 상세](#pro-버전-상세)
 - [설치 상세](#설치-상세)
@@ -181,7 +181,7 @@ Claude Code에서 **클론한 하네스 디렉토리**를 열고:
       └────────────────────────── ontology 수렴까지 반복 ─────────────────────────────────────┘
 ```
 
-### 10개 커맨드
+### 12개 커맨드
 
 | Command | Description | Agent | Subagent |
 |---------|-------------|-------|----------|
@@ -462,7 +462,7 @@ Driver(메인 에이전트)
 
 ```
 pro/src/harness_pro/
-├── cli.py                  # Typer CLI (10개 커맨드)
+├── cli.py                  # Typer CLI (12개 커맨드)
 ├── interview/engine.py     # 인터뷰 + 명확도 자동 점수화
 ├── scoring/ambiguity.py    # 모호성 가중 수식 계산
 ├── ontology/extractor.py   # 엔티티/관계/액션 추출 + 유사도
