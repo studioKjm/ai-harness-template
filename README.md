@@ -12,7 +12,7 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 | 버전 | 날짜 | 주요 변경 |
 |------|------|----------|
-| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-18 | `experimental` **Pair Mode** — Navigator-Driver 짝 프로그래밍 + 독립 Test Designer + `/review` 경량 중간 검증 커맨드. `HARNESS_ENABLE_PAIR_MODE=1`로 opt-in. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
+| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
 | [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
 | [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
 
@@ -85,29 +85,53 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 
 ## Quick Start
 
-### 옵션 A: Claude Code 플러그인 (가장 간단)
+### 옵션 A: 설치 마법사 (권장)
+
+```bash
+git clone https://github.com/studioKjm/ai-harness-template.git
+```
+
+Claude Code에서 프로젝트 디렉토리를 열고:
+
+```
+/install /path/to/your-project
+```
+
+대화형 마법사가 8단계 질문을 통해 최적의 설정을 안내합니다:
+
+```
+① 버전 선택        Stable (v2.0.0) / Experimental (v2.1.0)
+② 트랙 선택        Lite (bash only) / Pro (Python)
+③ 권한 프리셋      Strict / Standard / Permissive
+④ Pair Mode       Auto / Always On / Off  (Experimental만)
+⑤ 게이트 구성      기본 7개 + opt-in 선택
+⑥ Git Hooks       설치 / 스킵
+⑦ CI/CD           GitHub Actions 설치 / 스킵
+⑧ 스택 감지        자동 / 수동 선택
+```
+
+### 옵션 B: 원라인 설치
+
+```bash
+# Stable + Lite (기본값)
+./ai-harness-template/init.sh /path/to/your-project --yes
+
+# Experimental + Pair Mode Auto
+./ai-harness-template/init.sh /path/to/your-project --yes \
+  --version experimental --pair-mode auto
+
+# Pro 추가 설치
+./ai-harness-template/pro/install.sh /path/to/your-project
+```
+
+### 옵션 C: Claude Code 플러그인 (커맨드/에이전트만)
 
 ```
 /plugin marketplace add studioKjm/ai-harness-template
 /plugin install harness@studioKjm-harness
 ```
 
-커맨드/에이전트만 설치됩니다. 게이트·훅·템플릿까지 원하면 옵션 B 사용.
-
-### 옵션 B: 풀 설치 (권장)
-
-```bash
-# === Lite (bash only, zero dependencies) ===
-git clone https://github.com/studioKjm/ai-harness-template.git
-./ai-harness-template/init.sh /path/to/your-project
-
-# === Pro (Python-enhanced) ===
-./ai-harness-template/pro/install.sh /path/to/your-project
-
-# === Pro + MCP Server ===
-pip install ai-harness-pro[mcp]
-harness mcp-serve  # AI 에이전트에서 게이트를 MCP 도구로 호출
-```
+커맨드/에이전트만 설치됩니다. 게이트·훅·템플릿까지 원하면 옵션 A 또는 B 사용.
 
 ---
 
@@ -302,7 +326,7 @@ MCP         → harness mcp-serve (외부 에이전트에서 호출)
 
 ---
 
-## 9개 에이전트 페르소나
+## 11개 에이전트 페르소나
 
 ### 코어 (4개)
 
@@ -323,6 +347,38 @@ MCP         → harness mcp-serve (외부 에이전트에서 호출)
 | **Architect** | "구조가 원인인가?" | `/unstuck` |
 | **Hacker** | "우회로는?" | `/unstuck` |
 
+### Pair Mode (2개) — v2.1.0
+
+| Agent | Role | Lifecycle | When |
+|-------|------|-----------|------|
+| **Navigator** | 플랜 3개 생성, 최적 선택, 결과 검토 | Background (SendMessage) | `/run` Pair Mode (medium/high AC) |
+| **Test Designer** | AC 기반 독립 테스트 설계 (구현 코드 미참조) | One-shot (worktree 격리) | `/run` Pair Mode (high AC) |
+
+### Pair Mode 작동 방식
+
+```
+seed spec의 AC complexity에 따라 자동 판단:
+
+  low complexity   → Direct 구현 (기존 방식)
+  medium complexity → Navigator 플랜 + Driver 구현
+  high complexity  → Navigator + Driver + Test Designer (worktree 격리)
+
+Mixed Mode: low를 먼저 구현 → medium/high를 Pair로 구현
+```
+
+```
+Driver(메인 에이전트)
+  │
+  ├─ spawn Navigator (background, persistent)
+  │   ├─ SendMessage: "AC-001 플랜 요청" → Navigator 응답: 3 plans
+  │   ├─ Driver 구현
+  │   ├─ SendMessage: "결과 보고" → Navigator 응답: Pass/Retry/Switch
+  │   └─ 반복 (최대 5회 왕복)
+  │
+  └─ spawn Test Designer (worktree, one-shot)
+      └─ seed spec + AC만으로 독립 테스트 작성 (src/ 접근 불가)
+```
+
 ### Orchestration Topology (`agents/topology.yaml`)
 
 | 패턴 | 설명 | 사용 |
@@ -331,6 +387,7 @@ MCP         → harness mcp-serve (외부 에이전트에서 호출)
 | **Fan-out** | 병렬 실행 + 결과 병합 | `/evolve` (3 subagent 동시) |
 | **Expert Pool** | 전문가 풀 전원 투입 | `/unstuck` (5 관점) |
 | **Producer-Reviewer** | 생산-검증 분리 | `/run` → `/evaluate` |
+| **Navigator-Driver** | 짝프로그래밍 (양방향 통신) | `/run` Pair Mode |
 
 ---
 
@@ -361,7 +418,7 @@ MCP         → harness mcp-serve (외부 에이전트에서 호출)
 | 설치 | `./init.sh` | `./pro/install.sh` |
 | 11개 게이트 | O | O |
 | 10개 슬래시 커맨드 | O (AI 기반) | O (AI + 엔진) |
-| 9 에이전트 페르소나 | O | O |
+| 11 에이전트 페르소나 | O | O |
 | 실제 모호성 점수 계산 | - | O |
 | 온톨로지 유사도 추적 | - | O |
 | 3단계 자동 평가 | - | O |

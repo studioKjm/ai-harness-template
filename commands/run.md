@@ -1,5 +1,5 @@
 ---
-description: Execute seed spec via Double Diamond (Discover → Define → Design → Deliver). USE AFTER /decompose. Enforces D→L→P implementation order, writes tests immediately, runs gates continuously.
+description: Execute seed spec via Double Diamond (Discover → Define → Design → Deliver). USE AFTER /decompose. Enforces D→L→P implementation order, writes tests immediately, runs gates continuously. Supports Pair Mode for medium/high complexity ACs.
 ---
 
 # /run — Double Diamond Execution
@@ -21,6 +21,7 @@ You are now the **Executor**. Follow the Double Diamond methodology strictly.
    - No prior work → **fresh run**
    - Partial work + decomposed tasks → **resume** (skip completed, continue pending)
    - Uncommitted + no tasks → ask user: continue manually or `/rollback` first?
+4. **Determine Pair Mode** (아래 참조)
 
 ### Prerequisites
 1. Seed spec must exist in `.harness/ouroboros/seeds/`
@@ -47,7 +48,7 @@ Main Agent (Executor)
   ├─ Subagent(Explore) → Phase 1: 코드베이스 탐색, 영향 범위 분석
   ├─ Subagent(Explore) → Phase 1: 관련 패턴/라이브러리 조사  (병렬)
   ├─ Main              → Phase 2-3: 정의 및 설계 (subagent 결과 기반)
-  └─ Main              → Phase 4: 구현 (직접 수행)
+  └─ Main              → Phase 4: 구현 (직접 수행 또는 Pair Mode)
 ```
 
 **Claude Code에서 subagent 사용**:
@@ -112,34 +113,40 @@ AC-003: Presentation (UI component) + Logic (formatting)
 
 **Output**: Design decisions with layer mapping (inline)
 
-### Pair Mode (opt-in)
+---
 
-> `HARNESS_ENABLE_PAIR_MODE=1` 환경변수 설정 시에만 활성화.
-> 미설정 시 아래 기존 Deliver 방식으로 동작 (v2.0.0 호환).
+## Phase 4: Deliver — Mode Selection
 
-Pair Mode 활성 시 Phase 4를 다음으로 대체:
+Phase 3 완료 후, 각 AC의 `complexity` 필드를 확인하여 실행 모드를 결정한다.
 
-1. **Navigator** 에이전트가 현재 AC에 대한 플랜 3개 생성
-2. Navigator가 최적 플랜 선택 후 Driver(메인 에이전트)에게 지시
-3. Driver가 구현 + 테스트
-4. **Test Designer** 에이전트가 AC 기반으로 독립 테스트 설계 (구현 코드 미참조)
-5. Navigator가 결과 검토:
-   - Pass → 다음 AC
-   - Fail → 다른 플랜 선택 (최대 5회 왕복)
-6. **AC 3개 완료마다 자동 `/review` 실행** (드리프트 조기 발견)
+### Pair Mode 판단 기준
+
+seed spec의 각 AC에 `complexity` 필드가 있으면:
+
+| complexity | Pair Mode | 이유 |
+|-----------|-----------|------|
+| `low` | **OFF** — 직접 구현 | 오버헤드 > 이점 |
+| `medium` | **ON** — Navigator 플랜 요청 | 대안 비교의 가치가 있음 |
+| `high` | **ON** — Navigator 필수 + Test Designer 필수 | 결함 방지가 중요 |
+
+`complexity` 필드가 없으면:
+- AC 수 ≤ 3 → 전부 직접 구현 (Pair Mode OFF)
+- AC 수 ≥ 4 → 사용자에게 Pair Mode 사용 여부를 묻는다
+
+### Pair Mode 진행 시 — 사용자에게 안내
 
 ```
-Navigator ──(플랜 선택)──▶ Driver ──(구현)──▶ Navigator
-    ▲                                           │
-    └───────────(피드백: Pass/Fail/Redirect)─────┘
+═══ Pair Mode 활성화 ════════════════════════════
+AC 중 medium/high complexity가 감지되었습니다.
+Navigator-Driver 패턴으로 진행합니다.
 
-별도: Test Designer ──(AC 기반 독립 테스트)──▶ tests/
+Pair Mode AC: {목록}
+Direct AC:    {목록}
 ```
 
-Pair Mode 비활성 시 (기본):
-- 아래 기존 Phase 4 Deliver 그대로 실행
+---
 
-### Phase 4: Deliver (구현)
+## Phase 4a: Direct Deliver (기존 방식 — low complexity)
 
 실제 코드를 작성합니다:
 - Design에서 결정한 대로 구현
@@ -147,7 +154,7 @@ Pair Mode 비활성 시 (기본):
 - 테스트 작성 (가능한 경우)
 - 시드 스펙과의 drift를 최소화
 
-**Rules during Deliver**:
+**Rules during Direct Deliver**:
 1. 시드 스펙에 없는 기능을 추가하지 않는다
 2. AC를 만족하지 않는 구현은 미완성이다
 3. 각 AC 완료 시 체크 표시한다
@@ -155,7 +162,164 @@ Pair Mode 비활성 시 (기본):
 5. **각 모듈 구현 직후 해당 테스트를 작성한다** — 일괄 작성 금지
 6. **레이어 경계를 넘는 import가 발생하면 즉시 수정한다**
 
-### Progress Tracking
+---
+
+## Phase 4b: Pair Mode Deliver (medium/high complexity)
+
+### Step 1: Navigator 스폰
+
+**반드시 이 코드를 실행한다** — 건너뛰지 않는다:
+
+```
+Agent({
+  description: "Navigator for Pair Mode",
+  subagent_type: "navigator",
+  run_in_background: true,
+  prompt: `당신은 Pair Mode의 Navigator입니다.
+이 프로젝트의 seed spec과 코드베이스를 파악한 뒤, Driver(나)의 메시지를 기다리세요.
+
+Seed spec 위치: .harness/ouroboros/seeds/seed-v*.yaml
+아키텍처 규칙: ARCHITECTURE_INVARIANTS.md
+
+Driver가 AC를 보내면 플랜 3개를 생성하고 최적 플랜을 선택하여 응답하세요.
+Driver가 구현 결과를 보내면 검토 후 Pass/Retry/Switch/Escalate로 응답하세요.
+
+navigator.md 의 Behavior Rules를 정확히 따르세요.`
+})
+```
+
+Navigator의 agent ID를 기록한다 (이후 SendMessage에 사용).
+
+### Step 2: AC별 루프 — Pair Mode AC에 대해 반복
+
+**complexity가 medium 또는 high인 AC 각각에 대해:**
+
+#### 2a. Navigator에게 플랜 요청
+
+```
+SendMessage({
+  to: "{navigator_agent_id}",
+  message: `AC-{XXX}를 구현하려 합니다.
+
+AC 내용: {AC description}
+Priority: {must/should/nice}
+Complexity: {medium/high}
+현재 코드 상태: {관련 파일 목록과 주요 구조}
+이전 실패 이력: {있으면 기록, 없으면 "없음"}
+
+플랜 3개를 생성하고 최적 플랜을 선택해주세요.`
+})
+```
+
+#### 2b. Navigator 응답 수신 → 플랜에 따라 구현
+
+Navigator가 반환한 `Driver 지시사항`을 따라 구현한다:
+1. 지시된 레이어 순서대로 코드 작성
+2. 지시된 인터페이스/시그니처를 준수
+3. 지시된 테스트 전략대로 테스트 작성
+
+#### 2c. Navigator에게 결과 보고
+
+```
+SendMessage({
+  to: "{navigator_agent_id}",
+  message: `AC-{XXX} 구현 완료.
+
+변경된 파일:
+- {파일 경로}: {변경 내용 요약}
+
+테스트 결과: {pass/fail}
+발견된 이슈: {있으면 기록}
+
+검토해주세요.`
+})
+```
+
+#### 2d. Navigator 검토 결과에 따라 분기
+
+- **PASS** → 다음 AC로 진행
+- **RETRY** → Navigator의 수정 지시에 따라 코드 수정 → 2c로 돌아감
+- **SWITCH** → Navigator가 제시한 새 플랜으로 재구현 → 2b로 돌아감
+- **ESCALATE** → `/unstuck` 실행 또는 사용자에게 판단 요청
+
+### Step 3: Test Designer 스폰 (high complexity AC가 1개 이상일 때)
+
+**모든 Pair Mode AC 구현 완료 후**, Test Designer를 worktree 격리로 스폰한다:
+
+```
+Agent({
+  description: "Independent test design",
+  subagent_type: "test-designer",
+  isolation: "worktree",
+  prompt: `당신은 독립 Test Designer입니다.
+아래 seed spec과 AC 목록을 기반으로 테스트를 설계하세요.
+구현 코드(src/)를 읽지 마세요 — AC 스펙만으로 테스트를 작성합니다.
+
+=== SEED SPEC ===
+{seed spec 전문을 여기에 붙여넣기}
+
+=== 테스트 프레임워크 ===
+{jest/vitest/pytest 등}
+
+=== 테스트 디렉토리 ===
+tests/
+
+test-designer.md의 규칙을 따르세요.`
+})
+```
+
+Test Designer가 반환한 테스트 파일을 메인 브랜치에 병합한다.
+
+### Step 4: AC 카운터 기반 자동 /review
+
+**Pair Mode AC 3개를 완료할 때마다**, 다음을 실행한다:
+
+```
+═══ Auto-Review Checkpoint ══════════════════════
+{N}개의 AC가 완료되었습니다. 드리프트 점검을 실행합니다.
+
+체크리스트:
+- [ ] 구현이 seed spec의 goal과 일치하는가?
+- [ ] constraints의 must/must_not을 위반하지 않았는가?
+- [ ] 레이어 경계를 넘는 import가 없는가?
+- [ ] 온톨로지의 엔티티/액션 명명이 일관적인가?
+- [ ] 추가된 기능이 seed spec의 scope.mvp 안에 있는가?
+```
+
+하나라도 위반이 발견되면 사용자에게 보고하고, 계속 진행할지 확인한다.
+
+### Step 5: Navigator 세션 종료
+
+모든 AC 완료 후:
+
+```
+SendMessage({
+  to: "{navigator_agent_id}",
+  message: "모든 AC 완료. 최종 세션 요약을 보내주세요."
+})
+```
+
+Navigator의 세션 요약을 기록한다.
+
+---
+
+## Mixed Mode: Direct + Pair 혼합
+
+한 seed spec 내에서 low/medium/high가 섞여 있을 때:
+
+```
+구현 순서:
+1. low complexity AC를 먼저 Direct로 구현 (빠르게 기반 완성)
+2. medium/high AC를 Pair Mode로 구현 (Navigator 플랜 기반)
+3. Test Designer 스폰 (high가 있을 때)
+
+이유: low AC가 기반 인프라(데이터 모델, 기본 API)를 제공하면,
+medium/high AC에서 Navigator가 더 나은 플랜을 세울 수 있다.
+```
+
+---
+
+## Progress Tracking
 
 각 Phase 전환 시 표시:
 ```
@@ -168,23 +332,31 @@ Pair Mode 비활성 시 (기본):
 ═══ Phase: Design ═════════════════════════════
 [설계 중...]
 
-═══ Phase: Deliver ════════════════════════════
-[구현 중...]
-AC-001: [x] completed
-AC-002: [ ] in progress
-AC-003: [ ] pending
+═══ Phase: Deliver (Mixed Mode) ═══════════════
+[Direct] AC-001: [x] completed (low)
+[Direct] AC-002: [x] completed (low)
+[Pair]   AC-003: [x] completed (medium) — Plan B, 1회 시도
+[Pair]   AC-004: [ ] in progress (high) — Plan A, 2회 시도 중
+[Pair]   AC-005: [ ] pending (medium)
 ```
 
 ### Completion
 
 When all ACs are addressed:
 ```
-Double Diamond complete.
+═══ Double Diamond Complete ═══════════════════
 
 Acceptance Criteria:
-  AC-001: DONE
-  AC-002: DONE
-  AC-003: DONE
+  AC-001: DONE (direct)
+  AC-002: DONE (direct)
+  AC-003: DONE (pair, Plan B, 1 attempt)
+  AC-004: DONE (pair, Plan A, 3 attempts)
+
+Pair Mode Stats:
+  Navigator 왕복: {총 횟수}
+  플랜 전환: {횟수}
+  Escalation: {횟수}
+  Test Designer 테스트: {N}개
 
 Files changed: {list}
 

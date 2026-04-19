@@ -1,5 +1,5 @@
 # Agent Orchestration Topology
-# Defines how 9 agents coordinate across the Ouroboros workflow.
+# Defines how agents coordinate across the Ouroboros workflow.
 #
 # Patterns:
 #   pipeline    — Sequential execution, output of one feeds next
@@ -7,6 +7,7 @@
 #   expert-pool — Best agent selected based on context
 #   producer-reviewer — One creates, another validates
 #   supervisor  — One agent delegates to others
+#   navigator-driver — Pair programming with persistent feedback loop
 
 # ─── Ouroboros Workflow Topology ────────────────────────────────────
 workflows:
@@ -45,6 +46,55 @@ workflows:
         input: "plan + seed spec"
         output: "implemented code"
 
+  # ─── Pair Mode (v2.1.0) ──────────────────────────────────────────
+  # Activated per-AC based on complexity field in seed spec.
+  # NOT a global toggle — mixed mode (direct + pair) is default.
+  run-pair:
+    pattern: "navigator-driver"
+    agents: [navigator, architect, test-designer]
+    description: >
+      Navigator plans, Driver implements, Test Designer validates independently.
+      Navigator runs as a persistent background agent with SendMessage communication.
+      Test Designer runs in worktree isolation to prevent implementation bias.
+    activation: "AC complexity field: medium or high"
+    flow:
+      - step: "spawn-navigator"
+        agent: navigator
+        lifecycle: "background (persistent throughout session)"
+        communication: "SendMessage (bidirectional with Driver)"
+        input: "seed spec + architecture invariants + codebase structure"
+        state: "maintains failure history, attempt counts, completed AC list"
+
+      - step: "ac-loop"
+        description: "For each medium/high complexity AC"
+        substeps:
+          - "Driver → SendMessage → Navigator: AC 플랜 요청"
+          - "Navigator → 응답: 3 plans + selected plan + driver instructions"
+          - "Driver: implements following navigator instructions"
+          - "Driver → SendMessage → Navigator: 구현 결과 보고"
+          - "Navigator → 응답: Pass / Retry / Switch / Escalate"
+        max_roundtrips: 5
+        on_max_exceeded: "/unstuck"
+
+      - step: "test-designer"
+        agent: test-designer
+        lifecycle: "one-shot (spawned after all pair ACs complete)"
+        isolation: "worktree (physically prevents reading implementation code)"
+        input: "seed spec + AC list (embedded in prompt, NOT file paths)"
+        output: "tests/ directory with AC-based test files"
+
+      - step: "auto-review"
+        trigger: "every 3 completed pair-mode ACs"
+        action: "inline drift check against seed spec"
+
+    mixed_mode:
+      description: >
+        When seed spec contains both low and medium/high complexity ACs:
+        1. Direct deliver all low-complexity ACs first (build foundation)
+        2. Spawn Navigator for medium/high ACs (better plans with foundation in place)
+        3. Spawn Test Designer after all pair ACs complete (high complexity only)
+      order: "low → medium → high"
+
   evaluate:
     pattern: "producer-reviewer"
     agents: [evaluator]
@@ -70,28 +120,6 @@ workflows:
         role: "gather evidence"
         parallel: true
     merge: "synthesis of all perspectives → new seed version"
-
-  # Pair Mode workflows (opt-in: HARNESS_ENABLE_PAIR_MODE=1)
-  run-pair:
-    pattern: "navigator-driver"
-    agents: [navigator, architect, test-designer]
-    description: "Navigator plans, Driver implements, Test Designer validates independently. PairCoder-inspired."
-    condition: "HARNESS_ENABLE_PAIR_MODE=1"
-    flow:
-      - agent: navigator
-        role: "plan generation (3 plans per AC) + selection + review"
-        input: "AC + seed spec + failure history"
-        output: "selected plan + driver instructions"
-      - agent: architect
-        role: "driver — implements code following navigator's plan"
-        input: "navigator instructions + seed spec"
-        output: "implemented code"
-      - agent: test-designer
-        role: "independent test design from AC only (no implementation access)"
-        input: "AC + seed spec (NOT implementation code)"
-        output: "tests/"
-    feedback: "Driver result → Navigator review → next AC or plan switch (max 5 rounds)"
-    auto-review: "every 3 ACs → /review (lightweight gate check)"
 
   unstuck:
     pattern: "expert-pool"
@@ -138,10 +166,19 @@ patterns:
     risk: "감독 에이전트가 병목이 될 수 있음"
 
   navigator-driver:
-    description: "짝 프로그래밍 패턴. Navigator가 플랜 3개 생성 → 최적 선택 → Driver 지시 → 결과 검토 → 반복"
-    when: "HARNESS_ENABLE_PAIR_MODE=1 일 때 /run 내부에서"
-    risk: "플랜 생성에 토큰이 추가 소모됨. 단순 태스크에서는 오버헤드"
+    description: >
+      짝 프로그래밍 패턴.
+      Navigator를 background agent로 spawn → SendMessage로 양방향 통신.
+      AC별 플랜 3개 생성 → 최적 선택 → Driver 구현 → Navigator 검토 → 반복.
+      Test Designer는 worktree 격리로 구현 편향 없는 독립 테스트 설계.
+    when: "AC complexity가 medium 또는 high일 때"
+    risk: "플랜 생성에 토큰이 추가 소모됨. low complexity AC에서는 오버헤드"
     reference: "PairCoder (ASE 2024) + AgentCoder (2024)"
+    v2_1_changes:
+      - "환경변수 토글 → AC complexity 기반 자동 판단"
+      - "단방향 Agent 호출 → SendMessage 기반 persistent 양방향 통신"
+      - "Test Designer: 경로 차단 지시 → worktree 물리적 격리"
+      - "Mixed Mode: low는 direct, medium/high만 pair"
 
 # ─── Agent Capabilities Matrix ─────────────────────────────────────
 capabilities:
@@ -182,9 +219,11 @@ capabilities:
     cannot: [make_permanent_decisions]
 
   navigator:
-    can: [generate_plans, select_optimal_plan, review_results, direct_driver]
+    can: [generate_plans, select_optimal_plan, review_results, direct_driver, maintain_failure_history]
     cannot: [write_code, modify_files, run_tests]
+    lifecycle: "persistent background agent (SendMessage communication)"
 
   test-designer:
-    can: [design_tests, write_test_files, analyze_ac]
+    can: [design_tests, write_test_files, analyze_ac, find_edge_cases]
     cannot: [read_implementation_code, modify_source, make_design_decisions]
+    lifecycle: "one-shot worktree-isolated agent"

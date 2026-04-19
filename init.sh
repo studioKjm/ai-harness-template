@@ -2,9 +2,15 @@
 # AI Harness Installer
 # Usage: ./init.sh [target-project-path] [options]
 # Options:
-#   --yes, -y           Skip all confirmations (use defaults)
-#   --preset PRESET     Permission preset: strict | standard | permissive (default: standard)
-#   --name NAME         Project name (default: target dirname)
+#   --yes, -y                Skip all confirmations (use defaults)
+#   --preset PRESET          Permission preset: strict | standard | permissive (default: standard)
+#   --name NAME              Project name (default: target dirname)
+#   --version VERSION        stable | experimental (default: stable)
+#   --pair-mode MODE         auto | on | off (default: off). Only with --version experimental
+#   --gates GATES            Comma-separated: default, +complexity, +performance, +ai-antipatterns
+#   --no-hooks               Skip pre-commit hook installation
+#   --no-ci                  Skip GitHub Actions workflow
+#   --stack STACK             auto | nextjs-django | nextjs-fastapi | nextjs-nestjs | python | nodejs
 # Detects tech stack, generates CLAUDE.md, installs gates & boundaries.
 
 set -euo pipefail
@@ -17,15 +23,45 @@ TARGET="."
 AUTO_YES=0
 PRESET=""
 CUSTOM_PROJECT_NAME=""
+VERSION="stable"
+PAIR_MODE="off"
+EXTRA_GATES=""
+SKIP_HOOKS=0
+SKIP_CI=0
+STACK_MODE="auto"
 while [ $# -gt 0 ]; do
   case "$1" in
     --yes|-y) AUTO_YES=1; shift ;;
     --preset) PRESET="$2"; shift 2 ;;
     --name) CUSTOM_PROJECT_NAME="$2"; shift 2 ;;
+    --version) VERSION="$2"; shift 2 ;;
+    --pair-mode) PAIR_MODE="$2"; shift 2 ;;
+    --gates) EXTRA_GATES="$2"; shift 2 ;;
+    --no-hooks) SKIP_HOOKS=1; shift ;;
+    --no-ci) SKIP_CI=1; shift ;;
+    --stack) STACK_MODE="$2"; shift 2 ;;
     -*) error "Unknown option: $1"; exit 1 ;;
     *) TARGET="$1"; shift ;;
   esac
 done
+
+# Validate version
+case "$VERSION" in
+  stable|experimental) ;;
+  *) error "Invalid version: $VERSION (must be stable|experimental)"; exit 1 ;;
+esac
+
+# Validate pair-mode
+case "$PAIR_MODE" in
+  auto|on|off) ;;
+  *) error "Invalid pair-mode: $PAIR_MODE (must be auto|on|off)"; exit 1 ;;
+esac
+
+# Pair mode requires experimental
+if [ "$PAIR_MODE" != "off" ] && [ "$VERSION" = "stable" ]; then
+  warn "Pair Mode requires --version experimental. Setting version to experimental."
+  VERSION="experimental"
+fi
 
 # ─── Preflight checks ───────────────────────────────────────────────
 if [ ! -d "$TARGET" ]; then
@@ -251,8 +287,23 @@ fi
 AGENTS_TARGET="$TARGET/.claude/agents"
 mkdir -p "$AGENTS_TARGET"
 agent_count=0
+
+# Pair Mode agents (navigator, test-designer) — experimental only
+PAIR_MODE_AGENTS="navigator.md test-designer.md"
+
 for agent in "$HARNESS_DIR/agents/"*.md; do
   [ -f "$agent" ] || continue
+  agent_basename="$(basename "$agent")"
+
+  # Skip pair mode agents if stable version
+  if [ "$VERSION" = "stable" ]; then
+    for pm_agent in $PAIR_MODE_AGENTS; do
+      if [ "$agent_basename" = "$pm_agent" ]; then
+        continue 2
+      fi
+    done
+  fi
+
   cp "$agent" "$AGENTS_TARGET/"
   agent_count=$((agent_count + 1))
 done
@@ -260,6 +311,9 @@ if [ "$agent_count" -eq 0 ]; then
   warn "No agent files found in $HARNESS_DIR/agents/"
 else
   success "Installed $agent_count agent personas"
+  if [ "$VERSION" = "experimental" ]; then
+    info "  Includes Pair Mode agents: navigator, test-designer"
+  fi
 fi
 
 # Copy topology.yaml if exists
@@ -316,6 +370,19 @@ done
 if [ -f "$HARNESS_DIR/gates/GATES.md" ]; then
   cp "$HARNESS_DIR/gates/GATES.md" "$HARNESS_TARGET/gates/"
 fi
+# Install opt-in gates if requested
+if [ -n "$EXTRA_GATES" ]; then
+  IFS=',' read -ra GATE_LIST <<< "$EXTRA_GATES"
+  for gate_name in "${GATE_LIST[@]}"; do
+    gate_name=$(echo "$gate_name" | tr -d ' ' | sed 's/^+//')
+    gate_file="gates/check-${gate_name}.sh"
+    if [ -f "$HARNESS_DIR/$gate_file" ]; then
+      cp "$HARNESS_DIR/$gate_file" "$HARNESS_TARGET/gates/"
+      step "Installed opt-in gate: check-${gate_name}.sh"
+    fi
+  done
+fi
+
 chmod +x "$HARNESS_TARGET/gates/"*.sh 2>/dev/null || true
 
 # Copy hooks
@@ -341,7 +408,9 @@ success "Installed gates and hooks to .harness/"
 # ─── Step 10: Install pre-commit hook ─────────────────────────────
 header "Step 10: Installing pre-commit hook"
 
-if [ -d "$TARGET/.git" ]; then
+if [ "$SKIP_HOOKS" -eq 1 ]; then
+  info "Skipped (--no-hooks)"
+elif [ -d "$TARGET/.git" ]; then
   "$HARNESS_DIR/gates/install-hooks.sh" "$TARGET"
   success "Pre-commit hook installed"
 else
@@ -352,7 +421,9 @@ fi
 # ─── Step 11: Install GitHub Actions workflow (optional) ─────────
 header "Step 11: GitHub Actions CI"
 
-if [ -f "$HARNESS_DIR/templates/github-actions-gates.yaml" ]; then
+if [ "$SKIP_CI" -eq 1 ]; then
+  info "Skipped (--no-ci)"
+elif [ -f "$HARNESS_DIR/templates/github-actions-gates.yaml" ]; then
   if [ "$AUTO_YES" -eq 1 ]; then
     INSTALL_GHA="y"
   else
@@ -385,8 +456,32 @@ for entry in "${ENTRIES[@]}"; do
 done
 success ".gitignore updated"
 
+# ─── Step 13: Pair Mode configuration ────────────────────────────
+if [ "$VERSION" = "experimental" ] && [ "$PAIR_MODE" != "off" ]; then
+  header "Step 13: Pair Mode configuration"
+  PAIR_ENV_FILE="$TARGET/.env.local"
+  touch "$PAIR_ENV_FILE"
+  if ! grep -q "HARNESS_PAIR_MODE" "$PAIR_ENV_FILE" 2>/dev/null; then
+    echo "HARNESS_PAIR_MODE=$PAIR_MODE" >> "$PAIR_ENV_FILE"
+  fi
+  if [ "$PAIR_MODE" = "on" ]; then
+    if ! grep -q "HARNESS_ENABLE_PAIR_MODE" "$PAIR_ENV_FILE" 2>/dev/null; then
+      echo "HARNESS_ENABLE_PAIR_MODE=1" >> "$PAIR_ENV_FILE"
+    fi
+  fi
+  success "Pair Mode: $PAIR_MODE"
+fi
+
 # ─── Done ──────────────────────────────────────────────────────────
 header "Installation Complete"
+echo ""
+echo "  Configuration:"
+echo "    Version:     $VERSION"
+echo "    Track:       Lite"
+echo "    Preset:      $PRESET"
+if [ "$VERSION" = "experimental" ]; then
+  echo "    Pair Mode:   $PAIR_MODE"
+fi
 echo ""
 echo "  Files created:"
 echo "    CLAUDE.md                       - AI agent context file"
@@ -395,8 +490,8 @@ echo "    docs/code-convention.yaml       - Coding conventions"
 echo "    docs/adr.yaml                   - Architecture Decision Records"
 echo "    .claude/settings.local.json     - Claude Code permissions ($PRESET)"
 echo "    .claude/commands/               - Ouroboros slash commands"
-echo "    .claude/agents/                 - 9 agent personas"
-echo "    .harness/                       - Gates (7 default), hooks, tools, and Ouroboros workspace"
+echo "    .claude/agents/                 - $agent_count agent personas"
+echo "    .harness/                       - Gates, hooks, tools, and Ouroboros workspace"
 echo ""
 echo "  Ouroboros Workflow:"
 echo "    /interview 'topic'  → Socratic interview (clarify requirements)"
@@ -405,14 +500,15 @@ echo "    /run                → Execute Double Diamond"
 echo "    /evaluate           → 3-stage verification"
 echo "    /evolve             → Evolution loop"
 echo ""
+if [ "$VERSION" = "experimental" ] && [ "$PAIR_MODE" != "off" ]; then
+  echo "  Pair Mode:"
+  echo "    /seed에서 AC에 complexity: medium|high를 지정하면"
+  echo "    /run 시 Navigator-Driver 패턴이 자동 활성화됩니다."
+  echo ""
+fi
 echo "  Next steps:"
 echo "    1. Edit CLAUDE.md to add project-specific rules"
 echo "    2. Edit ARCHITECTURE_INVARIANTS.md to define your invariants"
 echo "    3. Try /interview 'feature description' to start spec-first workflow"
-echo "    4. Edit .harness/gates/rules/boundaries.yaml for import rules"
-echo "    5. Run '.harness/detect-violations.sh' to check current violations"
-echo ""
-echo "  Want Python-powered features (real scoring, drift monitoring, persistence)?"
-echo "    Run: $HARNESS_DIR/pro/install.sh $TARGET"
 echo ""
 success "Harness installed successfully!"

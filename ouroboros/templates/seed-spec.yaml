@@ -25,6 +25,10 @@ acceptance_criteria:
     description: ""    # Must be testable
     verification: ""   # manual | automated | both
     priority: ""       # must | should | nice
+    complexity: ""     # low | medium | high — determines Pair Mode activation
+                       # low: 단순 CRUD, 설정, UI 스타일링 → Pair Mode 스킵
+                       # medium: 비즈니스 로직, 데이터 변환, API 통합 → Pair Mode 선택적
+                       # high: 결제/정산, 보안, 복잡한 상태 관리, 외부 연동 → Pair Mode 강제
 
 ontology:
   entities:

@@ -12,9 +12,9 @@ Combines **Harness (structural guardrails) + Ouroboros (spec-first development) 
 
 | Version | Date | Highlights |
 |---------|------|-----------|
-| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-18 | `experimental` **Pair Mode** — Navigator-Driver pair programming + independent Test Designer + `/review` lightweight mid-run verification. Opt-in via `HARNESS_ENABLE_PAIR_MODE=1`. Based on PairCoder (ASE 2024) + AgentCoder. |
+| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | **Pair Mode** — AC complexity-based selective activation, Navigator as persistent background agent (SendMessage bidirectional), Test Designer with worktree isolation, Mixed Mode (direct+pair), auto /review checkpoints. Based on PairCoder (ASE 2024) + AgentCoder. |
 | [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` **Unified layout** — `.ouroboros/` merged under `.harness/ouroboros/`. Opt-in gates separated. (BREAKING) |
-| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | Initial release — 11 gates, 10 commands, 9 agents, 3-tier architecture enforcement. |
+| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | Initial release — 11 gates, 10 commands, 11 agents, 3-tier architecture enforcement. |
 
 ---
 
@@ -30,29 +30,53 @@ AI coding agents are fast but undisciplined. They hallucinate APIs, skip layers,
 
 ## Quick Start
 
-### Option A — Claude Code Plugin (simplest)
+### Option A — Install Wizard (recommended)
+
+```bash
+git clone https://github.com/studioKjm/ai-harness-template.git
+```
+
+Open your project in Claude Code and run:
+
+```
+/install /path/to/your-project
+```
+
+The interactive wizard guides you through 8 steps:
+
+```
+① Version        Stable (v2.0.0) / Experimental (v2.1.0)
+② Track          Lite (bash only) / Pro (Python)
+③ Permissions    Strict / Standard / Permissive
+④ Pair Mode      Auto / Always On / Off  (Experimental only)
+⑤ Gates          Default 7 + opt-in selection
+⑥ Git Hooks      Install / Skip
+⑦ CI/CD          GitHub Actions / Skip
+⑧ Stack          Auto-detect / Manual
+```
+
+### Option B — One-line install
+
+```bash
+# Stable + Lite (defaults)
+./ai-harness-template/init.sh /path/to/your-project --yes
+
+# Experimental + Pair Mode Auto
+./ai-harness-template/init.sh /path/to/your-project --yes \
+  --version experimental --pair-mode auto
+
+# Pro (Python 3.11+, adds scoring/persistence/MCP)
+./ai-harness-template/pro/install.sh /path/to/your-project
+```
+
+### Option C — Claude Code Plugin (commands/agents only)
 
 ```
 /plugin marketplace add studioKjm/ai-harness-template
 /plugin install harness@studioKjm-harness
 ```
 
-Installs 10 commands + 9 agents. For the full toolkit (gates, hooks, templates), use Option B.
-
-### Option B — Full install
-
-```shell
-git clone https://github.com/studioKjm/ai-harness-template.git
-
-# Lite (bash only, zero dependencies)
-./ai-harness-template/init.sh /path/to/your-project
-
-# Non-interactive install with defaults
-./ai-harness-template/init.sh /path/to/your-project --yes
-
-# Pro (Python 3.11+, adds scoring/persistence/MCP/observability)
-./ai-harness-template/pro/install.sh /path/to/your-project
-```
+Installs commands + agents only. For gates, hooks, and templates, use Option A or B.
 
 ---
 
@@ -97,11 +121,18 @@ Plus `/rollback`, `/unstuck`, `/pm` for edge cases.
 
 See [`gates/GATES.md`](./gates/GATES.md) for details.
 
-### 9 Agent Personas
+### 11 Agent Personas
 
-`interviewer`, `ontologist`, `seed-architect`, `evaluator`, `contrarian`, `simplifier`, `researcher`, `architect`, `hacker`
+**Core:** `interviewer`, `ontologist`, `seed-architect`, `evaluator`
+**Extended:** `contrarian`, `simplifier`, `researcher`, `architect`, `hacker`
+**Pair Mode (v2.1.0):** `navigator`, `test-designer`
 
-Orchestration patterns (see `agents/topology.yaml`): Pipeline · Fan-out · Expert Pool · Producer-Reviewer.
+Orchestration patterns (see `agents/topology.yaml`): Pipeline · Fan-out · Expert Pool · Producer-Reviewer · **Navigator-Driver**.
+
+**Pair Mode:** Activated per-AC based on `complexity` field in seed spec.
+- `low` → Direct implementation
+- `medium` → Navigator plans + Driver implements (SendMessage loop)
+- `high` → Navigator + Driver + Test Designer (worktree-isolated independent tests)
 
 ### 3-Tier Architecture (enforced)
 
@@ -130,7 +161,7 @@ Upgrade to Pro when 2+ apply:
 | Feature | Lite | Pro |
 |---|:---:|:---:|
 | Zero deps (bash only) | ✓ | - |
-| 11 gates, 10 commands, 9 agents | ✓ | ✓ |
+| 11 gates, 10 commands, 11 agents | ✓ | ✓ |
 | Ambiguity score engine | - | ✓ |
 | Ontology similarity tracking | - | ✓ |
 | SQLite session persistence | - | ✓ |

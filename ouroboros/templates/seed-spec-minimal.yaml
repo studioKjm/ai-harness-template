@@ -19,9 +19,11 @@ acceptance_criteria:       # At least 2, each testable
   - id: "AC-001"
     description: ""
     verification: "automated"   # automated | manual
+    complexity: "low"           # low | medium | high — Pair Mode 활성화 기준
   - id: "AC-002"
     description: ""
     verification: "automated"
+    complexity: "low"
 
 # ─── Optional fields (fill if relevant) ──────────────────────────
 

@@ -85,6 +85,10 @@ acceptance_criteria:
     description: "{testable criterion}"
     verification: "manual | automated | both"
     priority: "must | should | nice"
+    complexity: "low | medium | high"
+    # low: 단순 CRUD, 설정, UI → Direct 구현
+    # medium: 비즈니스 로직, 데이터 변환 → Pair Mode 선택적
+    # high: 결제/보안/외부연동/복잡한 상태 → Pair Mode 강제
   - id: "AC-002"
     description: "..."
 
@@ -127,9 +131,20 @@ Before saving, verify:
 - [ ] At least 1 must_not constraint
 - [ ] At least 2 acceptance criteria
 - [ ] All AC are testable (not vague)
+- [ ] All AC have complexity field (low/medium/high)
 - [ ] Ontology has at least 1 entity
 - [ ] MVP scope is defined
 - [ ] No TODO/TBD placeholders
+
+### Complexity 판단 기준
+
+AC의 complexity를 다음 기준으로 판단:
+
+| Complexity | 기준 | 예시 |
+|-----------|------|------|
+| **low** | 단일 레이어, 명확한 입출력, 표준 패턴 | CRUD 엔드포인트, 정적 페이지, 설정 파일 |
+| **medium** | 2+ 레이어 관련, 비즈니스 규칙 포함, 데이터 변환 | 필터링/정렬 로직, API 통합, 데이터 집계 |
+| **high** | 3 레이어 전체, 외부 연동, 보안, 복잡한 상태 관리 | 결제/정산, 인증/권한, 실시간 통신, 트랜잭션 |
 
 ### Output
 
