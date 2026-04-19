@@ -30,19 +30,21 @@ AI coding agents are fast but undisciplined. They hallucinate APIs, skip layers,
 
 ## Quick Start
 
+The `/install` wizard is available regardless of which method you choose.
+
 ### Option A — Install Wizard (recommended)
 
 ```bash
 git clone https://github.com/studioKjm/ai-harness-template.git
 ```
 
-Open your project in Claude Code and run:
+Open the **cloned harness directory** in Claude Code, then run:
 
 ```
 /install /path/to/your-project
 ```
 
-The interactive wizard guides you through 8 steps:
+The interactive wizard guides you step by step:
 
 ```
 ① Version        Stable (v2.0.0) / Experimental (v2.1.0)
@@ -55,7 +57,11 @@ The interactive wizard guides you through 8 steps:
 ⑧ Stack          Auto-detect / Manual
 ```
 
+After installation, `/install` is also available from the target project (for re-install or config changes).
+
 ### Option B — One-line install
+
+Install directly via CLI flags without the wizard:
 
 ```bash
 # Stable + Lite (defaults)
@@ -69,14 +75,32 @@ The interactive wizard guides you through 8 steps:
 ./ai-harness-template/pro/install.sh /path/to/your-project
 ```
 
-### Option C — Claude Code Plugin (commands/agents only)
+<details>
+<summary>All init.sh flags</summary>
+
+| Flag | Values | Default | Description |
+|------|--------|---------|-------------|
+| `--yes`, `-y` | - | - | Skip all confirmations |
+| `--preset` | strict / standard / permissive | standard | Permission preset |
+| `--version` | stable / experimental | stable | Install version |
+| `--pair-mode` | auto / on / off | off | Pair Mode (experimental only) |
+| `--gates` | +complexity,+performance,+ai-antipatterns | - | Add opt-in gates |
+| `--no-hooks` | - | - | Skip Git pre-commit hook |
+| `--no-ci` | - | - | Skip GitHub Actions |
+| `--stack` | auto / nextjs-django / python / nodejs ... | auto | Stack detection |
+| `--name` | string | dirname | Project name |
+
+</details>
+
+### Option C — Claude Code Plugin
 
 ```
 /plugin marketplace add studioKjm/ai-harness-template
 /plugin install harness@studioKjm-harness
 ```
 
-Installs commands + agents only. For gates, hooks, and templates, use Option A or B.
+After plugin installation, run `/install` to launch the wizard.
+Commands and agents are included; the wizard handles gates, hooks, and templates.
 
 ---
 

@@ -85,19 +85,21 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 
 ## Quick Start
 
+어떤 방식으로 설치하든 `/install` 마법사를 사용할 수 있습니다.
+
 ### 옵션 A: 설치 마법사 (권장)
 
 ```bash
 git clone https://github.com/studioKjm/ai-harness-template.git
 ```
 
-Claude Code에서 프로젝트 디렉토리를 열고:
+Claude Code에서 **클론한 하네스 디렉토리**를 열고:
 
 ```
 /install /path/to/your-project
 ```
 
-대화형 마법사가 8단계 질문을 통해 최적의 설정을 안내합니다:
+대화형 마법사가 단계별 질문을 통해 최적의 설정을 안내합니다:
 
 ```
 ① 버전 선택        Stable (v2.0.0) / Experimental (v2.1.0)
@@ -110,7 +112,11 @@ Claude Code에서 프로젝트 디렉토리를 열고:
 ⑧ 스택 감지        자동 / 수동 선택
 ```
 
+설치 완료 후에는 대상 프로젝트에서도 `/install`을 실행할 수 있습니다 (재설치·설정 변경 시 사용).
+
 ### 옵션 B: 원라인 설치
+
+마법사 없이 CLI 플래그로 직접 설치합니다:
 
 ```bash
 # Stable + Lite (기본값)
@@ -124,14 +130,32 @@ Claude Code에서 프로젝트 디렉토리를 열고:
 ./ai-harness-template/pro/install.sh /path/to/your-project
 ```
 
-### 옵션 C: Claude Code 플러그인 (커맨드/에이전트만)
+<details>
+<summary>init.sh 전체 옵션 보기</summary>
+
+| 플래그 | 값 | 기본값 | 설명 |
+|--------|-----|--------|------|
+| `--yes`, `-y` | - | - | 모든 확인 스킵 |
+| `--preset` | strict / standard / permissive | standard | 권한 프리셋 |
+| `--version` | stable / experimental | stable | 설치 버전 |
+| `--pair-mode` | auto / on / off | off | Pair Mode 설정 (experimental만) |
+| `--gates` | +complexity,+performance,+ai-antipatterns | - | opt-in 게이트 추가 |
+| `--no-hooks` | - | - | Git pre-commit hook 스킵 |
+| `--no-ci` | - | - | GitHub Actions 스킵 |
+| `--stack` | auto / nextjs-django / python / nodejs ... | auto | 스택 감지 방식 |
+| `--name` | 문자열 | 디렉토리명 | 프로젝트 이름 |
+
+</details>
+
+### 옵션 C: Claude Code 플러그인
 
 ```
 /plugin marketplace add studioKjm/ai-harness-template
 /plugin install harness@studioKjm-harness
 ```
 
-커맨드/에이전트만 설치됩니다. 게이트·훅·템플릿까지 원하면 옵션 A 또는 B 사용.
+플러그인 설치 후 `/install`로 마법사를 실행할 수 있습니다.
+커맨드/에이전트만 필요하면 이 방법으로 충분하고, 게이트·훅·템플릿까지 원하면 마법사가 나머지를 안내합니다.
 
 ---
 
