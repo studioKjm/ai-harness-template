@@ -50,7 +50,19 @@ fi
 header "Step 3: Installing harness-pro Python package"
 
 cd "$SCRIPT_DIR"
-pip install -e ".[all]" --quiet 2>/dev/null || pip install -e . --quiet
+
+# Detect pip command (pip3 fallback for macOS/systems without pip alias)
+PIP_CMD=""
+if command -v pip &>/dev/null; then
+  PIP_CMD="pip"
+elif command -v pip3 &>/dev/null; then
+  PIP_CMD="pip3"
+else
+  error "pip not found. Install Python 3.11+ with pip."
+  exit 1
+fi
+
+$PIP_CMD install -e ".[all]" --quiet 2>/dev/null || $PIP_CMD install -e . --quiet
 success "harness-pro package installed"
 
 # ─── Setup Ouroboros directories ─────────────────────────────────
