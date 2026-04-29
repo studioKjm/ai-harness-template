@@ -1,0 +1,91 @@
+# Parallel Change Plan — single backward-incompatible change
+#
+# One file per change. Lives at:
+#   .harness/parallel-change/plans/<plan-id>.yaml
+#
+# Lifecycle:
+#   /parallel-change new    — creates plan in phase=expand
+#   /expand                 — register old/new signatures (still in expand)
+#   /migrate-traffic        — verify expand criteria → advance to migrate
+#   /contract               — verify caller count == 0 → advance to contract → done
+
+schema_version: 1
+
+# ─────────────────────────────────────────────────────────
+# IDENTITY
+# ─────────────────────────────────────────────────────────
+
+id: ""                                       # e.g., pc-2026-04-28-refund-amount-enum
+title: ""                                    # one-line human description
+created_at: ""
+created_by: ""
+
+# ─────────────────────────────────────────────────────────
+# WHAT IS BEING CHANGED
+# ─────────────────────────────────────────────────────────
+
+target:
+  type: ""                                   # api | schema | function | type | column | endpoint
+  description: ""
+
+# Old signature — what exists today, will be removed at contract
+old:
+  symbol: ""                                 # e.g., "Refund.amount" or "POST /refunds"
+  files: []                                  # ["src/models/Refund.ts", "src/api/refunds.ts:15"]
+  # Grep pattern used by check-parallel-callers.sh to count usages
+  caller_pattern: ""                         # e.g., "Refund\.amount" — regex (egrep)
+
+# New signature — what coexists during expand+migrate
+new:
+  symbol: ""                                 # e.g., "Refund.amount_type"
+  files: []
+  caller_pattern: ""
+
+# Files exempt from caller scanning (e.g., the file defining old itself, tests)
+caller_scan:
+  exclude_files: []                          # paths or globs
+  exclude_dirs: ["node_modules", ".harness", "dist", "build", ".git"]
+  scan_dirs: []                              # if empty: src/, app/, lib/, api/, server/
+
+# ─────────────────────────────────────────────────────────
+# STATE MACHINE
+# ─────────────────────────────────────────────────────────
+
+phases:
+  current: "expand"                          # expand | migrate | contract | done
+  history:
+    - phase: "expand"
+      entered_at: ""
+
+# ─────────────────────────────────────────────────────────
+# CRITERIA — checked by gates before advancing
+# ─────────────────────────────────────────────────────────
+
+# expand → migrate transition criteria
+expand_criteria:
+  - "Both old and new signatures exist in the codebase"
+  - "Tests exist for new signature"
+  - "Old signature behavior preserved"
+
+# migrate → contract transition criteria
+migrate_criteria:
+  - "All known callers switched to new signature"
+  - "Documentation updated to reference new"
+  - "Deprecation warning added on old (optional)"
+
+# contract completion criteria — must hold for /contract to succeed
+contract_criteria:
+  - "Zero callers reference old signature (grep verified)"
+  - "All migration commits merged to main"
+
+# ─────────────────────────────────────────────────────────
+# OBSERVATIONS — auto-filled by gate runs (do not edit by hand)
+# ─────────────────────────────────────────────────────────
+
+last_check:
+  timestamp: ""
+  caller_count_old: -1
+  caller_count_new: -1
+  state_consistent: null
+
+notes: []                                    # free-form bullets per phase

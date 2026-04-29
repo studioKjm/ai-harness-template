@@ -1,0 +1,35 @@
+# Seed Evolution Extension (v2+)
+#
+# When /seed creates a new version (v2, v3, ...) on top of an existing seed,
+# these fields document the evolution. Append to the standard seed schema.
+#
+# Example: a seed-v2.yaml uses the full seed-spec.yaml schema PLUS this block.
+
+evolution:
+  parent_version: 1                            # The version this evolved from
+  evolved_at: ""                               # ISO-8601 timestamp
+  evolved_by: ""                               # "user" | "auto" | "<author>"
+  reason: ""                                   # Short — why this version exists
+
+  # Categorize the type of change
+  change_type: ""                              # additive | modification | breaking | refactor
+                                               # additive  — only new entities/AC, no removals
+                                               # modification — existing AC tightened or extended
+                                               # breaking  — entity/AC removed or signature changed
+                                               # refactor  — semantic identity preserved, names/structure reorganized
+
+  # Required if change_type == "breaking"
+  breaking_changes:
+    - id: ""                                   # AC-XXX or entity name
+      what_changed: ""                         # one-line summary
+      migration: ""                            # how callers should adapt
+
+  # Notes for downstream consumers (decompose / migrate-tasks)
+  migration_notes:
+    - ""                                       # free-form bullet, e.g. "Order.status becomes enum"
+
+  # Cross-reference: tasks that need attention
+  affected_tasks: []                           # ["TASK-001", "TASK-007"]
+
+  # Cross-reference: gates that may need updating
+  affected_gates: []                           # ["check-layers", "check-spec"]

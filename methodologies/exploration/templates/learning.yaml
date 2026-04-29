@@ -1,0 +1,63 @@
+# Exploration Learning Template
+# Knowledge extracted from a closed spike.
+# Path: .harness/exploration/learnings/<learning-id>.yaml
+
+schema_version: 1
+
+id: "<learning-id>"                  # e.g., ln-2026-04-29-llm-streaming-vercel
+created_at: "<ISO-8601>"
+spike_id: "<spike-id>"               # The spike this learning came from
+question: "<copied from spike.yaml for self-containment>"
+
+# ─── Finding (the answer) ────────────────────────────────────────────────
+finding:
+  summary: "<2-3 sentence answer to the question>"
+  confidence: "high | medium | low"
+  # Stated frankly. If confidence == low, you may need a follow-up spike.
+
+# ─── Hypothesis comparison ───────────────────────────────────────────────
+# Did your prediction match reality? This is the most valuable reflection.
+hypothesis_check:
+  expected: "<what spike.yaml predicted>"
+  actual: "<what you observed>"
+  delta: "<how reality differed>"   # Most useful field for future intuition
+
+# ─── Evidence (required) ─────────────────────────────────────────────────
+# A finding without evidence is an opinion. List concrete artifacts.
+evidence:
+  - kind: "measurement | code | doc | benchmark | error | screenshot"
+    location: "<file path or URL>"
+    summary: "<what this evidence shows>"
+
+# ─── Recommendation ──────────────────────────────────────────────────────
+recommendation:
+  action: "adopt | reject | defer | further_spike"
+  rationale: "<why this recommendation given the finding>"
+  caveats: []                       # Conditions that would invalidate the recommendation
+
+# ─── Applicability ───────────────────────────────────────────────────────
+# Where in the project should this finding be applied?
+applies_to:
+  - kind: "seed | adr | architecture | code | dependency | none"
+    target: "<seed-vN | adr-id | path/to/code | package-name | null>"
+    note: "<how to apply>"
+
+# ─── Promotion State ─────────────────────────────────────────────────────
+# Has this learning been moved into durable project artifacts?
+promotion:
+  to_adr: null                      # ADR id if promoted, null otherwise
+  to_seed: null                     # seed-vN if seeded a new version
+  to_code: false                    # true if production code was written based on this
+  promoted_at: null
+
+# ─── Lifespan ────────────────────────────────────────────────────────────
+# Findings can rot. Note what would invalidate this learning.
+expires_when:
+  - "<event/condition that would invalidate the finding>"
+  # e.g., "Vercel Edge runtime version > 3.x"
+  # e.g., "OpenAI deprecates /v1/responses endpoint"
+
+# ─── Cross-references ────────────────────────────────────────────────────
+related:
+  prior_learnings: []
+  superseded_by: null

@@ -14,9 +14,5 @@
       "Bash(alembic:*)", "Bash(ruff:*)", "Bash(black:*)"
     ]
   },
-  "hooks": {
-    "PreCommit": [
-      { "type": "command", "command": ".harness/hooks/pre-commit-gate.sh" }
-    ]
-  }
+  "hooks": {}
 }

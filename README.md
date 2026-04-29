@@ -10,11 +10,20 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 ## Releases
 
-| 버전 | 날짜 | 주요 변경 |
-|------|------|----------|
-| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
-| [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
-| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
+> **권장 설치: `v2.1.0` (안정).** v2.2.0은 메서드 플러그인 시스템 도입 — 실험 단계로 외주·프로덕션 도입 전 검증 필요.
+
+| 버전 | 날짜 | 상태 | 주요 변경 |
+|------|------|------|----------|
+| [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `experimental` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론을 사용자 선택·조합 가능한 플러그인으로 분리. 5종 번들(ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` 다중 활성화. 신규 11개 명령, 4개 게이트, 2개 상태머신. (NON-BREAKING) |
+| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | `stable` ⭐ **권장** | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
+| [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` | **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
+| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 초기 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
+
+**v2.2.0 실험 버전 도입 시 주의사항:**
+- 메서드 플러그인 시스템은 v0.1 — API 변경 가능성 있음
+- 5종 번들 메서드 중 ouroboros 외 4종은 `0.1.0` (beta)
+- `relaxes_gates` 컨슈머 컨트랙트는 정의됨, 하네스 코어 게이트의 자동 소비는 v0.2 예정
+- 외주·프로덕션 도입은 v2.1.0 권장. v2.2.0은 사이드 프로젝트로 먼저 검증.
 
 ## 데모 영상
 
@@ -33,6 +42,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 
 - [시스템 전체 구조](#시스템-전체-구조)
 - [Quick Start](#quick-start)
+- [Methodology System (v0.1)](#methodology-system-v01)
 - [하네스 6가지 구성요소](#하네스-6가지-구성요소)
 - [Ouroboros 워크플로우](#ouroboros-워크플로우)
 - [11개 게이트](#11개-게이트)
@@ -80,6 +90,78 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 | 자기 강화 | 위반 → 규칙 진화 → 시스템이 점점 강건해짐 |
 | 3-tier 아키텍처 | Presentation / Logic / Data 레이어 분리 필수 |
 | 점진적 채택 | 전부 쓸 필요 없이 개별 컴포넌트 선택 가능 |
+| 메서드 플러그인 | 하네스 코어는 고정, 개발 방법론은 사용자 선택·조합 |
+
+---
+
+## Methodology System (v0.1)
+
+> 하네스 코어는 **고정**. 메서드는 **플러그인**으로 사용자가 선택·조합.
+
+### 어떤 방법론을 골라야 하나?
+
+#### 한 줄 결정 트리
+
+```
+지금 뭐 하려는 중이세요?
+├─ 🆕 새 프로젝트 시작 (스펙 미확정) ───────────────► ouroboros
+├─ 🆕 새 프로젝트 + 기능별 스토리·AC 정리 필요 ─────► ouroboros + bmad-lite
+├─ 🔧 기존 프로젝트에 신규 기능 추가 ───────────────► ouroboros + bmad-lite + living-spec
+├─ 💥 DB 컬럼 / API 시그니처 / 함수 시그니처 변경 ──► ouroboros + parallel-change
+├─ ❓ 라이브러리 검증 / 막힌 미지수 / 빠른 PoC ─────► exploration (어느 조합에든 추가)
+└─ 🐛 단순 버그 수정 ──────────────────────────────► (메서드 불필요, 게이트만 작동)
+```
+
+#### 상황별 추천 매트릭스
+
+| 상황 | 추천 조합 | 왜 |
+|-----|---------|----|
+| **개인 사이드 프로젝트** (실험적, 빠른 검증) | `ouroboros` 또는 `exploration` 단독 | 무겁지 않고 명확 |
+| **신규 외주 SaaS MVP** | `ouroboros + bmad-lite` | 명세 + 스토리 양쪽 강제, 클라이언트 인수 시 명확 |
+| **외주 SaaS 유지보수·기능 추가** | `ouroboros + bmad-lite + living-spec` | 시드 v2 진화, 영향받는 스토리 자동 추적 |
+| **레거시 시스템 점진 개편** | `ouroboros + parallel-change` | 다운타임 0으로 호환 깨는 변경 |
+| **신규 라이브러리·인프라 도입 검증** | `exploration` (단독 또는 조합 추가) | 샌드박스에서 자유 실험, 학습은 ADR로 영속화 |
+| **정부·금융처럼 컴플라이언스 강한 곳** | `ouroboros + bmad-lite + parallel-change` | AC 엄격 검증 + 마이그레이션 안전성 |
+| **혼자 / 1인 외주 운영자** | `ouroboros` (단순), 필요시 `+ exploration` | 페르소나 분리는 오버킬 |
+| **6명 이상 팀에 풀 BMAD 필요** | (이 템플릿 X) → [BMAD-METHOD 본가](https://github.com/bmadcode/BMAD-METHOD) | bmad-lite는 의도적 축소판 |
+
+#### 안티패턴 (이건 쓰지 마세요)
+
+| 상황 | 잘못된 선택 | 올바른 선택 |
+|-----|----------|----------|
+| 단순 버그 수정 | `bmad-lite` (스토리 작성 강제) | 메서드 없이 그냥 수정 (게이트만 작동) |
+| "한 번만 빠르게 짜보자" | `ouroboros` (인터뷰 통과 필요) | `exploration` (timebox 스파이크) |
+| 외부 라이브러리 PoC | `parallel-change` (state machine 오버킬) | `exploration` |
+| 시드가 아직 없는데 스토리부터 | `bmad-lite` (prereq 차단됨) | `ouroboros` 먼저 → `bmad-lite` 추가 |
+| DB 마이그레이션을 그냥 진행 | `ouroboros`만 | `+ parallel-change` 필수 (caller 차단 게이트) |
+
+### 5종 메서드 한눈에
+
+| 메서드 | 적용 단계 | 한 줄 요약 |
+|-------|---------|----------|
+| 🐍 **ouroboros** | 0→1 (기본) | 명세 우선 — Ambiguity ≤ 0.2까지 인터뷰 |
+| 🔄 **living-spec** | 1→N | 시드 진화 — 두 버전 의미적 diff + 태스크 마이그레이션 |
+| ⫶ **parallel-change** | 1→N | 호환 깨는 변경 — Expand → Migrate → Contract 상태머신 |
+| 🎭 **bmad-lite** | 0→1, 1→N | 페르소나 + 스토리 — analyst/ux-designer/pm-strict |
+| 🔭 **exploration** | 모든 단계 | 시간 박스 스파이크 — 샌드박스 게이트 완화 |
+
+### 활성화 명령
+
+```bash
+/methodology list                              # 메서드 목록
+/methodology current                           # 현재 활성 메서드
+/methodology use ouroboros                     # 단일 활성화
+/methodology compose ouroboros bmad-lite       # 다중 조합
+/methodology compose ouroboros parallel-change living-spec   # 외주 SaaS 확장 시나리오
+/methodology info <name>                       # 메서드 상세 (prereq, 게이트, 명령 목록)
+/methodology deactivate <name>                 # 비활성화
+```
+
+### 더 자세히
+
+- 메서드 비교표·조합 매트릭스: [`docs/methodology-catalog.md`](./docs/methodology-catalog.md)
+- 시스템 구조·매니페스트 스키마·사용자 정의 방법: [`docs/methodology-guide.md`](./docs/methodology-guide.md)
+- 각 메서드 상세 README: [`methodologies/<name>/README.md`](./methodologies/)
 
 ---
 

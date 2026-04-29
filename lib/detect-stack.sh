@@ -267,10 +267,18 @@ if [ -f "$TARGET/pom.xml" ] || [ -f "$TARGET/build.gradle" ] || [ -f "$TARGET/bu
 fi
 
 # --- Deduplicate ---
-UNIQUE_STACKS=($(printf '%s\n' "${STACKS[@]}" | sort -u))
+if [ ${#STACKS[@]} -gt 0 ]; then
+  UNIQUE_STACKS=($(printf '%s\n' "${STACKS[@]}" | sort -u))
+else
+  UNIQUE_STACKS=()
+fi
 
 # --- Output JSON ---
-STACKS_JSON=$(printf '"%s",' "${UNIQUE_STACKS[@]}" | sed 's/,$//')
+if [ ${#UNIQUE_STACKS[@]} -gt 0 ]; then
+  STACKS_JSON=$(printf '"%s",' "${UNIQUE_STACKS[@]}" | sed 's/,$//')
+else
+  STACKS_JSON=""
+fi
 FRONTEND_DIR_REL=""
 BACKEND_DIR_REL=""
 if [ -n "$FRONTEND_DIR" ]; then

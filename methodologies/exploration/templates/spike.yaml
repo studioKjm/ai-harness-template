@@ -1,0 +1,67 @@
+# Exploration Spike Template
+# A time-boxed investigation answering ONE question.
+# Path: .harness/exploration/spikes/<spike-id>/spike.yaml
+
+schema_version: 1
+
+id: "<spike-id>"                     # e.g., sp-2026-04-29-llm-streaming-vercel
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+# ─── The Question (required, immutable) ──────────────────────────────────
+# The single thing this spike must answer. If question changes, close this
+# spike and start a new one — don't move the goalposts.
+question: "<one-sentence question, ending with '?'>"
+
+# ─── Timebox (required) ──────────────────────────────────────────────────
+# Spikes without timeboxes become tar pits. Set hard limit upfront.
+timebox:
+  duration_hours: 4               # Hard cap. Common values: 2, 4, 8.
+  started_at: null                # Auto-set when status moves to 'spiking'
+  expires_at: null                # Auto-computed = started_at + duration_hours
+
+# ─── Hypothesis (optional but recommended) ───────────────────────────────
+# Your guess at the answer before starting. Comparing hypothesis to actual
+# finding is the highest-value reflection.
+hypothesis: "<what you expect to find>"
+
+# ─── Acceptance — when is this 'answered'? ───────────────────────────────
+# Without this, spikes drift. Define what evidence ends the spike.
+answered_when:
+  - "<observable signal that closes the question>"
+  # e.g., "I can stream tokens from OpenAI through Vercel Edge with < 300ms TTFT"
+  # e.g., "I have measured latency for 3 alternative libraries and ranked them"
+
+# ─── Sandbox ─────────────────────────────────────────────────────────────
+sandbox:
+  path: ".harness/exploration/spikes/<spike-id>/sandbox/"
+  # Code in this directory is exempt from layer/spec/structure gates.
+  # Do NOT put production code here.
+
+# ─── Status ──────────────────────────────────────────────────────────────
+# State machine:
+#   questioning → spiking → learned → applied | abandoned
+#
+# questioning  — spike created, sandbox not touched yet
+# spiking      — active work, timebox running
+# learned      — findings captured in learning.yaml, spike closed
+# applied      — learnings promoted (ADR / seed update / production code)
+# abandoned    — explicitly dropped (record reason in `abandoned_reason`)
+status: "questioning"
+
+# ─── State Transition History ────────────────────────────────────────────
+history:
+  - timestamp: "<ISO-8601>"
+    from: null
+    to: "questioning"
+    note: "spike created"
+
+# ─── Related Artifacts ───────────────────────────────────────────────────
+links:
+  learning_id: null               # Set when /learn record runs
+  parent_seed: null               # If spike is informing a future seed
+  parent_story: null              # If spike was triggered by a stuck story
+  related_spikes: []              # Sibling investigations
+
+# ─── Abandonment (only if status == abandoned) ───────────────────────────
+abandoned_reason: null

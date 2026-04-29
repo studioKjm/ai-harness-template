@@ -1,0 +1,105 @@
+# Methodology Manifest Schema (v1)
+#
+# Each methodology plugin lives at:
+#   methodologies/<name>/
+#     ├── manifest.yaml      ← REQUIRED: metadata, commands, gates, prerequisites
+#     ├── commands/          ← OPTIONAL: slash command .md files
+#     ├── templates/         ← OPTIONAL: yaml/markdown templates
+#     ├── gates/             ← OPTIONAL: .sh gate scripts (added when active)
+#     ├── personas/          ← OPTIONAL: agent persona .md files
+#     └── README.md          ← OPTIONAL but recommended
+#
+# This file is the canonical schema reference. The dispatcher
+# (lib/methodology.sh) validates manifests against this schema.
+
+# ─────────────────────────────────────────────────────────
+# REQUIRED FIELDS
+# ─────────────────────────────────────────────────────────
+
+schema_version: 1                         # Manifest schema version (currently 1)
+name: ""                                  # Methodology id (lowercase, kebab-case). MUST match dirname.
+display_name: ""                          # Human-readable name shown in /methodology list
+description: ""                           # One-line summary
+version: "0.0.0"                          # Plugin's own semver
+author: ""                                # "harness-core" | "<github-handle>" | "<org-name>"
+
+# ─────────────────────────────────────────────────────────
+# ACTIVATION GUARDS
+# ─────────────────────────────────────────────────────────
+
+# Prerequisites — methodology refuses to activate if any check fails
+prerequisites:
+  - type: ""                              # file_exists | command_exists | gate_passed | env_var | seed_version
+    path: ""                              # for file_exists
+    name: ""                              # for command_exists / env_var
+    value: ""                             # expected value (optional)
+    message: ""                           # shown to user on fail
+
+# Mutually-exclusive methodologies (cannot be active simultaneously)
+conflicts_with: []                        # ["other-name"]
+
+# Required methodologies (this one only works if those are also active)
+requires: []                              # ["ouroboros"]
+
+# ─────────────────────────────────────────────────────────
+# CONTRIBUTIONS — what this methodology adds when active
+# ─────────────────────────────────────────────────────────
+
+# Slash commands (copied to .claude/commands/ on activation)
+commands:
+  - name: "/example"                      # Slash command name
+    file: "commands/example.md"           # Relative to methodology dir
+    description: ""                       # Short description for /methodology info
+
+# Templates (copied to .harness/methodologies/<name>/templates/)
+templates:
+  - file: "templates/example.yaml"
+    description: ""
+
+# Personas / agents (copied to .claude/agents/ on activation)
+personas:
+  - name: ""                              # e.g., "analyst"
+    file: "personas/analyst.md"
+    description: ""
+
+# Gates added when active (additive only — cannot remove core gates)
+adds_gates:
+  - file: "gates/check-example.sh"
+    severity: "warning"                   # warning | blocking
+    runs_on: []                           # ["pre-commit", "post-edit", "ci"]
+    description: ""
+
+# Gates relaxed when active — RESTRICTED. Only "exploration"-class
+# methodologies may set this, and only for non-security gates.
+# Core gates (check-secrets, check-layers, check-spec, check-boundaries,
+# check-structure, check-security, check-deps) can NEVER be relaxed.
+relaxes_gates: []                         # ["check-complexity", "check-ai-antipatterns"]
+
+# ─────────────────────────────────────────────────────────
+# STATE & LIFECYCLE HOOKS
+# ─────────────────────────────────────────────────────────
+
+# State files this methodology owns (created on activate, not removed on deactivate)
+state:
+  files: []                               # [".harness/state/<name>.yaml"]
+
+# Lifecycle scripts (optional)
+hooks:
+  on_activate: ""                         # path/to/activate.sh — runs on /methodology use
+  on_deactivate: ""                       # path/to/deactivate.sh — runs on /methodology deactivate
+  on_compose: ""                          # path/to/compose.sh — runs when composed with another method
+
+# ─────────────────────────────────────────────────────────
+# UI / DISCOVERY
+# ─────────────────────────────────────────────────────────
+
+tags: []                                  # ["0→1", "1→N", "spec-driven", "exploration", ...]
+icon: ""                                  # single emoji for /methodology list
+docs_url: ""                              # link to README or external docs
+
+# ─────────────────────────────────────────────────────────
+# COMPATIBILITY
+# ─────────────────────────────────────────────────────────
+
+min_harness_version: "0.0.0"              # minimum harness core version required
+max_harness_version: ""                   # leave empty for unbounded

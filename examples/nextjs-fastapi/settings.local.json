@@ -25,19 +25,13 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": { "tool": "Edit" },
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
             "command": ".harness/hooks/post-edit-lint.sh $CLAUDE_FILE_PATH"
           }
         ]
-      }
-    ],
-    "PreCommit": [
-      {
-        "type": "command",
-        "command": ".harness/hooks/pre-commit-gate.sh"
       }
     ]
   }

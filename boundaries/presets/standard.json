@@ -1,5 +1,5 @@
 {
-  "$schema": "https://claude.ai/settings-schema",
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "_comment": "STANDARD preset — Regular development. Balanced restrictions.",
   "permissions": {
     "deny": [
@@ -39,19 +39,13 @@
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": { "tool": "Edit" },
+        "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
             "command": ".harness/hooks/post-edit-lint.sh $CLAUDE_FILE_PATH"
           }
         ]
-      }
-    ],
-    "PreCommit": [
-      {
-        "type": "command",
-        "command": ".harness/hooks/pre-commit-gate.sh"
       }
     ]
   }

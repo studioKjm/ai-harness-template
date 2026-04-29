@@ -1,0 +1,57 @@
+schema_version: 1
+name: parallel-change
+display_name: "Parallel Change"
+description: "Expand → Migrate → Contract — backward-incompatible changes with zero downtime"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+
+conflicts_with: []
+requires:
+  - ouroboros
+
+commands:
+  - name: "/parallel-change"
+    file: "commands/parallel-change.md"
+    description: "Create or list parallel-change plans"
+  - name: "/expand"
+    file: "commands/expand.md"
+    description: "Enter the expand phase — introduce new alongside old"
+  - name: "/migrate-traffic"
+    file: "commands/migrate-traffic.md"
+    description: "Enter the migrate phase — switch callers from old to new"
+  - name: "/contract"
+    file: "commands/contract.md"
+    description: "Enter the contract phase — remove old (verified zero callers)"
+
+templates:
+  - file: "templates/parallel-change-plan.yaml"
+    description: "Plan + state machine for a single backward-incompatible change"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-parallel-state.sh"
+    severity: "blocking"
+    runs_on: ["pre-commit"]
+    description: "Enforce phase state machine — old/new coexistence by phase"
+  - file: "gates/check-parallel-callers.sh"
+    severity: "blocking"
+    runs_on: ["pre-commit"]
+    description: "Block contract phase if old signature still has callers"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/parallel-change/plans/"
+    - ".harness/state/parallel-change.yaml"
+
+hooks: {}
+
+tags: ["1→N", "breaking-change", "zero-downtime", "incremental"]
+icon: "⫶"
+docs_url: "methodologies/parallel-change/README.md"
+
+min_harness_version: "0.1.0"

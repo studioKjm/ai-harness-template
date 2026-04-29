@@ -334,6 +334,71 @@ if [ -d "$HARNESS_DIR/ouroboros/scoring" ]; then
 fi
 success "Ouroboros templates installed"
 
+# ─── Step 8.5: Install methodology plugin system ─────────────────
+header "Step 8.5: Installing methodology plugin system"
+
+METHOD_DISPATCH_TARGET="$TARGET/.harness/methodology"
+METHOD_PLUGINS_TARGET="$TARGET/.harness/methodologies"
+METHOD_LIB_TARGET="$TARGET/.harness/lib"
+
+mkdir -p "$METHOD_DISPATCH_TARGET/_schema"
+mkdir -p "$METHOD_PLUGINS_TARGET"
+mkdir -p "$METHOD_LIB_TARGET"
+
+# Copy dispatcher artifacts (registry, schema, state template, README)
+if [ -d "$HARNESS_DIR/methodology" ]; then
+  cp -R "$HARNESS_DIR/methodology/_schema/"* "$METHOD_DISPATCH_TARGET/_schema/" 2>/dev/null || true
+  cp "$HARNESS_DIR/methodology/_registry.yaml" "$METHOD_DISPATCH_TARGET/" 2>/dev/null || true
+  cp "$HARNESS_DIR/methodology/README.md" "$METHOD_DISPATCH_TARGET/" 2>/dev/null || true
+  # Initialize state from template if it doesn't exist yet
+  if [ ! -f "$METHOD_DISPATCH_TARGET/_state.yaml" ]; then
+    cp "$HARNESS_DIR/methodology/_state.template.yaml" "$METHOD_DISPATCH_TARGET/_state.yaml" 2>/dev/null || true
+  fi
+  success "Methodology dispatcher installed"
+else
+  warn "methodology/ source not found — skipping plugin system"
+fi
+
+# Copy dispatcher library
+if [ -f "$HARNESS_DIR/lib/methodology.sh" ]; then
+  cp "$HARNESS_DIR/lib/methodology.sh" "$METHOD_LIB_TARGET/"
+  chmod +x "$METHOD_LIB_TARGET/methodology.sh" 2>/dev/null || true
+  if [ -f "$HARNESS_DIR/lib/colors.sh" ]; then
+    cp "$HARNESS_DIR/lib/colors.sh" "$METHOD_LIB_TARGET/"
+  fi
+fi
+
+# Copy bundled methodology plugins (if any exist)
+plugin_count=0
+if [ -d "$HARNESS_DIR/methodologies" ]; then
+  for plugin_dir in "$HARNESS_DIR/methodologies/"*/; do
+    [ -d "$plugin_dir" ] || continue
+    plugin_name="$(basename "$plugin_dir")"
+    # Copy methodology directory as a whole (preserving its name)
+    rm -rf "$METHOD_PLUGINS_TARGET/$plugin_name"
+    cp -R "$plugin_dir" "$METHOD_PLUGINS_TARGET/$plugin_name"
+
+    # If methodology bundles its own slash commands, install them
+    if [ -d "$plugin_dir/commands" ]; then
+      for cmd in "$plugin_dir/commands/"*.md; do
+        [ -f "$cmd" ] || continue
+        cp "$cmd" "$TARGET/.claude/commands/"
+      done
+    fi
+    # If methodology bundles personas, install them as agents
+    if [ -d "$plugin_dir/personas" ]; then
+      for persona in "$plugin_dir/personas/"*.md; do
+        [ -f "$persona" ] || continue
+        cp "$persona" "$TARGET/.claude/agents/"
+      done
+    fi
+    plugin_count=$((plugin_count + 1))
+  done
+  if [ "$plugin_count" -gt 0 ]; then
+    success "Installed $plugin_count methodology plugin(s)"
+  fi
+fi
+
 # ─── Step 9: Copy gate rules ──────────────────────────────────────
 header "Step 9: Installing CI/CD gates & spec gate"
 

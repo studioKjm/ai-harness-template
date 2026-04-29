@@ -1,0 +1,47 @@
+# Task Migration Plan
+#
+# Output of /migrate-tasks. Classifies each task in .harness/ouroboros/tasks/
+# against a target seed version. Saved to:
+#   .harness/ouroboros/tasks/migration-plans/migration-v{from}-to-v{to}.yaml
+
+schema_version: 1
+generated_at: ""                               # ISO-8601
+from_version: 0                                # source seed version
+to_version: 0                                  # target seed version
+
+summary:
+  total_tasks: 0
+  unchanged: 0
+  modified: 0
+  deprecated: 0
+  added: 0
+
+# Per-task classification
+classifications:
+  unchanged: []                                # task ids whose AC/entities exist unchanged in v(to)
+  modified:                                    # tasks whose underlying AC/entity changed in v(to)
+    - task_id: ""
+      reason: ""                               # which AC/entity changed
+      action_required: ""                      # what to do about it
+
+  deprecated:                                  # tasks whose underlying AC/entity removed in v(to)
+    - task_id: ""
+      reason: ""
+      disposition: ""                          # delete | archive | replace_with: <task-id>
+
+  added:                                       # new AC/entities in v(to) with no covering task
+    - source: ""                               # AC-XXX or entity name
+      proposed_task: ""                        # suggested task description
+      priority: ""                             # must | should | nice
+
+# Confidence — heuristic match score (0.0 - 1.0)
+# Below 0.6 → human review required before applying
+confidence:
+  overall: 0.0
+  details:
+    name_match: 0.0                            # how well entity names align
+    structural_match: 0.0                      # AC structure similarity
+    semantic_match: 0.0                        # LLM-assisted (when available)
+
+# Manual review queue — items the algorithm couldn't decide
+review_queue: []

@@ -1,0 +1,62 @@
+schema_version: 1
+name: exploration
+display_name: "Exploration"
+description: "Time-boxed spikes for learning before committing to a spec — relaxes gates inside sandbox"
+version: "0.1.0"
+author: "harness-core"
+
+# Exploration is a base methodology — usable at any stage, including before /interview.
+prerequisites: []
+
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/spike"
+    file: "commands/spike.md"
+    description: "Create or manage time-boxed spikes (new | list | show | close | abandon)"
+  - name: "/learn"
+    file: "commands/learn.md"
+    description: "Capture spike findings and optionally promote them to ADR or seed evolution"
+
+templates:
+  - file: "templates/spike.yaml"
+    description: "Single spike — question, timebox, hypothesis, acceptance for 'answered'"
+  - file: "templates/learning.yaml"
+    description: "Findings extracted from a spike — evidence + recommendation + applicability"
+
+personas: []
+
+adds_gates: []
+
+# Spike sandboxes are explicitly outside the spec-driven discipline.
+# Other methodologies' gates skip files under .harness/exploration/spikes/<id>/sandbox/
+# by reading .harness/exploration/.gate-relaxation.yaml.
+relaxes_gates:
+  - target: "boundaries"
+    paths:
+      - ".harness/exploration/spikes/<spike-id>/sandbox/**"
+    reason: "Spike sandboxes do not respect layer boundaries — that's the point of a spike"
+  - target: "spec"
+    paths:
+      - ".harness/exploration/spikes/<spike-id>/sandbox/**"
+    reason: "Spike code is not bound to any seed spec"
+  - target: "structure"
+    paths:
+      - ".harness/exploration/spikes/<spike-id>/sandbox/**"
+    reason: "Spike sandbox structure is freeform"
+
+state:
+  files:
+    - ".harness/exploration/spikes/"
+    - ".harness/exploration/learnings/"
+    - ".harness/exploration/.gate-relaxation.yaml"
+    - ".harness/state/exploration.yaml"
+
+hooks: {}
+
+tags: ["exploration", "spike", "research", "pre-spec", "compose-with-anything"]
+icon: "🔭"
+docs_url: "methodologies/exploration/README.md"
+
+min_harness_version: "0.1.0"

@@ -1,0 +1,47 @@
+# BMAD-lite Epic Template
+# A feature-sized container — collection of stories that ship together.
+# Path: .harness/bmad-lite/epics/<epic-id>.yaml
+
+schema_version: 1
+
+id: "<epic-id>"                      # e.g., ep-2026-04-29-auth-recovery
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+title: "<short epic title>"
+seed_version: "v1"
+seed_entities_touched: []            # Cross-reference to seed
+
+# ─── High-level Description ──────────────────────────────────────────────
+goal: "<one-sentence outcome the epic delivers>"
+non_goals: []                        # Explicit "we are NOT doing X here"
+
+# ─── Stories ─────────────────────────────────────────────────────────────
+stories: []                          # ["st-2026-04-29-user-signup", ...]
+
+# ─── Sequencing ──────────────────────────────────────────────────────────
+# Optional — most epics are unordered, but if some stories block others:
+sequence:
+  - story: "<story-id>"
+    blocks: []                       # other story-ids
+    blocked_by: []
+
+# ─── Lifecycle ───────────────────────────────────────────────────────────
+status: "scoping | active | done | abandoned"
+# scoping  — analyst + pm-strict still iterating
+# active   — at least one story started
+# done     — all stories done
+# abandoned — explicitly dropped (record reason)
+
+# ─── Decision Log ────────────────────────────────────────────────────────
+decisions:
+  - timestamp: "<ISO-8601>"
+    decision: "<what was decided>"
+    rationale: "<why>"
+    persona: "analyst | ux-designer | pm-strict | user"
+
+# ─── Open Questions ──────────────────────────────────────────────────────
+open_questions:
+  - question: "<...>"
+    blocking: true|false
+    owner: "<who needs to answer>"

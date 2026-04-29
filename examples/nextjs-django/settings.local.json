@@ -15,9 +15,5 @@
       "Bash(python manage.py:*)"
     ]
   },
-  "hooks": {
-    "PreCommit": [
-      { "type": "command", "command": ".harness/hooks/pre-commit-gate.sh" }
-    ]
-  }
+  "hooks": {}
 }

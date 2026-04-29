@@ -1,0 +1,62 @@
+schema_version: 1
+name: bmad-lite
+display_name: "BMAD-lite"
+description: "Persona-driven story decomposition — lightweight BMAD without heavy document machinery"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites:
+  - type: file_exists
+    path: ".harness/ouroboros/seeds/seed-v1.yaml"
+    message: "BMAD-lite extends ouroboros. Run /interview → /seed first."
+
+conflicts_with: []
+requires:
+  - ouroboros
+
+commands:
+  - name: "/persona"
+    file: "commands/persona.md"
+    description: "Switch active reasoning persona (analyst | ux-designer | pm-strict)"
+  - name: "/story"
+    file: "commands/story.md"
+    description: "Decompose a feature into BMAD-style user stories with AC and dev notes"
+
+templates:
+  - file: "templates/story.yaml"
+    description: "Single user story with persona narrative, acceptance criteria, dev notes"
+  - file: "templates/epic.yaml"
+    description: "Feature epic — collection of stories with shared context"
+
+personas:
+  - name: "analyst"
+    file: "personas/analyst.md"
+    description: "Maps user goals to domain entities and behaviors"
+  - name: "ux-designer"
+    file: "personas/ux-designer.md"
+    description: "Proposes minimal user flows and UI primitives from acceptance criteria"
+  - name: "pm-strict"
+    file: "personas/pm-strict.md"
+    description: "Enforces story format and AC quality (rejects ambiguous specs)"
+
+adds_gates:
+  - file: "gates/check-story-format.sh"
+    severity: "warning"
+    runs_on: ["pre-commit"]
+    description: "Warn when stories miss persona narrative or AC structure"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/bmad-lite/stories/"
+    - ".harness/bmad-lite/epics/"
+    - ".harness/state/bmad-lite.yaml"
+
+hooks: {}
+
+tags: ["0→1", "story-driven", "persona", "bmad", "compose-with-ouroboros"]
+icon: "🎭"
+docs_url: "methodologies/bmad-lite/README.md"
+
+min_harness_version: "0.1.0"

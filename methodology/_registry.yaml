@@ -1,0 +1,45 @@
+# Methodology Registry
+#
+# Lists known methodologies bundled with the harness template.
+# The registry is the source of truth for /methodology list.
+#
+# Adding a custom methodology:
+#   1. Drop a folder into methodologies/<your-name>/ following the manifest schema
+#   2. Add an entry below (or run `/methodology install <path>`)
+#   3. Run `/methodology list` to verify it loads
+
+schema_version: 1
+
+# Default methodology — auto-activated when no other is selected.
+# Must point to a methodology whose manifest declares it as a base
+# (i.e., no `requires` field, idempotent activation).
+default: ouroboros
+
+methodologies:
+  - name: ouroboros
+    path: methodologies/ouroboros
+    enabled: true
+    bundled: true
+
+  - name: living-spec
+    path: methodologies/living-spec
+    enabled: true
+    bundled: true
+
+  - name: parallel-change
+    path: methodologies/parallel-change
+    enabled: true
+    bundled: true
+
+  - name: bmad-lite
+    path: methodologies/bmad-lite
+    enabled: true
+    bundled: true
+
+  - name: exploration
+    path: methodologies/exploration
+    enabled: true
+    bundled: true
+
+# Custom (user-installed) methodologies are appended here by /methodology install.
+# Bundled methodologies above can be disabled by setting enabled: false (not removed).

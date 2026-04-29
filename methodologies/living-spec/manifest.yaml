@@ -1,0 +1,54 @@
+schema_version: 1
+name: living-spec
+display_name: "Living Spec"
+description: "1→N spec evolution — analyze diff between seed versions and migrate existing tasks"
+version: "0.1.0"
+author: "harness-core"
+
+# Only meaningful when at least one seed exists
+prerequisites:
+  - type: file_exists
+    path: ".harness/ouroboros/seeds/seed-v1.yaml"
+    message: "Living Spec requires an existing seed-v1. Run /interview → /seed first."
+
+conflicts_with: []
+requires:
+  - ouroboros
+
+commands:
+  - name: "/diff-spec"
+    file: "commands/diff-spec.md"
+    description: "Semantic diff between two seed versions (entities, AC, architecture)"
+  - name: "/migrate-tasks"
+    file: "commands/migrate-tasks.md"
+    description: "Classify existing tasks against new seed version (added/modified/deprecated/unchanged)"
+
+templates:
+  - file: "templates/seed-evolution.yaml"
+    description: "Extension fields for evolved seeds (parent_version, breaking_changes, migration_notes)"
+  - file: "templates/task-migration-plan.yaml"
+    description: "Output template for /migrate-tasks"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-spec-drift.sh"
+    severity: "warning"
+    runs_on: ["post-edit", "pre-commit"]
+    description: "Warn when code references entities not present in current seed"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/state/living-spec.yaml"
+    - ".harness/ouroboros/seeds/.diffs/"
+    - ".harness/ouroboros/tasks/migration-plans/"
+
+hooks: {}
+
+tags: ["1→N", "spec-evolution", "incremental"]
+icon: "🔄"
+docs_url: "methodologies/living-spec/README.md"
+
+min_harness_version: "0.1.0"

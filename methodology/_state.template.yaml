@@ -1,0 +1,31 @@
+# Methodology State (template)
+#
+# This file is copied to .harness/methodology/_state.yaml on init.
+# It tracks which methodologies are currently active in this project.
+#
+# DO NOT edit by hand — use:
+#   /methodology use <name>           — activate a methodology
+#   /methodology compose <a> <b>      — activate multiple
+#   /methodology deactivate <name>    — turn one off
+#   /methodology current              — show current state
+
+schema_version: 1
+last_modified: ""                          # ISO-8601 timestamp, written by dispatcher
+
+# Currently active methodologies (in activation order).
+# At least one entry. The default (ouroboros) is auto-activated on first init.
+active:
+  - name: ouroboros
+    activated_at: ""
+    activated_by: "init"                   # init | user | compose
+
+# History of activation events (newest first, capped at 50)
+history: []
+#  - action: "activate"                    # activate | deactivate | compose
+#    name: "living-spec"
+#    timestamp: "2026-04-27T12:00:00"
+#    actor: "user"
+
+# Composition policy — what to do when commands/personas conflict between
+# active methodologies. Default: first-active wins.
+conflict_policy: "first-wins"              # first-wins | last-wins | error

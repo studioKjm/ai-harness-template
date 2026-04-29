@@ -1,0 +1,75 @@
+# BMAD-lite Story Template
+# Single user story — one deployable increment.
+# Path: .harness/bmad-lite/stories/<story-id>.yaml
+
+schema_version: 1
+
+id: "<story-id>"                    # e.g., st-2026-04-29-user-signup
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+epic: "<epic-id | null>"            # Optional parent epic
+seed_version: "v1"                  # Which seed this story is based on
+
+# ─── Narrative (required) ────────────────────────────────────────────────
+# pm-strict will block if any field is missing or vague.
+narrative:
+  persona: "<who | role>"           # e.g., "registered user"
+  capability: "<what they want>"    # e.g., "reset my forgotten password"
+  outcome: "<why it matters>"       # e.g., "regain access without contacting support"
+
+# ─── Acceptance Criteria (required, ≥ 1) ─────────────────────────────────
+# Format: Given/When/Then. Each AC must be observable from outside the system.
+acceptance_criteria:
+  - id: "AC-1"
+    given: "<context/precondition>"
+    when: "<user or system action>"
+    then: "<observable result>"
+    # pm-strict checks: no weasel words, measurable outcome
+  - id: "AC-2"
+    given: "<...>"
+    when: "<...>"
+    then: "<...>"
+
+# ─── Analyst Output (optional, populated by /persona analyst) ────────────
+analyst_notes:
+  entities_touched: []              # ["User", "ResetToken"]
+  behaviors: []                     # [{actor, action, target}]
+  ambiguities_resolved: []          # ["X means Y per ADR-005"]
+
+# ─── UX Output (optional, populated by /persona ux-designer) ─────────────
+ux_notes:
+  flow_summary: "<entry → exit in 1-2 sentences>"
+  states_handled: []                # ["empty", "loading", "error", "success"]
+  ui_primitives: []                 # ["Button", "InputField", "ToastNotification"]
+  minimal_viable_screens: []
+
+# ─── Dev Notes (optional, populated by developer) ────────────────────────
+dev_notes:
+  layer_targets: []                 # ["presentation", "logic", "data"]
+  tasks_decomposed: []              # ["task-id-1", "task-id-2"] from /decompose
+  estimated_size: "<S | M | L>"     # No time estimates — size only
+  dependencies:
+    blocks: []
+    blocked_by: []
+
+# ─── State Machine ───────────────────────────────────────────────────────
+status: "draft | refined | ready | in-progress | done | abandoned"
+# draft       — analyst working
+# refined     — pm-strict passed
+# ready       — decomposed into tasks, ready to implement
+# in-progress — at least one task started
+# done        — all AC verified by /evaluate
+
+# ─── pm-strict Audit Log ─────────────────────────────────────────────────
+pm_strict_log:
+  - timestamp: "<ISO-8601>"
+    verdict: "pass | block"
+    issues: []
+    overrides: []                   # Explicit user overrides with reason
+
+# ─── Traceability ────────────────────────────────────────────────────────
+traceability:
+  seed_entities: []                 # Which seed entities this story exercises
+  related_stories: []               # Sibling stories in same epic
+  superseded_by: null               # If replaced by a later story

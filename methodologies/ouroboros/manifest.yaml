@@ -1,0 +1,52 @@
+schema_version: 1
+name: ouroboros
+display_name: "Ouroboros (Specification-First)"
+description: "Default methodology for 0→1 development with immutable spec and ambiguity scoring"
+version: "1.0.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/interview"
+    file: "../../commands/interview.md"
+    description: "Socratic requirements interview (Ambiguity ≤ 0.2 to pass)"
+  - name: "/seed"
+    file: "../../commands/seed.md"
+    description: "Crystallize interview into immutable spec"
+  - name: "/decompose"
+    file: "../../commands/decompose.md"
+    description: "Break seed into atomic tasks with layer tags"
+  - name: "/trd"
+    file: "../../commands/trd.md"
+    description: "Technical Requirements Document"
+  - name: "/run"
+    file: "../../commands/run.md"
+    description: "Double Diamond execution"
+  - name: "/evaluate"
+    file: "../../commands/evaluate.md"
+    description: "3-stage verification (Mechanical/Semantic/Judgment)"
+  - name: "/evolve"
+    file: "../../commands/evolve.md"
+    description: "Wonder/Reflect/Re-seed evolution loop"
+
+templates: []
+personas: []
+adds_gates: []
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/ouroboros/seeds/"
+    - ".harness/ouroboros/interviews/"
+    - ".harness/ouroboros/evaluations/"
+
+hooks: {}
+
+tags: ["0→1", "spec-driven", "default"]
+icon: "🐍"
+docs_url: "https://github.com/studioKjm/ai-harness-template#ouroboros"
+
+min_harness_version: "0.1.0"
