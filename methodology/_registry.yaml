@@ -81,5 +81,20 @@ methodologies:
     enabled: true
     bundled: true
 
+  - name: ddd-lite
+    path: methodologies/ddd-lite
+    enabled: true
+    bundled: true
+
+  - name: bdd
+    path: methodologies/bdd
+    enabled: true
+    bundled: true
+
+  - name: shape-up
+    path: methodologies/shape-up
+    enabled: true
+    bundled: true
+
 # Custom (user-installed) methodologies are appended here by /methodology install.
 # Bundled methodologies above can be disabled by setting enabled: false (not removed).

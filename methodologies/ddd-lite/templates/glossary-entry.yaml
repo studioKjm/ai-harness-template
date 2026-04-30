@@ -1,0 +1,27 @@
+# Ubiquitous Language Glossary Entry
+# /ddd-glossary add <term> 으로 생성됩니다.
+
+term: ""                    # 정확한 용어 (도메인 전문가와 합의된 이름)
+context_id: ""              # 이 용어가 속한 Bounded Context (컨텍스트마다 의미가 다를 수 있음)
+definition: ""              # 비즈니스 관점의 명확한 정의
+
+# 코드에서 이 용어가 사용되는 곳
+code_references:
+  - type: ""                # class | function | variable | table | event
+    location: ""            # 파일 경로 또는 모듈명
+    note: ""
+
+# 혼동하기 쉬운 동의어/유사어
+synonyms: []                # 쓰지 말아야 할 대체 표현들
+
+# 다른 컨텍스트에서의 동일 개념 (이름이 다를 수 있음)
+cross_context:
+  - context_id: ""
+    term: ""                # 그 컨텍스트에서의 용어
+    relationship: ""        # same | similar | different
+
+status: "active"            # active | deprecated | disputed
+disputed_reason: ""         # disputed 사유 (팀 내 이견)
+
+created_at: ""
+updated_at: ""

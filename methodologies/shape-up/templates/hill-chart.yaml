@@ -1,0 +1,22 @@
+# Hill Chart Snapshot Template
+# /shapeup hill <cycle-id> 으로 생성됩니다.
+
+snapshot_id: ""             # HLC-YYYYMMDD-NNN
+cycle_id: ""
+captured_at: ""
+
+# Hill Chart: 각 작업의 현재 위치
+# Uphill = 문제 해결 중 (불확실성 있음)
+# Downhill = 실행 중 (방법 확실, 마무리 중)
+items:
+  - scope: ""               # 작업/범위 이름
+    position: 0             # 0=시작, 50=정상(hill top), 100=완료
+    phase: "uphill"         # uphill | hilltop | downhill | done
+    notes: ""
+    moved_since_last: false # 지난 스냅샷 대비 변화 여부
+
+# 전체 사이클 진행도 요약
+summary:
+  on_track: true
+  concerns: ""              # 우려사항 (속도 문제, 막힌 항목 등)
+  decisions_needed: ""      # 팀 결정이 필요한 사항

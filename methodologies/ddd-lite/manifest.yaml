@@ -1,0 +1,56 @@
+schema_version: 1
+name: ddd-lite
+display_name: "DDD Lite"
+description: "Domain-Driven Design 핵심 — Bounded Context · Aggregate · Ubiquitous Language"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/ddd"
+    file: "commands/ddd.md"
+    description: "Manage bounded contexts, aggregates, and domain glossary"
+  - name: "/ddd-glossary"
+    file: "commands/ddd-glossary.md"
+    description: "Ubiquitous Language glossary management"
+
+templates:
+  - file: "templates/bounded-context.yaml"
+    description: "Bounded Context 정의 (owner, public API, dependencies)"
+  - file: "templates/aggregate.yaml"
+    description: "Aggregate Root + Entity + Value Object 설계"
+  - file: "templates/domain-event.yaml"
+    description: "Domain Event 정의 (이벤트 스토밍 산출물)"
+  - file: "templates/glossary-entry.yaml"
+    description: "Ubiquitous Language 용어 항목"
+
+personas:
+  - name: "domain-expert"
+    file: "personas/domain-expert.md"
+    description: "도메인 전문가 페르소나 — 비즈니스 언어로 모델 검증"
+
+adds_gates:
+  - file: "gates/check-context-boundary.sh"
+    severity: "blocking"
+    runs_on: ["pre-commit"]
+    description: "Bounded Context 경계 위반 import 탐지 (다른 컨텍스트 내부 직접 참조 금지)"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/ddd-lite/contexts/"
+    - ".harness/ddd-lite/aggregates/"
+    - ".harness/ddd-lite/glossary.yaml"
+    - ".harness/state/ddd-lite.yaml"
+
+hooks: {}
+
+tags: ["ddd", "bounded-context", "aggregate", "ubiquitous-language", "domain-modeling"]
+icon: "🏛️"
+docs_url: "methodologies/ddd-lite/README.md"
+
+min_harness_version: "0.1.0"

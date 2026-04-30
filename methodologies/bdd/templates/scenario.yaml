@@ -1,0 +1,42 @@
+# BDD Scenario Template
+# /bdd new <title> 으로 생성됩니다.
+
+scenario_id: ""             # SCN-YYYYMMDD-NNN
+feature_id: ""              # 소속 Feature (선택)
+title: ""
+state: "draft"              # draft | ready | implementing | passing | skipped
+
+# Given/When/Then
+given: []                   # 전제 조건 (시스템의 초기 상태)
+  # - ""
+when: []                    # 행동 (사용자 또는 시스템의 행위)
+  # - ""
+then: []                    # 기대 결과
+  # - ""
+
+# 엣지 케이스 / 추가 예시 (Scenario Outline)
+examples:
+  - label: ""
+    given_override: {}      # 특정 given만 덮어쓸 값
+    expected: ""
+
+# 비기능 요건
+non_functional:
+  performance: ""           # e.g., "응답 < 200ms"
+  security: ""
+
+# 연결
+links:
+  story_id: ""              # 관련 user story / ouroboros seed
+  tdd_cycle_id: ""          # 구현 TDD 사이클
+  rfc_id: ""
+  acceptance_criteria: ""   # 이 시나리오가 충족하는 AC 번호
+
+# 테스트 구현 위치
+implementation:
+  file: ""                  # 실제 테스트 파일 경로
+  framework: ""             # jest | pytest | rspec | cucumber | ...
+  status: "not-implemented" # not-implemented | implemented | failing | passing
+
+created_at: ""
+updated_at: ""

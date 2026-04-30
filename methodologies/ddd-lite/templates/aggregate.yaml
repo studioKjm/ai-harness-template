@@ -1,0 +1,42 @@
+# Aggregate Template
+# /ddd aggregate new <name> 으로 생성됩니다.
+
+aggregate_id: ""            # AGG-YYYYMMDD-NNN
+context_id: ""              # 소속 Bounded Context
+name: ""                    # PascalCase Aggregate Root 이름
+description: ""
+state: "draft"              # draft | active | deprecated
+
+# Aggregate Root (집합의 진입점, 외부에서 유일하게 참조 가능한 엔티티)
+root:
+  name: ""
+  identity: ""              # ID 타입 (e.g., OrderId: UUID)
+  invariants:               # 불변 조건 — 언제나 참이어야 하는 규칙
+    - ""
+
+# 내부 엔티티 (ID가 있지만 Root를 통해서만 접근)
+entities:
+  - name: ""
+    identity: ""
+    description: ""
+
+# 값 객체 (동등성이 값으로 결정, 불변)
+value_objects:
+  - name: ""
+    fields: []
+    description: ""
+
+# 이 Aggregate가 발행하는 Domain Event
+domain_events:
+  - name: ""                # PastTense (e.g., OrderPlaced)
+    trigger: ""             # 어떤 커맨드/상황에서 발행
+
+# 이 Aggregate의 불변 조건을 검증하는 커맨드
+commands:
+  - name: ""
+    description: ""
+    preconditions: []
+    postconditions: []
+
+created_at: ""
+updated_at: ""

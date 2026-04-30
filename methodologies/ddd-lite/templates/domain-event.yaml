@@ -1,0 +1,35 @@
+# Domain Event Template
+# /ddd event new <name> 으로 생성됩니다.
+
+event_id: ""                # EVT-YYYYMMDD-NNN
+name: ""                    # PastTense PascalCase (e.g., OrderPlaced, PaymentFailed)
+context_id: ""              # 발생 Bounded Context
+aggregate_id: ""            # 발생 Aggregate (선택)
+description: ""
+
+# 이벤트 페이로드
+payload:
+  - field: ""
+    type: ""
+    description: ""
+
+# 이벤트 메타데이터
+metadata:
+  occurred_at: "DateTime"
+  correlation_id: "UUID"
+  causation_id: "UUID"      # 원인이 된 커맨드/이벤트 ID
+
+# 이 이벤트를 소비하는 컨텍스트/핸들러
+consumers:
+  - context_id: ""
+    handler: ""
+    reaction: ""            # 이 이벤트에 대한 반응 설명
+
+# 이벤트 스토밍 정보
+event_storming:
+  trigger: ""               # 무엇이 이 이벤트를 발생시키는가
+  color: "orange"           # event-storming sticky note 색상 convention
+  hotspot: false            # 논란/복잡도가 높은 이벤트
+
+created_at: ""
+updated_at: ""

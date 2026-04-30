@@ -14,6 +14,7 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 | 버전 | 날짜 | 상태 | 주요 변경 |
 |------|------|------|----------|
+| **v2.5.0** | 2026-05-01 | `experimental` | **메서드 3종 추가** — ddd-lite (Bounded Context·Aggregate·Ubiquitous Language, blocking gate), bdd (Given/When/Then 시나리오), shape-up (Appetite·Pitch·Betting Table). 총 **16종 번들**. (NON-BREAKING) |
 | [**v2.4.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.4.0) | 2026-04-30 | `experimental` | **메서드 3종 추가** — tdd-strict (Red→Green→Refactor, blocking git gate), lean-mvp (Build→Measure→Learn 가설 검증), mikado-method (트리 기반 점진 리팩터링). 총 **13종 번들**. (NON-BREAKING) |
 | [**v2.3.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.3.0) | 2026-04-30 | `experimental` | **메서드 5종 추가** — strangler-fig (모듈 마이그레이션), incident-review (blameless postmortem), threat-model-lite (STRIDE), observability-first (메트릭·SLO), rfc-driven (큰 변경 RFC). 총 **10종 번들**. 신규 14개 명령, 5개 게이트. (NON-BREAKING) |
 | [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `experimental` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론 플러그인 분리. 5종 번들(ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` 다중 활성화. (NON-BREAKING) |
@@ -21,12 +22,13 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 | [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` | **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
 | [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 초기 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
 
-**v2.4.0 실험 버전 도입 시 주의사항:**
+**v2.5.0 실험 버전 도입 시 주의사항:**
 - 메서드 플러그인 시스템은 v0.1 — API 변경 가능성 있음
-- 13종 번들 메서드 중 ouroboros 외 12종은 `0.1.0` (beta)
-- 모든 게이트는 충돌 없음 (13종 동시 활성화 가능, 단 실용적이진 않음)
+- 16종 번들 메서드 중 ouroboros 외 15종은 `0.1.0` (beta)
+- 모든 게이트는 충돌 없음 (16종 동시 활성화 가능, 단 실용적이진 않음)
+- ddd-lite의 `check-context-boundary.sh` (blocking): contexts 미정의 시 자동 스킵
 - `relaxes_gates` 컨슈머 컨트랙트는 정의됨, 코어 게이트 자동 소비는 v0.2 예정
-- 외주·프로덕션 도입은 v2.1.0 권장. v2.4.0은 사이드 프로젝트로 먼저 검증.
+- 외주·프로덕션 도입은 v2.1.0 권장. v2.5.0은 사이드 프로젝트로 먼저 검증.
 
 ## 데모 영상
 
@@ -99,7 +101,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 
 ## Methodology System (v0.1)
 
-> 하네스 코어는 **고정**. 메서드는 **플러그인**으로 사용자가 선택·조합. **번들 13종**.
+> 하네스 코어는 **고정**. 메서드는 **플러그인**으로 사용자가 선택·조합. **번들 16종**.
 
 ### 어떤 방법론을 골라야 하나?
 
@@ -127,6 +129,13 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 │
 ├─ 🧪 품질
 │   └─ 테스트 우선 엄격 강제 ──────────► tdd-strict (blocking gate)
+│
+├─ 🏛 도메인 설계
+│   ├─ 경계 모호, 용어 혼재 ────────────► ddd-lite
+│   └─ 비즈니스 언어로 시나리오 ─────────► bdd [+ tdd-strict]
+│
+├─ 🎯 계획·스코프
+│   └─ Appetite 기반 사이클 ─────────────► shape-up [+ lean-mvp]
 │
 ├─ 🛡 운영·신뢰성
 │   ├─ 결제·인증·민감 정보 다룸 ──────► + threat-model-lite
@@ -164,7 +173,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 | 메트릭 사후 추가 | `observability-first` 사후 | 새 기능부터 적용 |
 | Slack에서 "고쳤다"로 종료 | (메서드 없음) | `incident-review` 활용 |
 
-### 13종 메서드 한눈에
+### 16종 메서드 한눈에
 
 | 메서드 | 적용 단계 | 한 줄 요약 |
 |-------|---------|----------|
@@ -181,11 +190,14 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 | 🔴 **tdd-strict** | 모든 단계 | Red→Green→Refactor — 테스트 우선을 git 히스토리 게이트로 강제 |
 | 🧪 **lean-mvp** | 0→1, 1→N | Build→Measure→Learn — 가설 기반 MVP 검증, pivot or persist |
 | 🎋 **mikado-method** | 1→N | Goal→try→revert→prerequisites — 트리 기반 점진적 리팩터링 |
+| 🏛️ **ddd-lite** | 0→1, 1→N | Bounded Context + Aggregate + Ubiquitous Language — 경계 게이트 강제 |
+| 🎭 **bdd** | 모든 단계 | Given/When/Then 시나리오 — 비즈니스·개발 언어 연결, tdd-strict 짝꿍 |
+| 🎯 **shape-up** | 0→1, 1→N | Appetite + Pitch + Betting Table — 고정 시간·가변 범위 (Basecamp) |
 
 ### 활성화 명령
 
 ```bash
-/methodology list                                            # 메서드 목록 (13종)
+/methodology list                                            # 메서드 목록 (16종)
 /methodology current                                         # 현재 활성 메서드
 /methodology use ouroboros                                   # 단일 활성화
 /methodology compose ouroboros bmad-lite                     # 다중 조합

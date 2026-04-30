@@ -1,0 +1,50 @@
+schema_version: 1
+name: shape-up
+display_name: "Shape Up"
+description: "Basecamp 방법론 — Appetite(고정 시간·가변 범위) + Pitch + Betting Table"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/shapeup"
+    file: "commands/shapeup.md"
+    description: "Manage pitches, bets, and cycles (pitch | bet | cycle | hill | cool-down)"
+
+templates:
+  - file: "templates/pitch.yaml"
+    description: "Pitch 문서 — Problem·Appetite·Solution·Rabbit Holes·No-Gos"
+  - file: "templates/bet.yaml"
+    description: "Betting Table 항목 — 채택된 pitch + cycle 배정"
+  - file: "templates/hill-chart.yaml"
+    description: "Hill Chart 스냅샷 — 작업별 Uphill/Downhill 진행 상태"
+
+personas:
+  - name: "shaper"
+    file: "personas/shaper.md"
+    description: "Shaper 페르소나 — 문제를 appetite에 맞게 구체화"
+  - name: "bettor"
+    file: "personas/bettor.md"
+    description: "Betting Table 역할 — pitch 채택/기각 결정"
+
+adds_gates: []
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/shape-up/pitches/"
+    - ".harness/shape-up/bets/"
+    - ".harness/shape-up/cycles/"
+    - ".harness/state/shape-up.yaml"
+
+hooks: {}
+
+tags: ["shape-up", "basecamp", "appetite", "pitch", "betting-table", "fixed-time"]
+icon: "🎯"
+docs_url: "methodologies/shape-up/README.md"
+
+min_harness_version: "0.1.0"

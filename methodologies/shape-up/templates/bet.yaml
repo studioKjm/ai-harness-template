@@ -1,0 +1,31 @@
+# Shape Up Bet Template
+# /shapeup bet <pitch-id> 으로 생성됩니다.
+
+bet_id: ""                  # BET-YYYYMMDD-NNN
+pitch_id: ""                # 채택된 Pitch
+cycle_id: ""                # 배정된 Cycle
+
+title: ""
+appetite_weeks: 0
+
+# 팀 배정
+team:
+  designer: ""
+  developers: []
+  notes: ""
+
+# Betting Table 결정
+decision:
+  decided_at: ""
+  decided_by: ""
+  rationale: ""
+  competing_pitches: []     # 같이 심사했던 pitch들
+
+# Circuit Breaker — appetite 초과 시 처리 방침
+circuit_breaker:
+  policy: "ship-as-is"      # ship-as-is | cut-scope | re-pitch-next-cycle
+  notes: ""
+
+state: "active"             # active | done | abandoned
+
+created_at: ""

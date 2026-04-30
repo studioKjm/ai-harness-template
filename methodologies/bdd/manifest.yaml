@@ -1,0 +1,48 @@
+schema_version: 1
+name: bdd
+display_name: "BDD (Behavior-Driven Development)"
+description: "Given/When/Then 시나리오로 비즈니스·개발 언어를 연결 — tdd-strict의 짝꿍"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/bdd"
+    file: "commands/bdd.md"
+    description: "Manage BDD scenarios (new | list | status | link | done)"
+  - name: "/bdd-feature"
+    file: "commands/bdd-feature.md"
+    description: "Feature 파일 생성 및 시나리오 그룹 관리"
+
+templates:
+  - file: "templates/scenario.yaml"
+    description: "BDD 시나리오 (Given/When/Then + state machine)"
+  - file: "templates/feature.yaml"
+    description: "Feature 파일 — 관련 시나리오 묶음"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-scenario-coverage.sh"
+    severity: "warning"
+    runs_on: ["pre-commit"]
+    description: "새 기능 파일에 대응하는 시나리오(.yaml)가 없으면 경고"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/bdd/scenarios/"
+    - ".harness/bdd/features/"
+    - ".harness/state/bdd.yaml"
+
+hooks: {}
+
+tags: ["bdd", "given-when-then", "scenarios", "acceptance-testing", "dan-north"]
+icon: "🎭"
+docs_url: "methodologies/bdd/README.md"
+
+min_harness_version: "0.1.0"

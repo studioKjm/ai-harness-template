@@ -1,6 +1,6 @@
 # Methodology Catalog
 
-> 13종 번들 메서드 한눈에 비교. 어떤 상황에 무엇을 쓸지 결정하는 게이트.
+> 16종 번들 메서드 한눈에 비교. 어떤 상황에 무엇을 쓸지 결정하는 게이트.
 
 ## TL;DR — 의사결정 흐름
 
@@ -27,6 +27,16 @@
 ├─ 🧪 품질
 │   └─ 테스트 우선 엄격 강제 ──────────► tdd-strict (blocking gate)
 │
+├─ 🏛 도메인 설계
+│   ├─ 경계 모호, 용어 혼재 ────────────► ddd-lite (Bounded Context + Ubiquitous Language)
+│   └─ 컨텍스트 간 의존 방지 ───────────► ddd-lite (blocking gate)
+│
+├─ 🎭 행동 명세
+│   └─ 비즈니스 언어로 시나리오 ─────────► bdd (Given/When/Then) [+ tdd-strict 연계]
+│
+├─ 🎯 계획·스코프
+│   └─ Appetite 기반 6주 사이클 ─────────► shape-up (Pitch + Betting Table)
+│
 ├─ 🛡 운영·신뢰성
 │   ├─ 결제·인증·민감 정보 다룸 ──────► + threat-model-lite
 │   ├─ 메트릭·SLO 설계 필요 ──────────► + observability-first
@@ -37,7 +47,7 @@
 
 여러 메서드는 **조합 가능**. 예: `/methodology compose ouroboros bmad-lite living-spec threat-model-lite observability-first`
 
-## 한눈에 비교 (13종)
+## 한눈에 비교 (16종)
 
 | 메서드 | 적용 단계 | 기본 단위 | 추가 게이트 | 게이트 완화 | 페르소나 | 명령 수 |
 |-------|---------|---------|-----------|-----------|---------|--------|
@@ -54,6 +64,9 @@
 | **🔴 tdd-strict** | 모든 단계 | cycle (4-state) | 1 (blocking) | 없음 | 없음 | 2 |
 | **🧪 lean-mvp** | 0→1, 1→N | hypothesis (4-state) | 0 | 없음 | 없음 | 1 |
 | **🎋 mikado-method** | 1→N | graph + nodes | 0 | 없음 | 없음 | 1 |
+| **🏛️ ddd-lite** | 0→1, 1→N | bounded-context + aggregate | 1 (blocking) | 없음 | 1 | 2 |
+| **🎭 bdd** | 모든 단계 | scenario (5-state) | 1 (warning) | 없음 | 없음 | 2 |
+| **🎯 shape-up** | 0→1, 1→N | pitch + bet | 0 | 없음 | 2 | 1 |
 
 ## 메서드별 카드
 
@@ -361,29 +374,144 @@
 
 **조합 패턴**: `+ parallel-change` (나뭇잎 노드를 parallel-change로 안전 구현). `+ strangler-fig` (모듈 교체 진행도를 mikado 트리로 추적). `+ tdd-strict` (각 나뭇잎 노드 구현에 TDD 적용). `+ ouroboros` (리팩터링 목표를 시드 스펙으로 결정화 후 mikado).
 
+---
+
+### 🏛️ ddd-lite — Domain-Driven Design
+
+> "코드가 비즈니스 언어를 쓰지 않으면, 번역 비용이 계속 발생한다."
+
+**언제**: 여러 팀/컨텍스트가 협업, 용어 혼재, 경계 불명확, 도메인이 복잡해질 때.
+
+**무엇을 강제**:
+- Bounded Context 경계 정의 — 다른 컨텍스트 내부 직접 참조 차단 (blocking gate)
+- Aggregate Root 불변 조건 명시 — 외부에서는 Root를 통해서만 접근
+- Ubiquitous Language 용어집 — 코드 식별자와 비즈니스 언어 일치
+
+**산출물**:
+- `.harness/ddd-lite/contexts/BC-YYYYMMDD-NNN.yaml` — Bounded Context 정의
+- `.harness/ddd-lite/aggregates/AGG-YYYYMMDD-NNN.yaml` — Aggregate + 불변조건
+- `.harness/ddd-lite/events/EVT-YYYYMMDD-NNN.yaml` — Domain Event
+- `.harness/ddd-lite/glossary.yaml` — Ubiquitous Language 용어집
+
+**게이트**: `check-context-boundary.sh` (blocking) — Bounded Context 경계 위반 import 차단
+
+**페르소나**: `domain-expert` — 비즈니스 언어로 모델 검증
+
+**워크플로우**:
+```
+/ddd context new OrderManagement --owner "주문팀"
+/ddd aggregate new Order --context BC-20260501-001
+/ddd event new OrderPlaced --aggregate AGG-20260501-001
+/ddd-glossary add "주문" --definition "고객이 상품 구매를 요청한 단위"
+/ddd tree  # 컨텍스트 맵 시각화
+```
+
+**조합 패턴**: `ddd-lite + bdd` (BC → Feature 단위 시나리오). `ddd-lite + tdd-strict` (Aggregate 불변조건 → TDD 사이클). `ddd-lite + strangler-fig` (Context 경계 따라 시스템 분리).
+
+---
+
+### 🎭 bdd — Behavior-Driven Development
+
+> "비즈니스와 개발이 같은 언어로 인수 조건을 정의한다."
+
+**출처**: Dan North (2006) — "Introducing BDD". TDD를 넘어 비즈니스 의도를 코드로 연결.
+
+**언제**: 기획-개발 사이 언어 단절, 인수 조건이 모호, tdd-strict와 함께 "무엇을" 테스트할지 먼저 정의할 때.
+
+**무엇을 강제**:
+- Given/When/Then 형식으로 시나리오 작성 — 구현보다 행동 기술 우선
+- Feature 단위로 시나리오 묶음 — 인수 조건 커버리지 추적
+- 시나리오 5-state 머신: draft → ready → implementing → passing
+
+**산출물**:
+- `.harness/bdd/scenarios/SCN-YYYYMMDD-NNN.yaml` — 개별 시나리오
+- `.harness/bdd/features/FTR-YYYYMMDD-NNN.yaml` — Feature 단위 묶음
+
+**게이트**: `check-scenario-coverage.sh` (warning) — 새 기능 파일에 대응 시나리오 없으면 경고
+
+**워크플로우**:
+```
+/bdd-feature new "장바구니 관리"
+/bdd new "고객이 상품을 장바구니에 추가할 수 있다" --feature FTR-001
+# 시나리오 YAML에 Given/When/Then 작성
+/bdd status SCN-001 ready
+/bdd link SCN-001 --tdd TDD-001   # TDD 사이클 연결
+/bdd status SCN-001 passing
+```
+
+**조합 패턴**: `bdd + tdd-strict` (시나리오 → TDD Red/Green/Refactor로 세분화). `bdd + ddd-lite` (Feature = Bounded Context 단위). `bdd + bmad-lite` (bmad의 AC를 BDD 시나리오로 구체화).
+
+---
+
+### 🎯 shape-up — Appetite-Driven Cycles
+
+> "얼마나 투자할지 먼저 결정하고, 그 안에서 최선을 만든다."
+
+**출처**: Ryan Singer, Basecamp (2019) — "Shape Up". 스크럼의 추정 문제를 appetite로 해결.
+
+**언제**: 백로그 정리가 끝나지 않음, 스프린트 연장이 반복됨, 범위가 계속 늘어남, 팀이 "항상 바쁜데 완성이 없다"는 상황.
+
+**무엇을 강제**:
+- **Appetite 먼저** — "이 문제에 얼마를 투자할 가치가 있는가?" (추정 아님)
+- **Pitch** — Problem + Appetite + 대략적 Solution + Rabbit Holes + No-Gos
+- **Betting Table** — 다음 사이클에 뭘 만들지 명시적 결정
+- **Circuit Breaker** — appetite 초과 시 연장 없이 종료
+- **Hill Chart** — Uphill(불확실) → Downhill(실행) 시각화
+
+**산출물**:
+- `.harness/shape-up/pitches/PCH-YYYYMMDD-NNN.yaml` — Pitch 문서
+- `.harness/shape-up/bets/BET-YYYYMMDD-NNN.yaml` — 채택 결정
+- `.harness/shape-up/cycles/HLC-YYYYMMDD-NNN.yaml` — Hill Chart 스냅샷
+
+**게이트**: 없음 (강제 게이트보다 팀 프로세스 지원)
+
+**페르소나**: `shaper` (pitch 작성), `bettor` (채택/기각 결정)
+
+**워크플로우**:
+```
+[Cool-down: Shaping]
+/shapeup pitch new "주문 알림 재설계" --appetite big-batch
+# 편집: Problem/Solution/Rabbit Holes/No-Gos
+/shapeup pitch ready PCH-001
+
+[Betting Table]
+/shapeup pitch list --state ready
+/shapeup bet PCH-001 --cycle "2026-Q2-C1" --by "CEO"
+/shapeup not-bet PCH-002   # 이번 기각
+
+[Building — Hill Chart]
+/shapeup hill new --cycle "2026-Q2-C1"
+/shapeup hill show HLC-001
+```
+
+**조합 패턴**: `shape-up + lean-mvp` (Pitch = Hypothesis, 효과 검증). `shape-up + rfc-driven` (큰 pitch는 RFC 먼저). `shape-up + bdd` (범위를 시나리오로 구체화).
+
 ## 조합 매트릭스
 
 ✅ = 권장 / 기본 워크플로우
 ⭕ = 가능 (서로 보완)
 ❌ = 충돌 / 중복
 
-|  | ouro | living | p-change | bmad | explore | strangler | incident | threat | observe | rfc | tdd | lean | mikado |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **ouroboros** | base | ✅ | ✅ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **living-spec** | ✅ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **parallel-change** | ✅ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ✅ |
-| **bmad-lite** | ✅ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **exploration** | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **strangler-fig** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ |
-| **incident-review** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **threat-model-lite** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **observability-first** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ✅ | ⭕ |
-| **rfc-driven** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ |
-| **tdd-strict** | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ✅ | ✅ |
-| **lean-mvp** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ✅ | base | ⭕ |
-| **mikado-method** | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | base |
+|  | ouro | living | p-change | bmad | explore | strangler | incident | threat | observe | rfc | tdd | lean | mikado | ddd | bdd | shapeup |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **ouroboros** | base | ✅ | ✅ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **living-spec** | ✅ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **parallel-change** | ✅ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ |
+| **bmad-lite** | ✅ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ |
+| **exploration** | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **strangler-fig** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ✅ | ⭕ | ⭕ |
+| **incident-review** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **threat-model-lite** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **observability-first** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **rfc-driven** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ |
+| **tdd-strict** | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ✅ | ✅ | ✅ | ✅ | ⭕ |
+| **lean-mvp** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ✅ | base | ⭕ | ⭕ | ⭕ | ✅ |
+| **mikado-method** | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | base | ⭕ | ⭕ | ⭕ |
+| **ddd-lite** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | base | ✅ | ⭕ |
+| **bdd** | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ✅ | base | ✅ |
+| **shape-up** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ✅ | ⭕ | ⭕ | ✅ | base |
 
-→ **충돌 없음**. 13종 모두 동시 활성화 가능 (실용적이진 않지만 가능).
+→ **충돌 없음**. 16종 모두 동시 활성화 가능 (실용적이진 않지만 가능).
 
 **전형적 조합**:
 
@@ -396,6 +524,9 @@
 | 레거시 인수 + 점진 개편 | `strangler-fig + parallel-change [+ ouroboros]` |
 | 큰 아키텍처 결정 | `+ rfc-driven` |
 | 막혔을 때 | 어느 조합 + `exploration` 추가 |
+| 복잡한 도메인 (팀 여러 개) | `ddd-lite + bdd [+ tdd-strict]` |
+| Appetite 기반 6주 사이클 | `shape-up + lean-mvp` |
+| 비즈니스 언어로 명세 | `bdd + bmad-lite + ddd-lite` |
 | 풀 SaaS 운영 (모든 안전망) | `ouroboros + bmad-lite + living-spec + threat-model-lite + observability-first + incident-review + rfc-driven` |
 
 ## 활성화 명령 (공통)
@@ -414,7 +545,7 @@
 - **단순 버그 수정**: 메서드 없이 그냥 코드 수정. 게이트는 그대로 작동.
 - **6명 이상 팀의 풀 BMAD 필요**: BMAD 본가([github.com/bmadcode/BMAD-METHOD](https://github.com/bmadcode/BMAD-METHOD)) 사용
 - **레거시 마이그레이션 (Strangler Fig)**: 현재 미지원. v0.2 후보.
-- **DDD/Event Sourcing 같은 무거운 메타-아키텍처**: 별도 도입. 하네스는 메서드와 직교.
+- **DDD/Event Sourcing 같은 무거운 메타-아키텍처**: ddd-lite로 시작, 이벤트 소싱 필요 시 별도 도입.
 
 ## 메서드 추가하기 (사용자 정의)
 
@@ -440,5 +571,11 @@
 | threat-model-lite | 0.1.0 | beta | DREAD 점수, OWASP Top 10 자동 매핑 |
 | observability-first | 0.1.0 | beta | Datadog/Prometheus 자동 sync |
 | rfc-driven | 0.1.0 | beta | Slack/GitHub 리뷰어 알림 |
+| tdd-strict | 0.1.0 | beta | 커버리지 자동 체크, 테스트 실행 자동화 |
+| lean-mvp | 0.1.0 | beta | 메트릭 자동 수집 연동 |
+| mikado-method | 0.1.0 | beta | 노드 자동 완료 감지 (테스트 통과 시) |
+| ddd-lite | 0.1.0 | beta | Event Storming 자동 시각화 |
+| bdd | 0.1.0 | beta | Cucumber/Gherkin 파일 자동 생성 |
+| shape-up | 0.1.0 | beta | Hill Chart 자동 업데이트 |
 
 자세한 진화 계획은 각 메서드의 README 참조.

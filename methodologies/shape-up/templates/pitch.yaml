@@ -1,0 +1,42 @@
+# Shape Up Pitch Template
+# /shapeup pitch new <title> 으로 생성됩니다.
+
+pitch_id: ""                # PCH-YYYYMMDD-NNN
+title: ""
+state: "shaping"            # shaping | ready | bet | building | done | not-bet | abandoned
+
+# Appetite — 이 아이디어에 얼마나 투자할 것인가 (고정 시간)
+appetite:
+  size: ""                  # small-batch (1-2주) | big-batch (6주)
+  weeks: 0
+  rationale: ""             # 왜 이 appetite인가
+
+# Problem — 해결하려는 문제 (솔루션이 아닌 문제 중심)
+problem:
+  description: ""
+  customer_pain: ""         # 고객이 지금 어떤 불편을 겪는가
+  current_workaround: ""    # 고객이 지금 어떻게 해결하고 있는가
+
+# Solution — 문제를 해결하는 방법 (Breadboard 수준)
+solution:
+  description: ""
+  breadboard: ""            # 텍스트로 표현한 인터랙션 흐름 (와이어프레임 대신)
+  fat_marker_sketch: ""     # 굵은 선 스케치 설명 (세부 디자인 아님)
+
+# Rabbit Holes — 피해야 할 함정
+rabbit_holes:
+  - ""
+
+# No-Gos — 명시적으로 포함하지 않을 것들
+no_gos:
+  - ""
+
+# Betting Table 정보 (bet 상태가 되면 채워짐)
+bet:
+  decided_at: ""
+  decided_by: ""
+  cycle_id: ""
+  rationale: ""
+
+created_at: ""
+updated_at: ""
