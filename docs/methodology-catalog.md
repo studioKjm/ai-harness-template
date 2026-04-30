@@ -1,30 +1,50 @@
 # Methodology Catalog
 
-> 5종 번들 메서드 한눈에 비교. 어떤 상황에 무엇을 쓸지 결정하는 게이트.
+> 10종 번들 메서드 한눈에 비교. 어떤 상황에 무엇을 쓸지 결정하는 게이트.
 
 ## TL;DR — 의사결정 흐름
 
 ```
-프로젝트 시작 시점은?
-├─ 0→1 (신규 프로젝트, 스펙 미확정) ───────► ouroboros (기본)
-├─ 미지수가 막아서 스펙 작성 못 함 ──────► exploration (스파이크)
-└─ 1→N (기존 시스템 확장)
-   ├─ 기능 추가/스토리 분해 ──────────────► bmad-lite (+ ouroboros)
-   ├─ 시드 진화 (스펙 변경) ──────────────► living-spec (+ ouroboros)
-   └─ 호환 깨는 변경 (DB/API breaking) ───► parallel-change (+ ouroboros)
+지금 뭐 하려는 중이세요?
+│
+├─ 🆕 0→1 (신규)
+│   ├─ 단순 신규 ──────────────────────► ouroboros (기본)
+│   ├─ 스토리·AC 정리 필요 ────────────► ouroboros + bmad-lite
+│   └─ 큰 아키텍처 결정 ─────────────► ouroboros + bmad-lite + rfc-driven
+│
+├─ 🔧 1→N (기존 확장)
+│   ├─ 기능 추가 (시드 진화) ──────────► ouroboros + living-spec [+ bmad-lite]
+│   ├─ 함수 시그니처 변경 ─────────────► + parallel-change
+│   ├─ 모듈/시스템 교체 ──────────────► + strangler-fig
+│   └─ 클라이언트 레거시 인수 ─────────► strangler-fig (단독 가능)
+│
+├─ ❓ 미지수
+│   └─ 라이브러리 검증 / PoC ──────────► exploration (어느 조합에든 추가)
+│
+├─ 🛡 운영·신뢰성
+│   ├─ 결제·인증·민감 정보 다룸 ──────► + threat-model-lite
+│   ├─ 메트릭·SLO 설계 필요 ──────────► + observability-first
+│   └─ 장애 발생 ────────────────────► + incident-review
+│
+└─ 🐛 단순 버그 수정 ─────────────────► (메서드 불필요, 게이트만 작동)
 ```
 
-여러 메서드는 **조합 가능**. 예: `/methodology compose ouroboros bmad-lite living-spec`
+여러 메서드는 **조합 가능**. 예: `/methodology compose ouroboros bmad-lite living-spec threat-model-lite observability-first`
 
-## 한눈에 비교
+## 한눈에 비교 (10종)
 
 | 메서드 | 적용 단계 | 기본 단위 | 추가 게이트 | 게이트 완화 | 페르소나 | 명령 수 |
 |-------|---------|---------|-----------|-----------|---------|--------|
 | **🐍 ouroboros** | 0→1 | seed (불변 명세) | (없음 — 핵심 게이트만) | 없음 | (간접) | 7 |
 | **🔄 living-spec** | 1→N | seed-vN diff | 1 (warning) | 없음 | 없음 | 2 |
-| **⫶ parallel-change** | 1→N | plan (state machine) | 2 (blocking) | 없음 | 없음 | 4 |
+| **⫶ parallel-change** | 1→N | plan (4-state) | 2 (blocking) | 없음 | 없음 | 4 |
 | **🎭 bmad-lite** | 0→1, 1→N | story | 1 (warning) | 없음 | 3 | 2 |
 | **🔭 exploration** | 모든 단계 | spike + learning | 0 | 3 (paths) | 없음 | 2 |
+| **🌿 strangler-fig** | 1→N | plan (4-state) | 1 (warning) | 없음 | 없음 | 3 |
+| **🚨 incident-review** | 운영 | incident (5-state) | 1 (warning) | 없음 | 없음 | 3 |
+| **🛡 threat-model-lite** | 모든 단계 | model (4-state) | 1 (warning) | 없음 | 1 | 2 |
+| **📊 observability-first** | 0→1, 1→N | spec + SLO | 1 (warning) | 없음 | 없음 | 2 |
+| **📜 rfc-driven** | 모든 단계 | rfc (5-state) | 1 (warning/blocking) | 없음 | 없음 | 2 |
 
 ## 메서드별 카드
 
@@ -142,26 +162,164 @@
 
 **조합 패턴**: 모든 메서드와 조합 가능. 어느 단계든 막히면 spike 따고, 학습 끝나면 본 흐름으로 복귀.
 
+---
+
+### 🌿 strangler-fig — Module-level Legacy Migration
+
+> "facade로 감싸 점진적으로 교체. 다운타임 0."
+
+**언제**: 클라이언트 레거시 인수, 모듈/서비스 단위 점진 교체. 전체 재작성 불가.
+
+**parallel-change와 차이**: parallel-change는 **함수·시그니처 수준**. strangler-fig는 **모듈·시스템 수준** + 라우팅 facade.
+
+**무엇을 강제**:
+- 4-state 머신: legacy-only → coexist → new-primary → retired
+- cutover criteria 자동 검증:
+  - coexist: facade + new module 존재 + ≥1 routing rule
+  - new-primary: ≥80% rules → target new
+  - retired: 모든 rules → new + coverage 100%
+
+**산출물**:
+- `plans/sf-<id>.yaml` (legacy/new/facade 경로, routing rules, coverage)
+
+**게이트**: `check-strangler-coverage.sh` (warning) — 라우팅 안 된 endpoint, 90일+ stagnation 경고
+
+**조합 패턴**: `ouroboros + strangler-fig` (신규 모듈 설계는 시드 기반). `+ parallel-change` (모듈 안의 함수 시그니처 변경).
+
+---
+
+### 🚨 incident-review — Blameless Postmortem
+
+> "What system allowed this?"
+
+**언제**: production 장애, 배포 후 회귀, 보안 사고. Slack에서 끝나지 않게.
+
+**exploration과 차이**: exploration은 **선험적** (모르는 걸 알고 시작). incident-review는 **사후적** (예상 못한 문제).
+
+**무엇을 강제**:
+- 5-state: recording → analyzing → published → acted-on → archived
+- publish 전: blameless review + five_whys.root_cause 강제
+- close 전: 모든 action items resolved (open/in-progress 0건)
+- action items: owner + due_date + priority 필수
+
+**산출물**:
+- `incidents/inc-<id>.yaml` (timeline, 5-whys, contributing factors, action items)
+
+**게이트**: `check-incident-actions.sh` (warning) — overdue action items, owner 미지정, published with 0 actions
+
+**특별 명령**: `/incident-patterns` — 분기별 recurring root causes 집계
+
+**조합 패턴**: 어느 조합에든 추가. action item이 task/story/spike/ADR/parallel-change/strangler-fig으로 변환 가능.
+
+---
+
+### 🛡 threat-model-lite — STRIDE Threat Modeling
+
+> "Assume the attacker has read your spec."
+
+**언제**: 결제·인증·PII 다루는 스토리. 사후 보안 패치 대신 설계 단계 차단.
+
+**core gates와 차이**: core의 `check-secrets.sh`/`check-security.sh`는 **이미 코드에 들어간 것** 검증 (사후). threat-model은 **스토리 작성 시점** 위협 식별 (사전).
+
+**무엇을 강제**:
+- 4-state: draft → reviewed → approved → applied
+- review 전: STRIDE 6 카테고리 모두 위협 OR `not_applicable_reason` 필수
+- apply 전: 모든 mitigation `implemented`/`deferred`/`accepted`
+- override 시 reason + history 기록
+
+**산출물**:
+- `models/tm-<id>.yaml` (STRIDE × threats × mitigations)
+- `triggers.yaml` — 자동 요구 패턴 (auth/payment/pii 등)
+
+**페르소나**: `security-reviewer` — weasel words("HTTPS 쓰니까 안전") 차단
+
+**게이트**: `check-threat-coverage.sh` (warning) — sensitive 파일·스토리에 모델 미연결
+
+**조합 패턴**: `+ bmad-lite` (story narrative에 sensitive 키워드 → 자동 경고). `+ ouroboros` (위협 매트릭스가 시드 AC 정당화).
+
+---
+
+### 📊 observability-first — Metrics, Logs, Traces, SLOs
+
+> "Telemetry is a design output, not a retrofit."
+
+**언제**: MVP에서 자주 스킵되는 영역. 메트릭·SLO를 스토리 작성 시점에 설계.
+
+**무엇을 강제**:
+- spec 5-state: draft → defined → instrumented → measuring → review-due
+- SLO 3-state: proposed → active → retired
+- instrument 전: coverage.files/symbols 필수
+- 메트릭은 `--question` 필수 (어떤 질문에 답하는가)
+- log field에 PII 마킹
+
+**산출물**:
+- `specs/obs-<id>.yaml` (metrics + logs + traces + SLO 링크)
+- `slos/slo-<id>.yaml` (SLI + target + burn rate alert + 위반 기록)
+
+**게이트**: `check-observability-coverage.sh` (warning) — Logic 레이어 파일 중 spec 없는 것, 90일+ 미검토 spec
+
+**SLO target 가이드**: 99% (내부) / 99.5% (일반 API) / 99.9% (핵심) / 99.99% (결제·인증). **100% 금지**.
+
+**조합 패턴**: `+ ouroboros` (SLO target = 시드 AC). `+ incident-review` (위반 기록이 incident 연결).
+
+---
+
+### 📜 rfc-driven — Design Review Before Code
+
+> "큰 변경은 페이퍼 트레일."
+
+**언제**: 아키텍처 리팩터, 새 의존성, breaking migration. 합의 없는 진행 위험.
+
+**ADR과의 차이**: ADR은 **결정 후** (사실 기록). RFC는 **결정 전** (협의 + 대안 검토).
+
+**무엇을 강제**:
+- 5-state: draft → proposed → accepted/rejected → superseded
+- propose 전: summary/motivation/design + ≥2 alternatives + ≥1 drawback 필수
+- accept/reject: `--decided-by` + `--rationale` 필수
+- supersede: 양방향 자동 링크
+
+**산출물**:
+- `rfcs/rfc-<id>.yaml` (motivation, design, alternatives, drawbacks, decision)
+- `.rfc-links.yaml` — 파일/모듈 → RFC 매핑 (게이트 소비)
+- `config.yaml` — LOC 임계값 (per_file 500 / total 1000), 필수/면제 경로
+
+**게이트**: `check-rfc-required.sh` (warning, config로 blocking 가능) — 큰 변경에 RFC 링크 없으면 경고
+
+**조합 패턴**: `+ ouroboros` (accepted RFC가 시드 input). `+ parallel-change`/`+ strangler-fig` (마이그레이션 RFC가 plan 생성). `+ incident-review` (incident가 motivation evidence).
+
 ## 조합 매트릭스
 
 ✅ = 권장 / 기본 워크플로우
 ⭕ = 가능 (서로 보완)
 ❌ = 충돌 / 중복
 
-| | ouroboros | living-spec | parallel-change | bmad-lite | exploration |
-|---|---|---|---|---|---|
-| **ouroboros** | base | ✅ requires | ✅ requires | ✅ requires | ⭕ |
-| **living-spec** | ✅ | base+ | ⭕ (breaking 시 자동 제안) | ⭕ | ⭕ |
-| **parallel-change** | ✅ | ⭕ | base+ | ⭕ | ⭕ |
-| **bmad-lite** | ✅ | ⭕ | ⭕ | base+ | ⭕ |
-| **exploration** | ⭕ | ⭕ | ⭕ | ⭕ | base |
+|  | ouroboros | living-spec | parallel-change | bmad-lite | exploration | strangler-fig | incident-review | threat-model-lite | observability-first | rfc-driven |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **ouroboros** | base | ✅ requires | ✅ requires | ✅ requires | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **living-spec** | ✅ | base+ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **parallel-change** | ✅ | ⭕ | base+ | ⭕ | ⭕ | ⭕ (nested) | ⭕ | ⭕ | ⭕ | ⭕ |
+| **bmad-lite** | ✅ requires | ⭕ | ⭕ | base+ | ⭕ | ⭕ | ⭕ | ⭕ (보완) | ⭕ | ⭕ |
+| **exploration** | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **strangler-fig** | ⭕ | ⭕ | ⭕ (nested) | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ |
+| **incident-review** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ (위반 기록) | ⭕ |
+| **threat-model-lite** | ⭕ | ⭕ | ⭕ | ⭕ (보완) | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ |
+| **observability-first** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ (위반 기록) | ⭕ | base | ⭕ |
+| **rfc-driven** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base |
+
+→ **충돌 없음**. 10종 모두 동시 활성화 가능 (실용적이진 않지만 가능).
 
 **전형적 조합**:
-- 신규 프로젝트 단순: `ouroboros`
-- 신규 + 스토리 분해: `ouroboros + bmad-lite`
-- 외주 SaaS 확장: `ouroboros + bmad-lite + living-spec`
-- 호환 깨는 마이그레이션: `ouroboros + parallel-change`
-- 막혔을 때: 위 어느 조합 + `exploration` 추가
+
+| 시나리오 | 조합 |
+|---------|-----|
+| 사이드 프로젝트 (실험) | `ouroboros` 또는 `exploration` 단독 |
+| 신규 외주 SaaS MVP | `ouroboros + bmad-lite` |
+| 외주 SaaS 보안 강화 | `+ threat-model-lite + observability-first` |
+| 외주 SaaS 유지보수 | `ouroboros + bmad-lite + living-spec + incident-review` |
+| 레거시 인수 + 점진 개편 | `strangler-fig + parallel-change [+ ouroboros]` |
+| 큰 아키텍처 결정 | `+ rfc-driven` |
+| 막혔을 때 | 어느 조합 + `exploration` 추가 |
+| 풀 SaaS 운영 (모든 안전망) | `ouroboros + bmad-lite + living-spec + threat-model-lite + observability-first + incident-review + rfc-driven` |
 
 ## 활성화 명령 (공통)
 
@@ -191,14 +349,19 @@
 
 스키마: [methodology/_schema/manifest.yaml](../methodology/_schema/manifest.yaml)
 
-## 버전 매트릭스 (v0.1)
+## 버전 매트릭스
 
-| 메서드 | 버전 | 안정성 | 다음 |
+| 메서드 | 버전 | 안정성 | 다음 (v0.2 후보) |
 |-------|------|-------|------|
-| ouroboros | 1.0.0 | stable | (마이그레이션은 차후) |
+| ouroboros | 1.0.0 | stable | (Phase 1 마이그레이션 cleanup) |
 | living-spec | 0.1.0 | beta | AST 기반 drift 감지 |
 | parallel-change | 0.1.0 | beta | living-spec 자동 통합 |
 | bmad-lite | 0.1.0 | beta | ux-designer 컴포넌트 스캔 |
 | exploration | 0.1.0 | beta | gate consumer 자동화 |
+| strangler-fig | 0.1.0 | beta | APM 연동 (legacy traffic 0건 자동 검증) |
+| incident-review | 0.1.0 | beta | 외부 모니터링 timeline 자동 수집 |
+| threat-model-lite | 0.1.0 | beta | DREAD 점수, OWASP Top 10 자동 매핑 |
+| observability-first | 0.1.0 | beta | Datadog/Prometheus 자동 sync |
+| rfc-driven | 0.1.0 | beta | Slack/GitHub 리뷰어 알림 |
 
 자세한 진화 계획은 각 메서드의 README 참조.

@@ -1,0 +1,90 @@
+# Threat Model Triggers
+# Patterns that auto-require a threat model when matched in stories/code.
+# Path: .harness/threat-model-lite/triggers.yaml (copy on activation)
+
+schema_version: 1
+
+# Entity name patterns (matched against story narrative + code symbols)
+sensitive_entities:
+  authentication:
+    patterns:
+      - "auth*"
+      - "login*"
+      - "password"
+      - "session"
+      - "token"
+      - "jwt"
+      - "oauth"
+      - "saml"
+      - "sso"
+      - "mfa"
+      - "2fa"
+    severity: high
+
+  payment:
+    patterns:
+      - "payment"
+      - "billing"
+      - "invoice"
+      - "refund"
+      - "charge"
+      - "subscription"
+      - "checkout"
+      - "card"
+      - "wallet"
+    severity: critical
+
+  pii:
+    patterns:
+      - "email"
+      - "phone"
+      - "ssn"
+      - "name"
+      - "address"
+      - "kyc"
+      - "identity"
+      - "passport"
+      - "birthdate"
+    severity: high
+
+  authorization:
+    patterns:
+      - "admin"
+      - "role"
+      - "permission"
+      - "rbac"
+      - "abac"
+      - "scope"
+      - "grant"
+    severity: high
+
+  secrets:
+    patterns:
+      - "secret"
+      - "api_key"
+      - "apikey"
+      - "private_key"
+      - "credential"
+    severity: critical
+
+# File path patterns (always require threat model regardless of content)
+sensitive_paths:
+  - "**/auth/**"
+  - "**/payment/**"
+  - "**/billing/**"
+  - "**/admin/**"
+  - "**/security/**"
+
+# Endpoint patterns (HTTP routes that always need threat model)
+sensitive_endpoints:
+  - "POST /login"
+  - "POST /signup"
+  - "POST /password/*"
+  - "*/admin/*"
+  - "POST /payment/*"
+  - "POST /webhook/*"          # Webhooks are common attack surface
+
+# Exemptions (skip warnings for these — use sparingly)
+exemptions:
+  paths: []
+  reasons: {}

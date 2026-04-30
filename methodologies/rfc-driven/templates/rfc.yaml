@@ -1,0 +1,110 @@
+# RFC Template
+# Lightweight design review for high-stakes changes.
+# Path: .harness/rfc-driven/rfcs/<rfc-id>.yaml
+
+schema_version: 1
+
+id: "<rfc-id>"                       # e.g., rfc-2026-04-30-eventbus-replacement
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+title: "<short title>"
+authors: []                          # ["jimin"]
+
+# ─── Status ──────────────────────────────────────────────────────────────
+# State machine:
+#   draft → proposed → accepted | rejected
+#   accepted → superseded (when replaced by newer RFC)
+#
+# draft       — author still iterating
+# proposed    — submitted for review (no longer mutable except by editors)
+# accepted    — approved, code may proceed
+# rejected    — declined (record reason)
+# superseded  — replaced by a later RFC (supersedes link)
+status: "draft"
+
+history:
+  - timestamp: "<ISO-8601>"
+    from: null
+    to: "draft"
+    note: "RFC created"
+
+# ─── Summary ─────────────────────────────────────────────────────────────
+summary: "<2-3 sentence elevator pitch>"
+
+# ─── Motivation ──────────────────────────────────────────────────────────
+# Why are we doing this? What problem does it solve?
+motivation: |
+  <Plain prose. Cite specific evidence — incidents, metrics, complaints.
+   Avoid abstract appeals like "it would be nice if..." — make the cost
+   of NOT doing this concrete.>
+
+# ─── Design ──────────────────────────────────────────────────────────────
+# What we're proposing. Concrete enough to estimate effort.
+design: |
+  <Architecture changes, new components, modified data flow.
+   Diagrams welcome — embed as text or link out.
+   API/schema changes should be explicit.>
+
+# ─── Alternatives ────────────────────────────────────────────────────────
+# Other options considered. Mandatory — at least 2 (including "do nothing").
+alternatives: []
+# Example:
+#   - title: "Replace with managed service (e.g., AWS SQS)"
+#     pros: ["No ops burden", "Battle-tested"]
+#     cons: ["Vendor lock-in", "Cost at scale"]
+#     verdict: "Considered but rejected — see drawbacks section"
+#   - title: "Do nothing — keep current system"
+#     pros: ["Zero migration risk"]
+#     cons: ["Recurring outages cost ~$30K/quarter (cf. inc-* incidents)"]
+#     verdict: "Status quo unsustainable"
+
+# ─── Drawbacks ───────────────────────────────────────────────────────────
+# What's bad about the proposed design? Be honest — aware drawback >
+# discovered drawback.
+drawbacks: []
+# Example:
+#   - "Migration period requires dual-write for 4-6 weeks (parallel-change)"
+#   - "Operational expertise shifts — team needs Kafka training"
+
+# ─── Open Questions ──────────────────────────────────────────────────────
+open_questions: []
+# Example:
+#   - question: "Schema evolution policy — Avro or Protobuf?"
+#     blocking: true
+#     owner: "<reviewer-name>"
+
+# ─── Adoption Plan ───────────────────────────────────────────────────────
+# Concrete steps to roll out. Required for accepted state.
+adoption_plan: |
+  <Phased rollout. Reference parallel-change/strangler-fig if used.
+   Include rollback plan.>
+
+# ─── Decision ────────────────────────────────────────────────────────────
+# Filled when status moves to accepted/rejected.
+decision:
+  date: null
+  decided_by: ""                     # name(s) or role
+  rationale: ""
+  conditions: []                     # Constraints on adoption
+
+# ─── Links ───────────────────────────────────────────────────────────────
+links:
+  related_rfcs: []
+  supersedes: null                   # If this replaces an older RFC
+  superseded_by: null                # Set when a newer RFC supersedes this
+  related_adrs: []
+  related_incidents: []              # Incidents motivating this RFC
+  related_seeds: []                  # ouroboros seeds touched
+  governs_files: []                  # Files/paths this RFC's decision applies to
+  governs_modules: []
+
+# ─── Compliance / Approval Gates ─────────────────────────────────────────
+required_approvals: []
+# Example:
+#   - role: "tech-lead"
+#     approver: ""
+#     approved_at: null
+#   - role: "security-reviewer"
+#     approver: ""
+#     approved_at: null

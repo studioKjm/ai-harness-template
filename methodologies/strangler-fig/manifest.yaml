@@ -1,0 +1,51 @@
+schema_version: 1
+name: strangler-fig
+display_name: "Strangler Fig"
+description: "Module/system-level legacy replacement via facade routing — gradual cutover with coexistence"
+version: "0.1.0"
+author: "harness-core"
+
+# Strangler Fig is for projects where a legacy system already exists.
+# It does NOT require ouroboros (legacy migration sometimes precedes new-spec work).
+prerequisites: []
+
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/strangler"
+    file: "commands/strangler.md"
+    description: "Create or list strangler-fig plans (new | list | show | advance)"
+  - name: "/strangler-route"
+    file: "commands/strangler-route.md"
+    description: "Add or update a routing rule (which patterns go to legacy vs new)"
+  - name: "/strangler-retire"
+    file: "commands/strangler-retire.md"
+    description: "Final retirement check — verifies legacy module has 0 inbound traffic"
+
+templates:
+  - file: "templates/strangler-plan.yaml"
+    description: "Plan + routing rules + coverage tracking + state machine"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-strangler-coverage.sh"
+    severity: "warning"
+    runs_on: ["pre-commit"]
+    description: "Warn when endpoints in legacy module are not covered by routing rules"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/strangler-fig/plans/"
+    - ".harness/state/strangler-fig.yaml"
+
+hooks: {}
+
+tags: ["1→N", "legacy-migration", "incremental", "system-level", "compose-with-anything"]
+icon: "🌿"
+docs_url: "methodologies/strangler-fig/README.md"
+
+min_harness_version: "0.1.0"

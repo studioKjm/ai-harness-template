@@ -1,0 +1,49 @@
+schema_version: 1
+name: incident-review
+display_name: "Incident Review"
+description: "Blameless postmortem capture — structured incident records with action item tracking"
+version: "0.1.0"
+author: "harness-core"
+
+# Incident review is usable at any project stage and composes with everything.
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/incident"
+    file: "commands/incident.md"
+    description: "Manage incident records (new | list | show | analyze | publish | close)"
+  - name: "/incident-action"
+    file: "commands/incident-action.md"
+    description: "Add or resolve action items on an incident"
+  - name: "/incident-patterns"
+    file: "commands/incident-patterns.md"
+    description: "Analyze recurring root causes across incidents (last 90 days by default)"
+
+templates:
+  - file: "templates/incident.yaml"
+    description: "Incident record — timeline, 5-whys, contributing factors, action items"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-incident-actions.sh"
+    severity: "warning"
+    runs_on: ["pre-commit"]
+    description: "Warn about overdue action items (past due_date, status != resolved)"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/incident-review/incidents/"
+    - ".harness/state/incident-review.yaml"
+
+hooks: {}
+
+tags: ["postmortem", "blameless", "operations", "compose-with-anything"]
+icon: "🚨"
+docs_url: "methodologies/incident-review/README.md"
+
+min_harness_version: "0.1.0"

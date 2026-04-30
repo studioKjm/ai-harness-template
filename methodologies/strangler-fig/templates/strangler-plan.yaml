@@ -1,0 +1,100 @@
+# Strangler Fig Plan Template
+# Module-level legacy replacement effort.
+# Path: .harness/strangler-fig/plans/<plan-id>.yaml
+
+schema_version: 1
+
+id: "<plan-id>"                      # e.g., sf-2026-04-30-billing-rewrite
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+title: "<short title>"
+description: "<one paragraph: why we're strangling this, business context>"
+
+# ─── Modules involved ────────────────────────────────────────────────────
+legacy_module:
+  path: "<src/legacy/billing/>"      # Directory or file glob
+  language: "<typescript | python | ...>"
+  description: "<what it currently does>"
+  loc_estimate: 0                    # Optional, helps gauge scope
+
+new_module:
+  path: "<src/billing/>"             # Where new implementation lives
+  language: "<...>"
+  description: "<what it will do — usually superset of legacy>"
+  exists_yet: false                  # Set true once new module has any code
+
+facade:
+  path: "<src/billing-facade/>"      # Router/proxy that decides legacy vs new
+  description: "<how routing decisions are made — middleware? feature flag? URL pattern?>"
+  exists_yet: false
+
+# ─── Routing Rules ───────────────────────────────────────────────────────
+# The contract: each request/call pattern is either routed to legacy or new.
+# Coverage = (rules count) / (total endpoints) — tracked by gate.
+routing_rules: []
+# Example entries:
+#   - id: rule-1
+#     pattern: "POST /api/refunds"   # HTTP route, function symbol, or queue topic
+#     target: new                    # legacy | new
+#     reason: "validated 2026-04-30, 2 weeks production"
+#     added_at: "<ISO-8601>"
+#   - id: rule-2
+#     pattern: "GET /api/refunds/:id/audit-log"
+#     target: legacy
+#     reason: "edge case with grandfathered tokens — defer to phase 2"
+#     added_at: "<ISO-8601>"
+
+# ─── Coverage Tracking ───────────────────────────────────────────────────
+coverage:
+  legacy_endpoints: []               # All endpoints/symbols the legacy module exposes
+  routed_count: 0                    # Endpoints with explicit routing rule
+  total_count: 0                     # Total endpoints
+  percent: 0                         # routed_count / total_count
+  unrouted: []                       # Endpoints without rule — gate warns on these
+
+# ─── State Machine ───────────────────────────────────────────────────────
+# legacy-only — initial. Only legacy serves traffic. New module not built.
+# coexist     — Both legacy and new exist. Facade splits traffic per rules.
+# new-primary — New serves majority. Legacy is fallback for edge cases only.
+# retired     — Legacy module deleted from codebase. Plan archived.
+state: "legacy-only"
+
+# ─── State Transition History ────────────────────────────────────────────
+history:
+  - timestamp: "<ISO-8601>"
+    from: null
+    to: "legacy-only"
+    note: "plan created"
+    routing_count: 0
+
+# ─── Cutover Criteria ────────────────────────────────────────────────────
+# Per-state requirements that must be met before advancing.
+cutover_criteria:
+  to_coexist:
+    - "facade exists and routes ≥ 1 pattern"
+    - "new module has implementation for at least one routed pattern"
+    - "rollback plan documented"
+  to_new_primary:
+    - "≥ 80% routes target new"
+    - "no production incidents from new module in last 14 days"
+    - "performance parity verified (latency p95 within 20% of legacy)"
+  to_retired:
+    - "100% routes target new (or explicitly migrated/dropped)"
+    - "legacy module has 0 inbound traffic for 30+ days"
+    - "legacy code deletion PR approved"
+
+# ─── Risk Tracking ───────────────────────────────────────────────────────
+risks: []
+# Example:
+#   - id: r-1
+#     description: "Legacy uses MD5 for token comparison — must replicate exactly"
+#     severity: high
+#     mitigation: "Bit-for-bit equivalence test in facade"
+#     status: open | mitigated | accepted
+
+# ─── Related Artifacts ───────────────────────────────────────────────────
+links:
+  parallel_changes: []               # If individual functions need parallel-change
+  parent_seed: null                  # If new module reflects a seed
+  related_adrs: []

@@ -1,0 +1,51 @@
+schema_version: 1
+name: threat-model-lite
+display_name: "Threat Model (Lite)"
+description: "STRIDE-lite threat modeling at story/spec time — security analysis before code, not after"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/threat"
+    file: "commands/threat.md"
+    description: "Manage threat models (new | add | review | list | show | link)"
+  - name: "/threat-triggers"
+    file: "commands/threat-triggers.md"
+    description: "Configure trigger keywords (which entities/patterns auto-require threat model)"
+
+templates:
+  - file: "templates/threat-model.yaml"
+    description: "STRIDE-lite threat model with assets, threats, mitigations, residual risks"
+  - file: "templates/triggers.yaml"
+    description: "Default trigger patterns — entities/keywords that auto-require threat-model"
+
+personas:
+  - name: "security-reviewer"
+    file: "personas/security-reviewer.md"
+    description: "Challenges security assumptions — assumes attacker, validates each STRIDE category"
+
+adds_gates:
+  - file: "gates/check-threat-coverage.sh"
+    severity: "warning"
+    runs_on: ["pre-commit"]
+    description: "Warn when stories/spikes/code touch sensitive entities without linked threat model"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/threat-model-lite/models/"
+    - ".harness/threat-model-lite/triggers.yaml"
+    - ".harness/state/threat-model-lite.yaml"
+
+hooks: {}
+
+tags: ["security", "stride", "threat-modeling", "compose-with-bmad-lite", "compose-with-anything"]
+icon: "🛡"
+docs_url: "methodologies/threat-model-lite/README.md"
+
+min_harness_version: "0.1.0"

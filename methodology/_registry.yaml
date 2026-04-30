@@ -41,5 +41,30 @@ methodologies:
     enabled: true
     bundled: true
 
+  - name: strangler-fig
+    path: methodologies/strangler-fig
+    enabled: true
+    bundled: true
+
+  - name: incident-review
+    path: methodologies/incident-review
+    enabled: true
+    bundled: true
+
+  - name: threat-model-lite
+    path: methodologies/threat-model-lite
+    enabled: true
+    bundled: true
+
+  - name: observability-first
+    path: methodologies/observability-first
+    enabled: true
+    bundled: true
+
+  - name: rfc-driven
+    path: methodologies/rfc-driven
+    enabled: true
+    bundled: true
+
 # Custom (user-installed) methodologies are appended here by /methodology install.
 # Bundled methodologies above can be disabled by setting enabled: false (not removed).

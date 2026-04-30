@@ -1,0 +1,48 @@
+schema_version: 1
+name: observability-first
+display_name: "Observability First"
+description: "Define metrics, logs, traces, and SLOs at story time — telemetry is a design output, not retrofit"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/observe"
+    file: "commands/observe.md"
+    description: "Define observability spec for a story/feature/endpoint (define | check | list | show)"
+  - name: "/observe-slo"
+    file: "commands/observe-slo.md"
+    description: "Manage SLOs (new | list | violations | track)"
+
+templates:
+  - file: "templates/observability-spec.yaml"
+    description: "Telemetry plan — metrics, logs, traces, SLOs for a target"
+  - file: "templates/slo.yaml"
+    description: "SLO with SLI definition, target, error_budget, alert policy"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-observability-coverage.sh"
+    severity: "warning"
+    runs_on: ["pre-commit"]
+    description: "Warn when Logic-layer modules don't have linked observability spec"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/observability-first/specs/"
+    - ".harness/observability-first/slos/"
+    - ".harness/state/observability-first.yaml"
+
+hooks: {}
+
+tags: ["observability", "slo", "metrics", "tracing", "compose-with-anything"]
+icon: "📊"
+docs_url: "methodologies/observability-first/README.md"
+
+min_harness_version: "0.1.0"

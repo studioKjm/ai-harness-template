@@ -1,0 +1,108 @@
+# Observability Specification Template
+# Telemetry plan for a target (story/feature/endpoint/module).
+# Path: .harness/observability-first/specs/<spec-id>.yaml
+
+schema_version: 1
+
+id: "<spec-id>"                      # e.g., obs-2026-04-30-refund-api
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+# ─── Target ──────────────────────────────────────────────────────────────
+target:
+  kind: "story | feature | endpoint | module"
+  ref: "<id of the artifact>"        # e.g., st-2026-04-30-refund
+  description: "<what's being instrumented>"
+
+# ─── Metrics ─────────────────────────────────────────────────────────────
+# Quantitative measures. Each must answer "what question?"
+metrics: []
+# Example:
+#   - name: "refund_request_total"
+#     type: "counter"                # counter | gauge | histogram | summary
+#     labels: ["method", "status_code", "merchant_id"]
+#     question: "How many refund requests, segmented by outcome?"
+#     unit: "requests"
+#   - name: "refund_processing_duration_ms"
+#     type: "histogram"
+#     buckets: [50, 100, 250, 500, 1000, 2500]
+#     labels: ["merchant_id"]
+#     question: "Distribution of refund processing time"
+#     unit: "milliseconds"
+
+# ─── Logs ────────────────────────────────────────────────────────────────
+# Qualitative events. Structured (key-value), not free-text.
+logs: []
+# Example:
+#   - event: "refund.requested"
+#     level: "info"                  # debug | info | warn | error | fatal
+#     fields:
+#       - name: "merchant_id"
+#         pii: false
+#       - name: "amount"
+#       - name: "user_id"
+#         pii: true                  # marks for redaction policy
+#     when_to_log: "Each refund request, before processing"
+#   - event: "refund.failed"
+#     level: "error"
+#     fields:
+#       - name: "merchant_id"
+#       - name: "reason_code"
+#       - name: "underlying_error"
+#     when_to_log: "Refund processing fails for any reason"
+
+# ─── Traces ──────────────────────────────────────────────────────────────
+# Distributed tracing spans. Use when call graph crosses services/boundaries.
+traces: []
+# Example:
+#   - span_name: "RefundService.process"
+#     attributes:
+#       - "merchant.id"
+#       - "refund.amount"
+#       - "refund.id"
+#     parent_kind: "http_server"
+#     children: ["DB.query", "PaymentGateway.refund"]
+
+# ─── SLOs (Service Level Objectives) ─────────────────────────────────────
+# Linked SLOs. Detailed defs in .harness/observability-first/slos/.
+slos: []
+# Example:
+#   - id: "slo-refund-availability"
+#     summary: "99.5% of refund requests succeed (5xx-free) over 30d window"
+#   - id: "slo-refund-latency"
+#     summary: "95% of refund requests complete < 500ms over 30d window"
+
+# ─── Status ──────────────────────────────────────────────────────────────
+# State machine:
+#   draft → defined → instrumented → measuring → review-due
+#
+# draft         — spec being written
+# defined       — spec complete, ready for code
+# instrumented  — code emits the spec'd telemetry, verified by check
+# measuring     — production data flowing, SLOs computable
+# review-due    — quarterly review marker (auto-set after 90d in measuring)
+status: "draft"
+
+history:
+  - timestamp: "<ISO-8601>"
+    from: null
+    to: "draft"
+    note: "spec created"
+
+# ─── Coverage ────────────────────────────────────────────────────────────
+# Which code paths are instrumented per this spec.
+coverage:
+  files: []                          # Files with relevant instrumentation
+  symbols: []                        # Functions/classes covered
+  last_verified_at: null
+
+# ─── Cost / Volume ───────────────────────────────────────────────────────
+# Estimated impact on observability bill (high-cardinality labels are expensive).
+cost_notes: ""
+high_cardinality_warnings: []        # Labels likely to explode (e.g., user_id, request_id)
+
+# ─── Links ───────────────────────────────────────────────────────────────
+links:
+  story: null
+  related_incidents: []              # Incidents that motivated this spec
+  related_adrs: []

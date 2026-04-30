@@ -1,0 +1,47 @@
+schema_version: 1
+name: rfc-driven
+display_name: "RFC Driven"
+description: "Large changes require an RFC before code — lightweight design review for high-stakes work"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/rfc"
+    file: "commands/rfc.md"
+    description: "Manage RFCs (new | propose | accept | reject | supersede | list | show)"
+  - name: "/rfc-link"
+    file: "commands/rfc-link.md"
+    description: "Link a code change/PR to an accepted RFC (declares which RFC governs the work)"
+
+templates:
+  - file: "templates/rfc.yaml"
+    description: "RFC structure: motivation, design, alternatives, drawbacks, decision"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-rfc-required.sh"
+    severity: "warning"
+    runs_on: ["pre-commit"]
+    description: "Warn when a commit changes >N lines without linking to an accepted RFC"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/rfc-driven/rfcs/"
+    - ".harness/rfc-driven/.rfc-links.yaml"
+    - ".harness/rfc-driven/config.yaml"
+    - ".harness/state/rfc-driven.yaml"
+
+hooks: {}
+
+tags: ["design-review", "decision-record", "compose-with-anything"]
+icon: "📜"
+docs_url: "methodologies/rfc-driven/README.md"
+
+min_harness_version: "0.1.0"

@@ -1,0 +1,106 @@
+# Threat Model (Lite) Template
+# STRIDE-based threat analysis for a feature/component.
+# Path: .harness/threat-model-lite/models/<model-id>.yaml
+
+schema_version: 1
+
+id: "<model-id>"                     # e.g., tm-2026-04-30-password-reset
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+# ─── Target ──────────────────────────────────────────────────────────────
+target:
+  kind: "story | spike | feature | endpoint | module"
+  ref: "<id of the linked artifact>"  # e.g., st-2026-04-30-password-reset
+  description: "<one-line: what's being threat-modeled>"
+
+# ─── Assets (what's at risk) ─────────────────────────────────────────────
+# Things an attacker would want to steal/modify/destroy.
+assets: []
+# Example:
+#   - name: "user_password_hash"
+#     sensitivity: "high"             # low | medium | high | critical
+#     stored_at: "users.password_hash column"
+#   - name: "reset_token"
+#     sensitivity: "high"
+#     stored_at: "redis ephemeral, 1h TTL"
+
+# ─── Trust Boundaries ────────────────────────────────────────────────────
+# Where data crosses from one trust zone to another.
+trust_boundaries: []
+# Example:
+#   - from: "internet (untrusted)"
+#     to: "API gateway"
+#     protocol: "HTTPS"
+#   - from: "API server"
+#     to: "Database"
+#     protocol: "TLS, internal network"
+
+# ─── STRIDE Analysis ─────────────────────────────────────────────────────
+# For EACH category, list at least one threat OR explicitly state "N/A — <reason>".
+# Empty array = not analyzed = warning.
+stride:
+  spoofing:
+    threats: []
+    # Example:
+    #   - id: S-1
+    #     description: "Attacker uses leaked email to request reset for victim's account"
+    #     likelihood: "medium"          # low | medium | high
+    #     impact: "high"
+    #     mitigations:
+    #       - "Rate limit reset requests per email (5/hour)"
+    #       - "Notify account owner via secondary channel (SMS) on reset"
+    #     mitigation_status: "planned"  # planned | implemented | deferred | accepted
+
+  tampering:
+    threats: []
+
+  repudiation:
+    threats: []
+
+  information_disclosure:
+    threats: []
+
+  denial_of_service:
+    threats: []
+
+  elevation_of_privilege:
+    threats: []
+
+# ─── Residual Risks ──────────────────────────────────────────────────────
+# Threats consciously NOT mitigated. Document why — future-you needs to know.
+residual_risks: []
+# Example:
+#   - threat_id: "S-1"
+#     reason: "Cost of perfect mitigation > expected damage. Accepted for v1."
+#     reviewed_by: "<name>"
+#     review_date: "<ISO-8601>"
+
+# ─── Status ──────────────────────────────────────────────────────────────
+# State machine:
+#   draft → reviewed → approved → applied
+#
+# draft     — analyst working
+# reviewed  — security-reviewer persona pass (or human equivalent)
+# approved  — story/spec ready to ship with these mitigations
+# applied   — mitigations implemented, verified
+status: "draft"
+
+history:
+  - timestamp: "<ISO-8601>"
+    from: null
+    to: "draft"
+    note: "model created"
+
+# ─── Links ───────────────────────────────────────────────────────────────
+links:
+  story: null                        # bmad-lite story id
+  spike: null                        # exploration spike id
+  related_adrs: []
+  related_incidents: []              # Past incidents informing this model
+  related_models: []                 # Sibling threat models
+
+# ─── Compliance References (optional) ────────────────────────────────────
+compliance:
+  frameworks: []                     # ["OWASP-Top-10", "PCI-DSS", "GDPR"]
+  controls: []                       # Specific control IDs if known

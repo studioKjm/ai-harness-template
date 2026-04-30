@@ -1,0 +1,38 @@
+# RFC-driven Methodology Config
+# Path: .harness/rfc-driven/config.yaml (initialized on activation)
+
+schema_version: 1
+
+# Threshold for "large change" — files with > N changed lines without RFC link
+# trigger a warning. Adjust per project/team.
+rfc_required_threshold:
+  # Per-file LOC change threshold
+  per_file_loc: 500
+  # Whole-PR LOC change threshold (sum across all files)
+  total_loc: 1000
+
+# Paths that always require RFC, regardless of change size.
+always_required_paths:
+  - "**/architecture/**"
+  - "**/migrations/**"
+  - "**/auth/**"
+  - "**/payment/**"
+  - "package.json"            # Dependency changes
+  - "requirements.txt"
+  - "Dockerfile"
+  - "*.yaml"                  # Infrastructure-as-code
+
+# Paths exempt from RFC requirement (even when other rules trigger).
+always_exempt_paths:
+  - "**/test/**"
+  - "**/__tests__/**"
+  - "**/*.test.*"
+  - "**/*.spec.*"
+  - "docs/**"
+  - "**/*.md"
+  - ".harness/**"             # The harness itself
+
+# When a commit changes >threshold but no RFC link exists, what to do.
+# - "warn"  → stderr message, do not block (default)
+# - "block" → fail commit (only if you want hard enforcement)
+on_violation: warn

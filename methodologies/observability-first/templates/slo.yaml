@@ -1,0 +1,95 @@
+# SLO (Service Level Objective) Template
+# Single SLO with SLI definition, target, and alert policy.
+# Path: .harness/observability-first/slos/<slo-id>.yaml
+
+schema_version: 1
+
+id: "<slo-id>"                       # e.g., slo-refund-availability
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+title: "<short SLO title>"
+service: "<service-name>"            # The service this SLO applies to
+
+# ─── SLI (Service Level Indicator) ───────────────────────────────────────
+# Concrete, measurable. Should be a ratio of (good events) / (valid events).
+sli:
+  description: "<what we're measuring>"
+  good_events: "<query/metric for successful events>"
+  # Example: 'sum(rate(refund_request_total{status_code!~"5.."}[5m]))'
+  valid_events: "<query/metric for total events to count>"
+  # Example: 'sum(rate(refund_request_total[5m]))'
+  metric_source: "<prometheus | datadog | cloudwatch | other>"
+
+# ─── Target ──────────────────────────────────────────────────────────────
+# The objective the SLI must meet.
+target:
+  percentage: 99.5                   # e.g., 99.5% of requests succeed
+  window: "30d"                      # Rolling window
+  unit: "ratio"                      # ratio | latency | other
+
+# For latency SLOs:
+# target:
+#   percentile: 95                   # p95
+#   threshold: 500
+#   threshold_unit: "ms"
+#   window: "30d"
+
+# ─── Error Budget ────────────────────────────────────────────────────────
+# Auto-computed from target — kept here for clarity.
+error_budget:
+  per_window: "0.5%"                 # = 100% - 99.5%
+  in_minutes: 216                    # For 99.5% over 30d = ~216min downtime allowed
+  policy: "<what to do when budget exhausted>"
+  # Example policy: "Halt all non-critical deploys to this service for 24h"
+
+# ─── Alert Policy ────────────────────────────────────────────────────────
+# When and how to alert based on burn rate.
+alert_policy:
+  fast_burn:
+    burn_rate_threshold: 14          # 14x normal burn → page on-call
+    window: "1h"
+    severity: "page"
+    notify: ["#oncall-billing", "pagerduty:billing"]
+  slow_burn:
+    burn_rate_threshold: 6           # 6x normal burn → ticket
+    window: "6h"
+    severity: "ticket"
+    notify: ["#observability"]
+
+# ─── Lifecycle ───────────────────────────────────────────────────────────
+status: "proposed"                   # proposed | active | retired
+# proposed   — defined, not yet enforced
+# active     — measuring, alerts firing
+# retired    — replaced by newer SLO or feature deprecated
+
+history:
+  - timestamp: "<ISO-8601>"
+    from: null
+    to: "proposed"
+    note: "SLO drafted"
+
+# ─── Recent Performance ──────────────────────────────────────────────────
+# Manually updated from monitoring (auto-sync is v0.2).
+recent:
+  measured_at: null
+  achieved_pct: null                 # e.g., 99.62
+  budget_remaining_pct: null         # e.g., 24%
+  burn_rate_24h: null
+
+# ─── Violations Log ──────────────────────────────────────────────────────
+# Track SLO breaches for trend analysis.
+violations: []
+# Example:
+#   - date: "2026-04-15"
+#     duration_minutes: 45
+#     burn_rate: 18
+#     incident_id: "inc-2026-04-15-billing-outage"
+#     resolved: true
+
+# ─── Links ───────────────────────────────────────────────────────────────
+links:
+  related_specs: []                  # observability-spec ids
+  related_incidents: []
+  dashboard_url: ""                  # Grafana/Datadog dashboard
+  runbook_url: ""                    # Response procedure

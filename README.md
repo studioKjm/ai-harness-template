@@ -10,20 +10,22 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 ## Releases
 
-> **권장 설치: `v2.1.0` (안정).** v2.2.0은 메서드 플러그인 시스템 도입 — 실험 단계로 외주·프로덕션 도입 전 검증 필요.
+> **권장 설치: `v2.1.0` (안정).** v2.2.0/v2.3.0은 메서드 플러그인 시스템 — 실험 단계로 외주·프로덕션 도입 전 검증 필요.
 
 | 버전 | 날짜 | 상태 | 주요 변경 |
 |------|------|------|----------|
-| [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `experimental` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론을 사용자 선택·조합 가능한 플러그인으로 분리. 5종 번들(ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` 다중 활성화. 신규 11개 명령, 4개 게이트, 2개 상태머신. (NON-BREAKING) |
+| [**v2.3.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.3.0) | 2026-04-30 | `experimental` | **메서드 5종 추가** — strangler-fig (모듈 마이그레이션), incident-review (blameless postmortem), threat-model-lite (STRIDE), observability-first (메트릭·SLO), rfc-driven (큰 변경 RFC). 총 **10종 번들**. 신규 14개 명령, 5개 게이트. (NON-BREAKING) |
+| [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `experimental` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론 플러그인 분리. 5종 번들(ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` 다중 활성화. (NON-BREAKING) |
 | [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | `stable` ⭐ **권장** | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
 | [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` | **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
 | [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 초기 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
 
-**v2.2.0 실험 버전 도입 시 주의사항:**
+**v2.3.0 실험 버전 도입 시 주의사항:**
 - 메서드 플러그인 시스템은 v0.1 — API 변경 가능성 있음
-- 5종 번들 메서드 중 ouroboros 외 4종은 `0.1.0` (beta)
-- `relaxes_gates` 컨슈머 컨트랙트는 정의됨, 하네스 코어 게이트의 자동 소비는 v0.2 예정
-- 외주·프로덕션 도입은 v2.1.0 권장. v2.2.0은 사이드 프로젝트로 먼저 검증.
+- 10종 번들 메서드 중 ouroboros 외 9종은 `0.1.0` (beta)
+- 모든 게이트는 충돌 없음 (10종 동시 활성화 가능, 단 실용적이진 않음)
+- `relaxes_gates` 컨슈머 컨트랙트는 정의됨, 코어 게이트 자동 소비는 v0.2 예정
+- 외주·프로덕션 도입은 v2.1.0 권장. v2.3.0은 사이드 프로젝트로 먼저 검증.
 
 ## 데모 영상
 
@@ -96,65 +98,92 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 
 ## Methodology System (v0.1)
 
-> 하네스 코어는 **고정**. 메서드는 **플러그인**으로 사용자가 선택·조합.
+> 하네스 코어는 **고정**. 메서드는 **플러그인**으로 사용자가 선택·조합. **번들 10종**.
 
 ### 어떤 방법론을 골라야 하나?
 
-#### 한 줄 결정 트리
+#### 결정 트리
 
 ```
 지금 뭐 하려는 중이세요?
-├─ 🆕 새 프로젝트 시작 (스펙 미확정) ───────────────► ouroboros
-├─ 🆕 새 프로젝트 + 기능별 스토리·AC 정리 필요 ─────► ouroboros + bmad-lite
-├─ 🔧 기존 프로젝트에 신규 기능 추가 ───────────────► ouroboros + bmad-lite + living-spec
-├─ 💥 DB 컬럼 / API 시그니처 / 함수 시그니처 변경 ──► ouroboros + parallel-change
-├─ ❓ 라이브러리 검증 / 막힌 미지수 / 빠른 PoC ─────► exploration (어느 조합에든 추가)
-└─ 🐛 단순 버그 수정 ──────────────────────────────► (메서드 불필요, 게이트만 작동)
+│
+├─ 🆕 0→1 (신규 프로젝트)
+│   ├─ 단순 시작 ──────────────────────► ouroboros (기본)
+│   ├─ 스토리·AC 정리 필요 ────────────► ouroboros + bmad-lite
+│   └─ 큰 아키텍처 결정 ─────────────► ouroboros + bmad-lite + rfc-driven
+│
+├─ 🔧 1→N (기존 확장)
+│   ├─ 기능 추가 (시드 진화) ──────────► ouroboros + living-spec [+ bmad-lite]
+│   ├─ 함수 시그니처 변경 ─────────────► + parallel-change
+│   ├─ 모듈/시스템 교체 ──────────────► + strangler-fig
+│   └─ 클라이언트 레거시 인수 ─────────► strangler-fig (단독 가능)
+│
+├─ ❓ 미지수
+│   └─ 라이브러리 검증 / PoC ──────────► exploration (어느 조합에든 추가)
+│
+├─ 🛡 운영·신뢰성
+│   ├─ 결제·인증·민감 정보 다룸 ──────► + threat-model-lite
+│   ├─ 메트릭·SLO 설계 필요 ──────────► + observability-first
+│   └─ 장애 발생 ────────────────────► + incident-review
+│
+└─ 🐛 단순 버그 수정 ─────────────────► (메서드 불필요, 게이트만 작동)
 ```
 
 #### 상황별 추천 매트릭스
 
 | 상황 | 추천 조합 | 왜 |
 |-----|---------|----|
-| **개인 사이드 프로젝트** (실험적, 빠른 검증) | `ouroboros` 또는 `exploration` 단독 | 무겁지 않고 명확 |
-| **신규 외주 SaaS MVP** | `ouroboros + bmad-lite` | 명세 + 스토리 양쪽 강제, 클라이언트 인수 시 명확 |
-| **외주 SaaS 유지보수·기능 추가** | `ouroboros + bmad-lite + living-spec` | 시드 v2 진화, 영향받는 스토리 자동 추적 |
-| **레거시 시스템 점진 개편** | `ouroboros + parallel-change` | 다운타임 0으로 호환 깨는 변경 |
-| **신규 라이브러리·인프라 도입 검증** | `exploration` (단독 또는 조합 추가) | 샌드박스에서 자유 실험, 학습은 ADR로 영속화 |
-| **정부·금융처럼 컴플라이언스 강한 곳** | `ouroboros + bmad-lite + parallel-change` | AC 엄격 검증 + 마이그레이션 안전성 |
-| **혼자 / 1인 외주 운영자** | `ouroboros` (단순), 필요시 `+ exploration` | 페르소나 분리는 오버킬 |
-| **6명 이상 팀에 풀 BMAD 필요** | (이 템플릿 X) → [BMAD-METHOD 본가](https://github.com/bmadcode/BMAD-METHOD) | bmad-lite는 의도적 축소판 |
+| **개인 사이드 프로젝트** | `ouroboros` 또는 `exploration` 단독 | 무겁지 않고 명확 |
+| **신규 외주 SaaS MVP** | `ouroboros + bmad-lite` | 명세 + 스토리 양쪽 강제 |
+| **외주 SaaS 보안 강화** | `+ threat-model-lite + observability-first` | 결제·인증·PII 안전망 |
+| **외주 SaaS 유지보수** | `ouroboros + bmad-lite + living-spec + incident-review` | 진화 + 장애 학습 |
+| **레거시 인수 + 점진 개편** | `strangler-fig + parallel-change [+ ouroboros]` | 모듈+함수 양쪽 안전 |
+| **큰 아키텍처 결정** | `+ rfc-driven` | 합의 + 페이퍼 트레일 |
+| **신규 라이브러리·인프라 검증** | `exploration` (단독 또는 추가) | 샌드박스 자유 실험 |
+| **혼자 / 1인 외주 운영자** | `ouroboros` (단순) → 필요 시 추가 | 페르소나 분리는 오버킬 |
+| **6명 이상 팀 풀 BMAD** | (이 템플릿 X) → [BMAD-METHOD 본가](https://github.com/bmadcode/BMAD-METHOD) | bmad-lite는 의도적 축소판 |
 
 #### 안티패턴 (이건 쓰지 마세요)
 
 | 상황 | 잘못된 선택 | 올바른 선택 |
 |-----|----------|----------|
-| 단순 버그 수정 | `bmad-lite` (스토리 작성 강제) | 메서드 없이 그냥 수정 (게이트만 작동) |
+| 단순 버그 수정 | `bmad-lite` (스토리 강제) | 메서드 없이 수정 (게이트만 작동) |
 | "한 번만 빠르게 짜보자" | `ouroboros` (인터뷰 통과 필요) | `exploration` (timebox 스파이크) |
-| 외부 라이브러리 PoC | `parallel-change` (state machine 오버킬) | `exploration` |
-| 시드가 아직 없는데 스토리부터 | `bmad-lite` (prereq 차단됨) | `ouroboros` 먼저 → `bmad-lite` 추가 |
-| DB 마이그레이션을 그냥 진행 | `ouroboros`만 | `+ parallel-change` 필수 (caller 차단 게이트) |
+| 외부 라이브러리 PoC | `parallel-change` (오버킬) | `exploration` |
+| 시드 없는데 스토리부터 | `bmad-lite` (prereq 차단) | `ouroboros` 먼저 → `bmad-lite` 추가 |
+| DB 마이그레이션 그냥 진행 | `ouroboros`만 | `+ parallel-change` 필수 |
+| 모듈 단위 마이그레이션 | `parallel-change` (함수 단위라 부족) | `strangler-fig` (모듈 단위 + facade) |
+| 코드 후 RFC 작성 | `rfc-driven` 사후 | ADR로 충분 (`docs/adr.yaml`) |
+| 메트릭 사후 추가 | `observability-first` 사후 | 새 기능부터 적용 |
+| Slack에서 "고쳤다"로 종료 | (메서드 없음) | `incident-review` 활용 |
 
-### 5종 메서드 한눈에
+### 10종 메서드 한눈에
 
 | 메서드 | 적용 단계 | 한 줄 요약 |
 |-------|---------|----------|
 | 🐍 **ouroboros** | 0→1 (기본) | 명세 우선 — Ambiguity ≤ 0.2까지 인터뷰 |
 | 🔄 **living-spec** | 1→N | 시드 진화 — 두 버전 의미적 diff + 태스크 마이그레이션 |
-| ⫶ **parallel-change** | 1→N | 호환 깨는 변경 — Expand → Migrate → Contract 상태머신 |
-| 🎭 **bmad-lite** | 0→1, 1→N | 페르소나 + 스토리 — analyst/ux-designer/pm-strict |
+| ⫶ **parallel-change** | 1→N | 호환 깨는 변경 (함수 단위) — Expand → Migrate → Contract |
+| 🎭 **bmad-lite** | 0→1, 1→N | 페르소나(analyst/ux-designer/pm-strict) + 스토리 분해 |
 | 🔭 **exploration** | 모든 단계 | 시간 박스 스파이크 — 샌드박스 게이트 완화 |
+| 🌿 **strangler-fig** | 1→N | 모듈·시스템 단위 교체 — facade 라우팅 + 4-state |
+| 🚨 **incident-review** | 운영 | blameless postmortem — 5-state + action items + 패턴 분석 |
+| 🛡 **threat-model-lite** | 모든 단계 | STRIDE 위협 모델링 — security-reviewer 페르소나 |
+| 📊 **observability-first** | 0→1, 1→N | 메트릭·로그·트레이스·SLO를 설계 산출물로 |
+| 📜 **rfc-driven** | 모든 단계 | 큰 변경은 코드 전 RFC — 5-state + LOC 임계값 게이트 |
 
 ### 활성화 명령
 
 ```bash
-/methodology list                              # 메서드 목록
-/methodology current                           # 현재 활성 메서드
-/methodology use ouroboros                     # 단일 활성화
-/methodology compose ouroboros bmad-lite       # 다중 조합
-/methodology compose ouroboros parallel-change living-spec   # 외주 SaaS 확장 시나리오
-/methodology info <name>                       # 메서드 상세 (prereq, 게이트, 명령 목록)
-/methodology deactivate <name>                 # 비활성화
+/methodology list                                            # 메서드 목록 (10종)
+/methodology current                                         # 현재 활성 메서드
+/methodology use ouroboros                                   # 단일 활성화
+/methodology compose ouroboros bmad-lite                     # 다중 조합
+/methodology compose ouroboros bmad-lite living-spec         # 외주 SaaS 유지보수
+/methodology compose ouroboros bmad-lite threat-model-lite observability-first  # 보안 강화 SaaS
+/methodology compose strangler-fig parallel-change           # 레거시 인수 + 점진 교체
+/methodology info <name>                                     # 메서드 상세
+/methodology deactivate <name>                               # 비활성화
 ```
 
 ### 더 자세히

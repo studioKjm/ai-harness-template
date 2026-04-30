@@ -1,0 +1,122 @@
+# Incident Review Template
+# Single production incident — recorded for blameless postmortem.
+# Path: .harness/incident-review/incidents/<incident-id>.yaml
+
+schema_version: 1
+
+id: "<incident-id>"                  # e.g., inc-2026-04-30-billing-outage
+created_at: "<ISO-8601>"
+updated_at: "<ISO-8601>"
+
+# ─── Basic ───────────────────────────────────────────────────────────────
+title: "<one-line description of what failed>"
+severity: "sev3"                     # sev1 (critical) — sev4 (minor)
+# sev1: total outage / data loss / security breach. < 1h response.
+# sev2: major degradation. < 4h response.
+# sev3: partial degradation. same-day response.
+# sev4: minor / cosmetic. next-day response.
+
+reporter: "<who reported>"           # name or system (e.g., "alertmanager")
+incident_commander: ""               # who coordinated response (optional)
+
+# ─── Status ──────────────────────────────────────────────────────────────
+# State machine:
+#   recording → analyzing → published → acted-on → archived
+#
+# recording   — timeline still being captured, response ongoing or just ended
+# analyzing   — response done, root cause investigation in progress
+# published   — postmortem complete and distributed (Slack, email, etc.)
+# acted-on    — all action items closed (done | dropped | converted)
+# archived    — >6 months old, kept for historical pattern analysis
+status: "recording"
+
+history:
+  - timestamp: "<ISO-8601>"
+    from: null
+    to: "recording"
+    note: "incident opened"
+
+# ─── Timeline (UTC times preferred) ──────────────────────────────────────
+# All known events in chronological order.
+timeline:
+  - time: "<ISO-8601>"
+    event: "<what happened>"
+    source: "<log | alert | user-report | manual>"
+# Required key timestamps:
+started_at: null                     # When the issue actually began (often != detected_at)
+detected_at: null                    # When team became aware
+mitigated_at: null                   # When user-facing impact stopped
+resolved_at: null                    # When all systems back to normal
+
+# ─── Impact ──────────────────────────────────────────────────────────────
+impact:
+  user_facing: true                  # Did real users see this?
+  affected_users: 0                  # Estimate (or "all" / "subset" / "internal-only")
+  affected_systems: []               # ["billing-api", "checkout-flow"]
+  duration_minutes: 0                # mitigated_at - started_at
+  financial_estimate: null           # USD/KRW lost, if quantifiable
+  data_loss: false
+  data_loss_details: ""
+  customer_communication: false      # Did we notify customers?
+  customer_communication_url: ""
+
+# ─── Detection & Response ────────────────────────────────────────────────
+detection:
+  method: "<alert | user-report | proactive-check | random>"
+  delay_minutes: 0                   # detected_at - started_at
+  notes: ""                          # "Alert fired but ignored 30min" etc.
+
+response:
+  who_responded: []                  # Names or roles
+  mttr_minutes: 0                    # mitigated_at - detected_at
+  rollback_used: false
+  rollback_target: ""
+
+# ─── Root Cause Analysis ─────────────────────────────────────────────────
+# 5 Whys — drill down until you hit a system-level cause (not a person).
+# If your final "why" is "person X did Y", drill further: WHY was that
+# possible? Why didn't a check catch it?
+five_whys:
+  why_1: ""                          # "<observable problem>"
+  why_2: ""
+  why_3: ""
+  why_4: ""
+  why_5: ""
+  root_cause: ""                     # The system-level conclusion
+
+# Contributing factors — things that made it worse, but not the root cause.
+contributing_factors: []
+# Example:
+#   - factor: "Alert was set to fire only at 99% CPU; missed gradual climb"
+#     category: "monitoring"
+#   - factor: "Runbook for this scenario was outdated (last updated 2024)"
+#     category: "documentation"
+
+# What went WELL during the response (don't skip — important for morale).
+what_went_well: []
+
+# ─── Action Items ────────────────────────────────────────────────────────
+# Specific, time-bound, owned. Vague action items = no action.
+action_items: []
+# Example:
+#   - id: ai-1
+#     description: "Add alert when DB connection pool > 80% for >5 min"
+#     owner: "<name>"
+#     due_date: "2026-05-15"
+#     status: open                   # open | in-progress | done | dropped | converted
+#     priority: high                 # high | medium | low
+#     converted_to: null             # task-id, story-id, or adr-id if status=converted
+#     notes: ""
+
+# ─── Links ───────────────────────────────────────────────────────────────
+links:
+  postmortem_doc: ""                 # External long-form doc (Notion, Confluence, gist)
+  related_incidents: []              # Same root cause family
+  related_adrs: []                   # If decisions were made
+  related_stories: []                # If work was created
+  related_spikes: []                 # If exploration was triggered
+
+# ─── Blameless Affirmation ───────────────────────────────────────────────
+# Required acknowledgment that this postmortem is blameless.
+# A "yes" here means: you've removed names tied to blame and focused on systems.
+blameless_review_passed: false       # Set true only after explicit review
