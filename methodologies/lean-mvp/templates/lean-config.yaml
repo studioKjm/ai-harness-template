@@ -1,0 +1,29 @@
+# Lean MVP — Project Configuration
+# Place at: .harness/lean-mvp/config.yaml
+
+# Default measurement window (days) when not specified per-hypothesis
+default_measurement_window_days: 14
+
+# Require a metric target before allowing /lean build (transition to testing)
+require_metric_before_build: true
+
+# Require rationale when deciding pivot/abandon
+require_rationale_for_pivot: true
+
+# Hypothesis statement template (enforced on new)
+statement_template: "We believe that {action} will result in {outcome} for {user}"
+
+# Maximum concurrent hypotheses in 'testing' or 'measuring' state
+# 0 = no limit
+max_active_hypotheses: 3
+
+# Tags that classify hypotheses for reporting
+hypothesis_tags:
+  - acquisition
+  - activation
+  - retention
+  - revenue
+  - referral
+  - ux
+  - performance
+  - cost

@@ -1,0 +1,38 @@
+schema_version: 1
+name: mikado-method
+display_name: "Mikado Method"
+description: "Goal → try → revert → visualize prerequisites — tree-based incremental refactoring"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/mikado"
+    file: "commands/mikado.md"
+    description: "Manage Mikado graphs (new | try | block | done | revert | tree | show)"
+
+templates:
+  - file: "templates/mikado-graph.yaml"
+    description: "Mikado graph — root goal + prerequisite nodes with per-node state machines"
+
+personas: []
+
+adds_gates: []
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/mikado-method/graphs/"
+    - ".harness/state/mikado-method.yaml"
+
+hooks: {}
+
+tags: ["refactoring", "incremental", "prerequisites", "tree", "safe-change"]
+icon: "🎋"
+docs_url: "methodologies/mikado-method/README.md"
+
+min_harness_version: "0.1.0"

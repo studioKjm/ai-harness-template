@@ -1,0 +1,50 @@
+# Lean MVP Hypothesis — Build → Measure → Learn
+# Created by: /lean new <hypothesis>
+# DO NOT edit state directly — use /lean commands
+
+hypothesis_id: "<hyp-id>"          # e.g. hyp-20260430-001
+title: ""                           # short name
+statement: ""                       # "We believe that <action> will result in <outcome> for <user>"
+created_at: ""
+updated_at: ""
+deadline: ""                        # ISO date — when measurement window closes
+
+# State machine:
+#   proposed  → testing   (when: /lean build — MVP shipped, measurement started)
+#   testing   → measuring (when: /lean measure — data collection in progress)
+#   measuring → decided   (when: /lean decide persist|pivot|abandon — outcome reached)
+#
+# Invariant: decided requires metric populated AND outcome selected
+state: "proposed"
+
+# Build phase
+build:
+  mvp_description: ""              # what was built (minimal feature/experiment)
+  shipped_at: ""
+  ship_commit: ""
+
+# Measure phase
+measure:
+  metric_name: ""                  # the ONE metric that determines success
+  metric_target: ""                # success threshold (e.g. "> 5% conversion lift")
+  metric_actual: ""                # observed value after measurement window
+  measurement_window_days: 14      # how long to collect data
+  data_source: ""                  # where data comes from
+  measured_at: ""
+
+# Learn / Decide phase
+learn:
+  outcome: ""                      # "persist" | "pivot" | "abandon"
+  rationale: ""                    # why this outcome was chosen
+  next_hypothesis_id: ""           # if pivot — ID of the follow-up hypothesis
+  decided_by: ""
+  decided_at: ""
+
+# Context
+links:
+  story_id: ""                     # optional: .harness/ouroboros/tasks/<id>.yaml
+  rfc_id: ""                       # optional: if preceded by RFC
+  tdd_cycle_id: ""                 # optional: linked TDD cycle
+  parent_hypothesis_id: ""         # if this is a pivot from a prior hypothesis
+
+tags: []

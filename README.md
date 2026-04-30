@@ -14,6 +14,7 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 | 버전 | 날짜 | 상태 | 주요 변경 |
 |------|------|------|----------|
+| [**v2.4.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.4.0) | 2026-04-30 | `experimental` | **메서드 3종 추가** — tdd-strict (Red→Green→Refactor, blocking git gate), lean-mvp (Build→Measure→Learn 가설 검증), mikado-method (트리 기반 점진 리팩터링). 총 **13종 번들**. (NON-BREAKING) |
 | [**v2.3.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.3.0) | 2026-04-30 | `experimental` | **메서드 5종 추가** — strangler-fig (모듈 마이그레이션), incident-review (blameless postmortem), threat-model-lite (STRIDE), observability-first (메트릭·SLO), rfc-driven (큰 변경 RFC). 총 **10종 번들**. 신규 14개 명령, 5개 게이트. (NON-BREAKING) |
 | [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `experimental` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론 플러그인 분리. 5종 번들(ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` 다중 활성화. (NON-BREAKING) |
 | [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | `stable` ⭐ **권장** | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
@@ -98,7 +99,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 
 ## Methodology System (v0.1)
 
-> 하네스 코어는 **고정**. 메서드는 **플러그인**으로 사용자가 선택·조합. **번들 10종**.
+> 하네스 코어는 **고정**. 메서드는 **플러그인**으로 사용자가 선택·조합. **번들 13종**.
 
 ### 어떤 방법론을 골라야 하나?
 
@@ -110,16 +111,22 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 ├─ 🆕 0→1 (신규 프로젝트)
 │   ├─ 단순 시작 ──────────────────────► ouroboros (기본)
 │   ├─ 스토리·AC 정리 필요 ────────────► ouroboros + bmad-lite
+│   ├─ 가설 먼저 검증하고 싶음 ─────────► lean-mvp (단독 또는 추가)
 │   └─ 큰 아키텍처 결정 ─────────────► ouroboros + bmad-lite + rfc-driven
 │
 ├─ 🔧 1→N (기존 확장)
 │   ├─ 기능 추가 (시드 진화) ──────────► ouroboros + living-spec [+ bmad-lite]
 │   ├─ 함수 시그니처 변경 ─────────────► + parallel-change
 │   ├─ 모듈/시스템 교체 ──────────────► + strangler-fig
+│   ├─ 복잡한 리팩터링 (의존성 불명확) ──► + mikado-method
 │   └─ 클라이언트 레거시 인수 ─────────► strangler-fig (단독 가능)
 │
 ├─ ❓ 미지수
-│   └─ 라이브러리 검증 / PoC ──────────► exploration (어느 조합에든 추가)
+│   ├─ 라이브러리 검증 / PoC ──────────► exploration (어느 조합에든 추가)
+│   └─ 기능 효과 검증 (A/B 대신) ───────► lean-mvp (가설 기반 측정)
+│
+├─ 🧪 품질
+│   └─ 테스트 우선 엄격 강제 ──────────► tdd-strict (blocking gate)
 │
 ├─ 🛡 운영·신뢰성
 │   ├─ 결제·인증·민감 정보 다룸 ──────► + threat-model-lite
@@ -157,7 +164,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 | 메트릭 사후 추가 | `observability-first` 사후 | 새 기능부터 적용 |
 | Slack에서 "고쳤다"로 종료 | (메서드 없음) | `incident-review` 활용 |
 
-### 10종 메서드 한눈에
+### 13종 메서드 한눈에
 
 | 메서드 | 적용 단계 | 한 줄 요약 |
 |-------|---------|----------|
@@ -171,11 +178,14 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 | 🛡 **threat-model-lite** | 모든 단계 | STRIDE 위협 모델링 — security-reviewer 페르소나 |
 | 📊 **observability-first** | 0→1, 1→N | 메트릭·로그·트레이스·SLO를 설계 산출물로 |
 | 📜 **rfc-driven** | 모든 단계 | 큰 변경은 코드 전 RFC — 5-state + LOC 임계값 게이트 |
+| 🔴 **tdd-strict** | 모든 단계 | Red→Green→Refactor — 테스트 우선을 git 히스토리 게이트로 강제 |
+| 🧪 **lean-mvp** | 0→1, 1→N | Build→Measure→Learn — 가설 기반 MVP 검증, pivot or persist |
+| 🎋 **mikado-method** | 1→N | Goal→try→revert→prerequisites — 트리 기반 점진적 리팩터링 |
 
 ### 활성화 명령
 
 ```bash
-/methodology list                                            # 메서드 목록 (10종)
+/methodology list                                            # 메서드 목록 (13종)
 /methodology current                                         # 현재 활성 메서드
 /methodology use ouroboros                                   # 단일 활성화
 /methodology compose ouroboros bmad-lite                     # 다중 조합

@@ -1,0 +1,48 @@
+schema_version: 1
+name: tdd-strict
+display_name: "TDD Strict"
+description: "Red → Green → Refactor — test-first is enforced by git history gate"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/tdd"
+    file: "commands/tdd.md"
+    description: "Manage TDD cycles (new | status | list | pass | refactor | done)"
+  - name: "/tdd-config"
+    file: "commands/tdd-config.md"
+    description: "Configure test pairing conventions and exemptions"
+
+templates:
+  - file: "templates/tdd-cycle.yaml"
+    description: "Single TDD cycle with Red→Green→Refactor state machine"
+  - file: "templates/tdd-config.yaml"
+    description: "Project-level TDD configuration (pairing conventions, exemptions)"
+
+personas: []
+
+adds_gates:
+  - file: "gates/check-test-first.sh"
+    severity: "blocking"
+    runs_on: ["pre-commit"]
+    description: "Block commits where source file appears before its test file in git history"
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/tdd-strict/cycles/"
+    - ".harness/tdd-strict/config.yaml"
+    - ".harness/state/tdd-strict.yaml"
+
+hooks: {}
+
+tags: ["tdd", "test-first", "red-green-refactor", "quality", "blocking-gate"]
+icon: "🔴"
+docs_url: "methodologies/tdd-strict/README.md"
+
+min_harness_version: "0.1.0"

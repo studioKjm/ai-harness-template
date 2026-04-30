@@ -1,0 +1,40 @@
+schema_version: 1
+name: lean-mvp
+display_name: "Lean MVP"
+description: "Build → Measure → Learn — hypothesis-driven feature validation with pivot/persist decision"
+version: "0.1.0"
+author: "harness-core"
+
+prerequisites: []
+conflicts_with: []
+requires: []
+
+commands:
+  - name: "/lean"
+    file: "commands/lean.md"
+    description: "Manage Lean hypotheses (new | measure | decide | list | status)"
+
+templates:
+  - file: "templates/hypothesis.yaml"
+    description: "Single Build-Measure-Learn hypothesis with 4-state machine"
+  - file: "templates/lean-config.yaml"
+    description: "Project-level Lean configuration (measurement window, auto-advance)"
+
+personas: []
+
+adds_gates: []
+
+relaxes_gates: []
+
+state:
+  files:
+    - ".harness/lean-mvp/hypotheses/"
+    - ".harness/state/lean-mvp.yaml"
+
+hooks: {}
+
+tags: ["lean", "mvp", "build-measure-learn", "hypothesis", "pivot-or-persist"]
+icon: "🧪"
+docs_url: "methodologies/lean-mvp/README.md"
+
+min_harness_version: "0.1.0"

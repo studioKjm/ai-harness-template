@@ -1,0 +1,68 @@
+# TDD Strict — Project Configuration
+# Place at: .harness/tdd-strict/config.yaml
+
+# Test file pairing conventions
+# The gate checks: for each source file in a commit,
+# a corresponding test file must exist in git BEFORE the source file.
+pairing:
+  conventions:
+    # Format: source pattern → test pattern (glob-style)
+    - source: "src/**/*.ts"
+      test: "src/**/*.test.ts"
+    - source: "src/**/*.ts"
+      test: "src/**/*.spec.ts"
+    - source: "lib/**/*.py"
+      test: "tests/**/test_*.py"
+    - source: "lib/**/*.py"
+      test: "tests/**/*_test.py"
+    - source: "**/*.go"
+      test: "**/*_test.go"
+    - source: "**/*.rb"
+      test: "spec/**/*_spec.rb"
+    - source: "**/*.java"
+      test: "src/test/**/*Test.java"
+    - source: "**/*.java"
+      test: "src/test/**/*Spec.java"
+
+  # Directories exempt from test-first enforcement
+  # (infrastructure, config, generated code, etc.)
+  exempt_dirs:
+    - "migrations/"
+    - "scripts/"
+    - "config/"
+    - "docs/"
+    - "__generated__/"
+    - "vendor/"
+    - "node_modules/"
+    - ".harness/"
+
+  # File patterns always exempt
+  exempt_patterns:
+    - "*.d.ts"        # TypeScript declaration files
+    - "*.min.js"      # Minified files
+    - "index.ts"      # Re-export barrels
+    - "index.js"
+    - "types.ts"      # Pure type files
+    - "constants.ts"  # Constants-only files
+
+# Commit message exemptions
+# Commits whose message starts with these prefixes skip the gate
+commit_exemptions:
+  prefixes:
+    - "[refactor]"    # Refactoring without behavior change
+    - "[chore]"       # Build, tooling, dependency updates
+    - "[docs]"        # Documentation only
+    - "[style]"       # Formatting, whitespace
+    - "[ci]"          # CI configuration
+    - "[infra]"       # Infrastructure changes
+  # Full-message overrides (exact match)
+  overrides: []
+
+# Gate behavior
+gate:
+  # blocking: commit fails; warning: stderr only, exit 0
+  severity: "blocking"
+  # Check git history depth (how many commits back to look for test file)
+  history_depth: 100
+  # Allow test and source in SAME commit (some teams prefer this)
+  allow_same_commit: false

@@ -1,0 +1,36 @@
+# TDD Cycle — Red → Green → Refactor
+# Created by: /tdd new <target>
+# DO NOT edit state directly — use /tdd commands
+
+cycle_id: "<cycle-id>"            # e.g. tdd-20260430-001
+target: "<description>"           # what behavior is being driven
+created_at: ""
+updated_at: ""
+
+# State machine:
+#   red       → green     (when: /tdd pass — tests are now passing)
+#   green     → refactor  (when: /tdd refactor — cleanup phase started)
+#   refactor  → done      (when: /tdd done — cycle complete)
+#   any       → abandoned (when: /tdd abandon — cancelled)
+#
+# Invariant: source file MUST NOT appear in git before test file (enforced by gate)
+state: "red"
+
+files:
+  test: ""          # e.g. src/auth/login.test.ts
+  source: ""        # e.g. src/auth/login.ts  (created AFTER test)
+
+git:
+  test_commit: ""   # SHA of commit that introduced test file
+  green_commit: ""  # SHA of commit where tests first passed
+  refactor_commit: "" # SHA of commit finalizing refactor
+
+notes:
+  hypothesis: ""    # what behavior is expected to emerge
+  red_criteria: ""  # what makes this "red" (test fails for right reason)
+  green_criteria: "" # minimal implementation to pass
+  refactor_notes: "" # what was cleaned up
+
+links:
+  story_id: ""      # optional: .harness/ouroboros/tasks/<id>.yaml
+  spike_id: ""      # optional: if preceded by an exploration spike

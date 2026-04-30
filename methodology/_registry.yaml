@@ -66,5 +66,20 @@ methodologies:
     enabled: true
     bundled: true
 
+  - name: tdd-strict
+    path: methodologies/tdd-strict
+    enabled: true
+    bundled: true
+
+  - name: lean-mvp
+    path: methodologies/lean-mvp
+    enabled: true
+    bundled: true
+
+  - name: mikado-method
+    path: methodologies/mikado-method
+    enabled: true
+    bundled: true
+
 # Custom (user-installed) methodologies are appended here by /methodology install.
 # Bundled methodologies above can be disabled by setting enabled: false (not removed).
