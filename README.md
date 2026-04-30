@@ -21,12 +21,12 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 | [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` | **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
 | [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 초기 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
 
-**v2.3.0 실험 버전 도입 시 주의사항:**
+**v2.4.0 실험 버전 도입 시 주의사항:**
 - 메서드 플러그인 시스템은 v0.1 — API 변경 가능성 있음
-- 10종 번들 메서드 중 ouroboros 외 9종은 `0.1.0` (beta)
-- 모든 게이트는 충돌 없음 (10종 동시 활성화 가능, 단 실용적이진 않음)
+- 13종 번들 메서드 중 ouroboros 외 12종은 `0.1.0` (beta)
+- 모든 게이트는 충돌 없음 (13종 동시 활성화 가능, 단 실용적이진 않음)
 - `relaxes_gates` 컨슈머 컨트랙트는 정의됨, 코어 게이트 자동 소비는 v0.2 예정
-- 외주·프로덕션 도입은 v2.1.0 권장. v2.3.0은 사이드 프로젝트로 먼저 검증.
+- 외주·프로덕션 도입은 v2.1.0 권장. v2.4.0은 사이드 프로젝트로 먼저 검증.
 
 ## 데모 영상
 

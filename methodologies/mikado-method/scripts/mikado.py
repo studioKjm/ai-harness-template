@@ -183,7 +183,8 @@ def cmd_try(args):
         print(f"Node '{args.node_id}' is already done.", file=sys.stderr)
         sys.exit(1)
 
-    if node["state"] == "blocked":
+    # Check prerequisites for both blocked and pending states (pending after revert may still have prereqs)
+    if node.get("prerequisites"):
         all_done, not_done = prerequisites_done(data, node)
         if not all_done:
             print(f"Error: prerequisites not done yet: {not_done}", file=sys.stderr)
@@ -195,7 +196,8 @@ def cmd_try(args):
     node["updated_at"] = now_iso()
     save_graph(p, data)
 
-    print(f"✓ {args.graph_id} / {args.node_id}: ⬜ → 🟡 attempted")
+    icon = "⬜" if node["state"] == "pending" else "🔴"
+    print(f"✓ {args.graph_id} / {args.node_id}: {icon} → 🟡 attempted")
     print(f"  Make the change. If it builds clean → /mikado done {args.graph_id} {args.node_id}")
     print(f"  If you hit blockers → /mikado block {args.graph_id} {args.node_id} --prereq <desc>")
     print(f"  To undo all changes → /mikado revert {args.graph_id} {args.node_id}")

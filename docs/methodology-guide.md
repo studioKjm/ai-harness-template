@@ -39,7 +39,7 @@ ai-harness-template/
 ├── lib/
 │   └── methodology.sh              # 디스패처 (use/compose/list/info...)
 │
-├── methodologies/                  # 번들 플러그인 (10종)
+├── methodologies/                  # 번들 플러그인 (13종)
 │   ├── ouroboros/
 │   ├── living-spec/
 │   ├── parallel-change/
@@ -49,7 +49,10 @@ ai-harness-template/
 │   ├── incident-review/
 │   ├── threat-model-lite/
 │   ├── observability-first/
-│   └── rfc-driven/
+│   ├── rfc-driven/
+│   ├── tdd-strict/
+│   ├── lean-mvp/
+│   └── mikado-method/
 │
 └── commands/methodology.md         # /methodology 슬래시 커맨드
 ```
@@ -284,7 +287,7 @@ cat .harness/<name>/.gate-relaxation.yaml
 
 | 버전 | 추가 |
 |-----|------|
-| v0.1 (현재) | 10종 번들, prerequisites/conflicts/requires, adds_gates 동작, relaxes_gates 컨트랙트 정의 |
+| v0.1 (현재) | 13종 번들 (ouroboros~rfc-driven~tdd-strict~lean-mvp~mikado-method), prerequisites/conflicts/requires, adds_gates 동작, relaxes_gates 컨트랙트 정의 |
 | v0.2 | relaxes_gates 자동 소비 (코어 게이트 업데이트), 메서드 hot-swap, 메서드 마켓플레이스 후보 |
 | v0.3 | 메서드 자동 추천 (`/methodology suggest`), 프로젝트 분석 기반 |
 

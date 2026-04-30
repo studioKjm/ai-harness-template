@@ -1,6 +1,6 @@
 # Methodology Catalog
 
-> 10종 번들 메서드 한눈에 비교. 어떤 상황에 무엇을 쓸지 결정하는 게이트.
+> 13종 번들 메서드 한눈에 비교. 어떤 상황에 무엇을 쓸지 결정하는 게이트.
 
 ## TL;DR — 의사결정 흐름
 
@@ -10,16 +10,22 @@
 ├─ 🆕 0→1 (신규)
 │   ├─ 단순 신규 ──────────────────────► ouroboros (기본)
 │   ├─ 스토리·AC 정리 필요 ────────────► ouroboros + bmad-lite
+│   ├─ 가설 먼저 검증하고 싶음 ─────────► lean-mvp (단독 또는 추가)
 │   └─ 큰 아키텍처 결정 ─────────────► ouroboros + bmad-lite + rfc-driven
 │
 ├─ 🔧 1→N (기존 확장)
 │   ├─ 기능 추가 (시드 진화) ──────────► ouroboros + living-spec [+ bmad-lite]
 │   ├─ 함수 시그니처 변경 ─────────────► + parallel-change
 │   ├─ 모듈/시스템 교체 ──────────────► + strangler-fig
+│   ├─ 복잡한 리팩터링 (의존성 불명확) ──► + mikado-method
 │   └─ 클라이언트 레거시 인수 ─────────► strangler-fig (단독 가능)
 │
 ├─ ❓ 미지수
-│   └─ 라이브러리 검증 / PoC ──────────► exploration (어느 조합에든 추가)
+│   ├─ 라이브러리 검증 / PoC ──────────► exploration (어느 조합에든 추가)
+│   └─ 기능 효과 검증 ────────────────► lean-mvp (가설 기반 측정)
+│
+├─ 🧪 품질
+│   └─ 테스트 우선 엄격 강제 ──────────► tdd-strict (blocking gate)
 │
 ├─ 🛡 운영·신뢰성
 │   ├─ 결제·인증·민감 정보 다룸 ──────► + threat-model-lite
@@ -31,7 +37,7 @@
 
 여러 메서드는 **조합 가능**. 예: `/methodology compose ouroboros bmad-lite living-spec threat-model-lite observability-first`
 
-## 한눈에 비교 (10종)
+## 한눈에 비교 (13종)
 
 | 메서드 | 적용 단계 | 기본 단위 | 추가 게이트 | 게이트 완화 | 페르소나 | 명령 수 |
 |-------|---------|---------|-----------|-----------|---------|--------|
@@ -45,6 +51,9 @@
 | **🛡 threat-model-lite** | 모든 단계 | model (4-state) | 1 (warning) | 없음 | 1 | 2 |
 | **📊 observability-first** | 0→1, 1→N | spec + SLO | 1 (warning) | 없음 | 없음 | 2 |
 | **📜 rfc-driven** | 모든 단계 | rfc (5-state) | 1 (warning/blocking) | 없음 | 없음 | 2 |
+| **🔴 tdd-strict** | 모든 단계 | cycle (4-state) | 1 (blocking) | 없음 | 없음 | 2 |
+| **🧪 lean-mvp** | 0→1, 1→N | hypothesis (4-state) | 0 | 없음 | 없음 | 1 |
+| **🎋 mikado-method** | 1→N | graph + nodes | 0 | 없음 | 없음 | 1 |
 
 ## 메서드별 카드
 
@@ -287,26 +296,94 @@
 
 **조합 패턴**: `+ ouroboros` (accepted RFC가 시드 input). `+ parallel-change`/`+ strangler-fig` (마이그레이션 RFC가 plan 생성). `+ incident-review` (incident가 motivation evidence).
 
+---
+
+### 🔴 tdd-strict
+
+**언제**: 테스트 우선 원칙을 "규칙"이 아닌 게이트로 강제하고 싶을 때. 팀/AI가 자주 소스 먼저 짜는 패턴 반복 시.
+
+**핵심**: `check-test-first.sh` (blocking gate) — 스테이지된 소스 파일의 대응 테스트가 git 히스토리에 먼저 존재하지 않으면 커밋 차단.
+
+**무엇을 강제**:
+- 4-state cycle: red → green → refactor → done
+- 소스 파일은 테스트보다 나중에 커밋되어야 함
+- `[refactor]`/`[chore]`/`[docs]`/`[ci]` prefix로 면제
+- 테스트 페어링 컨벤션 설정 가능 (tdd-config.yaml)
+
+**산출물**:
+- `.harness/tdd-strict/cycles/tdd-YYYYMMDD-NNN.yaml` — 사이클별 상태
+- `.harness/tdd-strict/config.yaml` — 페어링 컨벤션, 면제 경로
+
+**게이트**: `check-test-first.sh` (blocking) — 소스 파일이 테스트 파일보다 git 히스토리에 먼저 등장하면 커밋 차단
+
+**조합 패턴**: `+ ouroboros` (시드 AC → TDD 사이클 1:1 매핑). `+ lean-mvp` (가설 검증 구현에 TDD 강제). `+ mikado-method` (리팩터링 나뭇잎 노드에 TDD 적용).
+
+---
+
+### 🧪 lean-mvp
+
+**언제**: 기능을 풀로 구현하기 전 가설을 세우고 최소 MVP로 검증하고 싶을 때. "이게 실제로 효과 있을까?" 물음이 먼저인 상황.
+
+**핵심**: Build → Measure → Learn. 하나의 지표(metric)로 판단. 결정은 persist / pivot / abandon 셋 중 하나.
+
+**무엇을 강제**:
+- 4-state: proposed → testing → measuring → decided
+- build 전: metric 이름 + 목표값 필수 (require_metric_before_build: true)
+- pivot/abandon: rationale 필수
+- measurement_window로 시간 제한
+
+**산출물**:
+- `.harness/lean-mvp/hypotheses/hyp-YYYYMMDD-NNN.yaml` — 가설별 상태 + 데이터
+- `.harness/lean-mvp/config.yaml` — 기본 측정 기간, 동시 가설 수 제한
+
+**게이트**: 없음 (가설 실험이므로 blocking 아님)
+
+**조합 패턴**: `+ ouroboros` (가설 → 시드 스펙 → 구현). `+ tdd-strict` (MVP 구현 시 TDD). `+ observability-first` (SLO를 가설 metric으로 연결). `+ rfc-driven` (대형 실험은 RFC 선행).
+
+---
+
+### 🎋 mikado-method
+
+**언제**: 복잡한 리팩터링에서 어디서부터 손댈지 모를 때. 변경 시도 → 컴파일 오류/테스트 실패 → 원인이 다른 곳에 있는 패턴 반복 시.
+
+**핵심**: Goal을 Try → 막히면 Revert + 전제조건 기록 → 나뭇잎(prereq 없는 노드)부터 해결. 코드베이스는 항상 그린 상태 유지.
+
+**무엇을 강제**:
+- per-node 상태: pending → attempted → blocked/done ← reverted
+- done: 모든 prerequisites가 done이어야 가능
+- revert 후 pending 상태에서도 미완료 prereq 있으면 try 차단
+
+**산출물**:
+- `.harness/mikado-method/graphs/mik-YYYYMMDD-NNN.yaml` — 트리 전체 상태
+- `/mikado tree` — ASCII 트리 시각화 (완료/차단/진행 현황)
+
+**게이트**: 없음 (리팩터링 자체가 이미 안전 메커니즘)
+
+**조합 패턴**: `+ parallel-change` (나뭇잎 노드를 parallel-change로 안전 구현). `+ strangler-fig` (모듈 교체 진행도를 mikado 트리로 추적). `+ tdd-strict` (각 나뭇잎 노드 구현에 TDD 적용). `+ ouroboros` (리팩터링 목표를 시드 스펙으로 결정화 후 mikado).
+
 ## 조합 매트릭스
 
 ✅ = 권장 / 기본 워크플로우
 ⭕ = 가능 (서로 보완)
 ❌ = 충돌 / 중복
 
-|  | ouroboros | living-spec | parallel-change | bmad-lite | exploration | strangler-fig | incident-review | threat-model-lite | observability-first | rfc-driven |
-|---|---|---|---|---|---|---|---|---|---|---|
-| **ouroboros** | base | ✅ requires | ✅ requires | ✅ requires | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **living-spec** | ✅ | base+ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **parallel-change** | ✅ | ⭕ | base+ | ⭕ | ⭕ | ⭕ (nested) | ⭕ | ⭕ | ⭕ | ⭕ |
-| **bmad-lite** | ✅ requires | ⭕ | ⭕ | base+ | ⭕ | ⭕ | ⭕ | ⭕ (보완) | ⭕ | ⭕ |
-| **exploration** | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
-| **strangler-fig** | ⭕ | ⭕ | ⭕ (nested) | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ |
-| **incident-review** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ (위반 기록) | ⭕ |
-| **threat-model-lite** | ⭕ | ⭕ | ⭕ | ⭕ (보완) | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ |
-| **observability-first** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ (위반 기록) | ⭕ | base | ⭕ |
-| **rfc-driven** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base |
+|  | ouro | living | p-change | bmad | explore | strangler | incident | threat | observe | rfc | tdd | lean | mikado |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **ouroboros** | base | ✅ | ✅ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **living-spec** | ✅ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **parallel-change** | ✅ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ✅ |
+| **bmad-lite** | ✅ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **exploration** | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **strangler-fig** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ |
+| **incident-review** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **threat-model-lite** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ |
+| **observability-first** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ✅ | ⭕ |
+| **rfc-driven** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ⭕ | ⭕ | ⭕ |
+| **tdd-strict** | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | base | ✅ | ✅ |
+| **lean-mvp** | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | ✅ | base | ⭕ |
+| **mikado-method** | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ✅ | ⭕ | ⭕ | ⭕ | ⭕ | ✅ | ⭕ | base |
 
-→ **충돌 없음**. 10종 모두 동시 활성화 가능 (실용적이진 않지만 가능).
+→ **충돌 없음**. 13종 모두 동시 활성화 가능 (실용적이진 않지만 가능).
 
 **전형적 조합**:
 
