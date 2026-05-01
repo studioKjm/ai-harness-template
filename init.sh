@@ -8,6 +8,7 @@
 #   --version VERSION        stable | experimental (default: stable)
 #   --pair-mode MODE         auto | on | off (default: off). Only with --version experimental
 #   --gates GATES            Comma-separated: default, +complexity, +performance, +ai-antipatterns
+#   --methodology LIST       all | none | comma-separated names (e.g. ouroboros,bdd,ddd-lite)
 #   --no-hooks               Skip pre-commit hook installation
 #   --no-ci                  Skip GitHub Actions workflow
 #   --stack STACK             auto | nextjs-django | nextjs-fastapi | nextjs-nestjs | python | nodejs
@@ -26,6 +27,7 @@ CUSTOM_PROJECT_NAME=""
 VERSION="stable"
 PAIR_MODE="off"
 EXTRA_GATES=""
+METHODOLOGY_ARG=""
 SKIP_HOOKS=0
 SKIP_CI=0
 STACK_MODE="auto"
@@ -37,6 +39,7 @@ while [ $# -gt 0 ]; do
     --version) VERSION="$2"; shift 2 ;;
     --pair-mode) PAIR_MODE="$2"; shift 2 ;;
     --gates) EXTRA_GATES="$2"; shift 2 ;;
+    --methodology) METHODOLOGY_ARG="$2"; shift 2 ;;
     --no-hooks) SKIP_HOOKS=1; shift ;;
     --no-ci) SKIP_CI=1; shift ;;
     --stack) STACK_MODE="$2"; shift 2 ;;
@@ -368,12 +371,126 @@ if [ -f "$HARNESS_DIR/lib/methodology.sh" ]; then
   fi
 fi
 
-# Copy bundled methodology plugins (if any exist)
+# ─── Methodology selection ────────────────────────────────────────
+# Catalog: "name:category:description"  (order = display order)
+METHODOLOGY_CATALOG=(
+  "ouroboros:0→1/1→N:Spec-first development (default ★)"
+  "living-spec:0→1/1→N:Living specification"
+  "parallel-change:0→1/1→N:Parallel Change Pattern"
+  "bmad-lite:0→1/1→N:Multi-agent workflow (BMAD)"
+  "lean-mvp:0→1/1→N:MVP 가설 검증"
+  "ddd-lite:0→1/1→N:Domain-Driven Design [blocking gate]"
+  "shape-up:0→1/1→N:Basecamp Shape Up"
+  "bdd:모든 단계:Behavior-Driven Development"
+  "tdd-strict:모든 단계:TDD strict cycle"
+  "exploration:모든 단계:Spike & Explore"
+  "rfc-driven:모든 단계:RFC-first decisions"
+  "threat-model-lite:모든 단계:Threat modeling"
+  "strangler-fig:운영/시스템:Incremental migration"
+  "incident-review:운영/시스템:Post-incident review"
+  "observability-first:운영/시스템:Observability-first"
+  "mikado-method:리팩터링:Dependency-first refactor"
+)
+
+# Build ordered name list from catalog
+ALL_METHODOLOGY_NAMES=()
+for entry in "${METHODOLOGY_CATALOG[@]}"; do
+  ALL_METHODOLOGY_NAMES+=("$(echo "$entry" | cut -d: -f1)")
+done
+
+# Populates global SELECTED_METHODS array; returns 1 on unknown name.
+_select_methodologies() {
+  local arg="$1"
+  local valid_names=" ${ALL_METHODOLOGY_NAMES[*]} "
+  SELECTED_METHODS=()
+  if [ "$arg" = "all" ]; then
+    SELECTED_METHODS=("${ALL_METHODOLOGY_NAMES[@]}")
+    return 0
+  fi
+  if [ "$arg" = "none" ]; then
+    return 0
+  fi
+  IFS=',' read -ra requested <<< "$arg"
+  for name in "${requested[@]}"; do
+    name="$(echo "$name" | tr -d ' ')"
+    if [[ "$valid_names" != *" $name "* ]]; then
+      error "Unknown methodology: '$name'"
+      error "Valid names: ${ALL_METHODOLOGY_NAMES[*]}"
+      return 1
+    fi
+    SELECTED_METHODS+=("$name")
+  done
+  return 0
+}
+
+SELECTED_METHODS=()
+
+if [ -n "$METHODOLOGY_ARG" ]; then
+  # CLI flag provided — resolve immediately
+  _select_methodologies "$METHODOLOGY_ARG" || exit 1
+elif [ "$AUTO_YES" -eq 1 ]; then
+  # --yes mode — install all
+  SELECTED_METHODS=("${ALL_METHODOLOGY_NAMES[@]}")
+else
+  # Interactive selection
+  echo ""
+  echo "  16 methodologies available. Choose which ones to install."
+  echo "  (ouroboros is the default; others activate via /methodology use <name>)"
+  echo ""
+
+  idx=1
+  prev_category=""
+  for entry in "${METHODOLOGY_CATALOG[@]}"; do
+    name="$(echo "$entry" | cut -d: -f1)"
+    category="$(echo "$entry" | cut -d: -f2)"
+    desc="$(echo "$entry" | cut -d: -f3-)"
+    if [ "$category" != "$prev_category" ]; then
+      echo "  ${BOLD}${category}${NC}"
+      prev_category="$category"
+    fi
+    printf "    [%2d] %-22s %s\n" "$idx" "$name" "$desc"
+    idx=$((idx + 1))
+  done
+
+  echo ""
+  echo "  'all'  — install all 16 (recommended for new projects)"
+  echo "  'none' — skip plugins (install dispatcher only)"
+  echo "  or comma-separated numbers, e.g. 1,7,8"
+  echo ""
+  read -p "  Select [all]: " -r METHOD_CHOICE
+  echo ""
+
+  METHOD_CHOICE="${METHOD_CHOICE:-all}"
+
+  if [ "$METHOD_CHOICE" = "all" ]; then
+    SELECTED_METHODS=("${ALL_METHODOLOGY_NAMES[@]}")
+  elif [ "$METHOD_CHOICE" = "none" ]; then
+    SELECTED_METHODS=()
+  else
+    # Parse comma-separated numbers
+    IFS=',' read -ra choices <<< "$METHOD_CHOICE"
+    total_catalog="${#METHODOLOGY_CATALOG[@]}"
+    for choice in "${choices[@]}"; do
+      choice="$(echo "$choice" | tr -d ' ')"
+      if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt "$total_catalog" ]; then
+        error "Invalid selection: '$choice' (must be 1-$total_catalog)"
+        exit 1
+      fi
+      entry="${METHODOLOGY_CATALOG[$((choice - 1))]}"
+      SELECTED_METHODS+=("$(echo "$entry" | cut -d: -f1)")
+    done
+  fi
+fi
+
+# ─── Install selected plugins ─────────────────────────────────────
 plugin_count=0
 if [ -d "$HARNESS_DIR/methodologies" ]; then
-  for plugin_dir in "$HARNESS_DIR/methodologies/"*/; do
-    [ -d "$plugin_dir" ] || continue
-    plugin_name="$(basename "$plugin_dir")"
+  for plugin_name in "${SELECTED_METHODS[@]}"; do
+    plugin_dir="$HARNESS_DIR/methodologies/$plugin_name/"
+    if [ ! -d "$plugin_dir" ]; then
+      warn "Methodology directory not found, skipping: $plugin_name"
+      continue
+    fi
     # Copy methodology directory as a whole (preserving its name)
     rm -rf "$METHOD_PLUGINS_TARGET/$plugin_name"
     cp -R "$plugin_dir" "$METHOD_PLUGINS_TARGET/$plugin_name"
@@ -394,9 +511,12 @@ if [ -d "$HARNESS_DIR/methodologies" ]; then
     fi
     plugin_count=$((plugin_count + 1))
   done
-  if [ "$plugin_count" -gt 0 ]; then
-    success "Installed $plugin_count methodology plugin(s)"
-  fi
+fi
+
+if [ "$plugin_count" -eq 0 ] && [ "${#SELECTED_METHODS[@]}" -eq 0 ]; then
+  info "No methodology plugins installed (dispatcher only)"
+elif [ "$plugin_count" -gt 0 ]; then
+  success "Installed $plugin_count methodology plugin(s): ${SELECTED_METHODS[*]}"
 fi
 
 # ─── Step 9: Copy gate rules ──────────────────────────────────────
@@ -547,6 +667,13 @@ echo "  Configuration:"
 echo "    Version:     $VERSION"
 echo "    Track:       Lite"
 echo "    Preset:      $PRESET"
+if [ "$plugin_count" -eq 0 ]; then
+  echo "    Methodologies: (none — dispatcher only)"
+elif [ "$plugin_count" -eq "${#ALL_METHODOLOGY_NAMES[@]}" ]; then
+  echo "    Methodologies: all ($plugin_count)"
+else
+  echo "    Methodologies: $plugin_count selected — ${SELECTED_METHODS[*]}"
+fi
 if [ "$VERSION" = "experimental" ]; then
   echo "    Pair Mode:   $PAIR_MODE"
 fi
