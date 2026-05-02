@@ -483,6 +483,10 @@ else
 fi
 
 # ─── Install selected plugins ─────────────────────────────────────
+# Always start clean so a partial/previous install doesn't leave stale plugins
+rm -rf "$METHOD_PLUGINS_TARGET"
+mkdir -p "$METHOD_PLUGINS_TARGET"
+
 plugin_count=0
 if [ -d "$HARNESS_DIR/methodologies" ]; then
   for plugin_name in "${SELECTED_METHODS[@]}"; do
