@@ -109,7 +109,63 @@ VERSION 결과에 따라 질문을 구성한다.
 
 결과를 `PAIR_MODE`, `EXTRA_GATES`, `HOOKS`, `CI` 변수에 저장한다.
 
-### Phase 3: 프로젝트 설정 (Round 3)
+### Phase 3: 메서드 선택 (Round 3)
+
+AskUserQuestion으로 한 개 질문:
+
+```
+질문 N: "설치할 메서드 번들을 선택하세요."
+  header: "메서드"
+  options:
+    - label: "Lean — ouroboros (Recommended)"
+      description: "스펙 주도 개발만. 가볍게 시작."
+      preview: |
+        설치: ouroboros
+        └── /interview, /seed, /run, /evaluate, /evolve
+
+    - label: "Dev — TDD/BDD 개발"
+      description: "ouroboros + bdd + tdd-strict + exploration"
+      preview: |
+        설치: ouroboros, bdd, tdd-strict, exploration
+        ├── /interview, /seed, /run   (spec-first)
+        ├── /bdd, /bdd-feature        (BDD 시나리오)
+        └── /explore, /spike          (탐색/스파이크)
+
+    - label: "Domain — 도메인 설계"
+      description: "ouroboros + ddd-lite + bdd + shape-up"
+      preview: |
+        설치: ouroboros, ddd-lite, bdd, shape-up
+        ├── /interview, /seed, /run   (spec-first)
+        ├── /ddd, /ddd-glossary       (도메인 모델)
+        ├── /bdd                      (행동 명세)
+        └── /shapeup                  (계획/스코프)
+
+    - label: "Full — 16종 전부"
+      description: "모든 메서드 설치. 나중에 /methodology use로 선택 활성화."
+      preview: |
+        설치: 16종 전체
+        ouroboros · living-spec · parallel-change
+        bmad-lite · lean-mvp · ddd-lite · shape-up
+        bdd · tdd-strict · exploration · rfc-driven
+        threat-model-lite · strangler-fig
+        incident-review · observability-first
+        mikado-method
+
+    Other → 직접 입력 (예: ouroboros,bdd,rfc-driven)
+```
+
+번들 → `--methodology` 플래그 매핑:
+- Lean → `ouroboros`
+- Dev → `ouroboros,bdd,tdd-strict,exploration`
+- Domain → `ouroboros,ddd-lite,bdd,shape-up`
+- Full → `all`
+- Other 입력값 → 그대로 사용
+
+결과를 `METHODOLOGY` 변수에 저장한다.
+
+---
+
+### Phase 4: 프로젝트 설정 (Round 4)
 
 ```
 질문 8: "프로젝트 스택을 어떻게 감지하시겠습니까?"
@@ -171,6 +227,7 @@ VERSION 결과에 따라 질문을 구성한다.
   --preset {PRESET} \
   --version {VERSION} \
   --pair-mode {PAIR_MODE} \
+  --methodology {METHODOLOGY} \
   --gates {GATES_LIST} \
   --no-hooks      # (HOOKS가 스킵일 때만) \
   --no-ci         # (CI가 스킵일 때만) \
