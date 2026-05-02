@@ -233,14 +233,15 @@ Claude Code에서 **클론한 하네스 디렉토리**를 열고:
 대화형 마법사가 단계별 질문을 통해 최적의 설정을 안내합니다:
 
 ```
-① 버전 선택        Stable (v2.0.0) / Experimental (v2.1.0)
+① 구성 선택        Full(Pair Mode 포함) / Minimal(제외)  ← v2.5.1 기준
 ② 트랙 선택        Lite (bash only) / Pro (Python)
 ③ 권한 프리셋      Strict / Standard / Permissive
-④ Pair Mode       Auto / Always On / Off  (Experimental만)
+④ Pair Mode       Auto / Always On / Off  (Full 구성만)
 ⑤ 게이트 구성      기본 7개 + opt-in 선택
-⑥ Git Hooks       설치 / 스킵
-⑦ CI/CD           GitHub Actions 설치 / 스킵
-⑧ 스택 감지        자동 / 수동 선택
+⑥ 메서드 번들      Lean / Dev / Domain / Full  (16종 중 선택)
+⑦ Git Hooks       설치 / 스킵
+⑧ CI/CD           GitHub Actions 설치 / 스킵
+⑨ 스택 감지        자동 / 수동 선택
 ```
 
 설치 완료 후에는 대상 프로젝트에서도 `/install`을 실행할 수 있습니다 (재설치·설정 변경 시 사용).

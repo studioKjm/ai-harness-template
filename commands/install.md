@@ -29,13 +29,15 @@ argument-hint: [target-project-path]
 AskUserQuestion을 호출하여 다음 3개 질문을 **한 번에** 묻는다:
 
 ```
-질문 1: "어떤 버전을 설치하시겠습니까?"
-  header: "Version"
+질문 1: "어떤 구성을 설치하시겠습니까?" (모든 v2.x 릴리즈는 stable. 최신 v2.5.1 기준)
+  header: "Configuration"
   options:
-    - label: "Stable (v2.0.0) (Recommended)"
-      description: "검증된 안정 버전. 11 게이트, 12 커맨드, 9 에이전트, 3-tier 강제."
-    - label: "Experimental (v2.1.0)"
-      description: "Stable + Pair Mode (Navigator-Driver 짝프로그래밍, 독립 Test Designer). AC complexity 기반 선택적 활성화."
+    - label: "Full — Pair Mode 포함 (Recommended)"
+      description: "v2.5.1 전체 구성. 11 게이트 + 12 커맨드 + 9 에이전트 + Pair Mode (Navigator-Driver, Test Designer worktree 격리, Mixed Mode). AC complexity 기반 선택적 활성화."
+    - label: "Minimal — Pair Mode 제외"
+      description: "v2.5.1 최소 구성. 11 게이트 + 12 커맨드 + 9 에이전트만. Pair Mode 관련 에이전트(navigator, test-designer) 미설치."
+
+(내부 매핑: Full → --version experimental, Minimal → --version stable)
 
 질문 2: "어떤 트랙을 사용하시겠습니까?"
   header: "Track"
@@ -62,7 +64,7 @@ AskUserQuestion을 호출하여 다음 3개 질문을 **한 번에** 묻는다:
 
 VERSION 결과에 따라 질문을 구성한다.
 
-**Experimental(v2.1.0)을 선택한 경우** — 4개 질문:
+**Full(Pair Mode 포함)을 선택한 경우** — 4개 질문:
 
 ```
 질문 4: "Pair Mode를 어떻게 설정하시겠습니까?"
@@ -73,7 +75,7 @@ VERSION 결과에 따라 질문을 구성한다.
     - label: "Always On"
       description: "모든 AC에 Pair Mode 적용. 토큰 소비 증가, 결함 방지 최대화."
     - label: "Off"
-      description: "Pair Mode 비활성화. v2.0.0과 동일하게 동작."
+      description: "Pair Mode 비활성화. Minimal 구성과 동일하게 동작."
 
 질문 5: "추가 게이트를 활성화하시겠습니까?"
   header: "Gates"
@@ -105,7 +107,7 @@ VERSION 결과에 따라 질문을 구성한다.
       description: "CI/CD 없이 로컬만 사용합니다."
 ```
 
-**Stable(v2.0.0)을 선택한 경우** — 질문 4를 스킵하고 5, 6, 7만 묻는다.
+**Minimal(Pair Mode 제외)을 선택한 경우** — 질문 4를 스킵하고 5, 6, 7만 묻는다.
 
 결과를 `PAIR_MODE`, `EXTRA_GATES`, `HOOKS`, `CI` 변수에 저장한다.
 
