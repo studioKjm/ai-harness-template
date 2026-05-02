@@ -10,25 +10,23 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 ## Releases
 
-> **권장 설치: `v2.1.0` (안정).** v2.2.0/v2.3.0은 메서드 플러그인 시스템 — 실험 단계로 외주·프로덕션 도입 전 검증 필요.
+> **권장 설치: `v2.5.1` (최신 안정).** 모든 릴리즈가 `stable` 상태이며, 메서드 번들은 `/methodology` 커맨드로 선택 활성화합니다.
 
 | 버전 | 날짜 | 상태 | 주요 변경 |
 |------|------|------|----------|
-| **v2.5.0** | 2026-05-01 | `experimental` | **메서드 3종 추가** — ddd-lite (Bounded Context·Aggregate·Ubiquitous Language, blocking gate), bdd (Given/When/Then 시나리오), shape-up (Appetite·Pitch·Betting Table). 총 **16종 번들**. (NON-BREAKING) |
-| [**v2.4.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.4.0) | 2026-04-30 | `experimental` | **메서드 3종 추가** — tdd-strict (Red→Green→Refactor, blocking git gate), lean-mvp (Build→Measure→Learn 가설 검증), mikado-method (트리 기반 점진 리팩터링). 총 **13종 번들**. (NON-BREAKING) |
-| [**v2.3.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.3.0) | 2026-04-30 | `experimental` | **메서드 5종 추가** — strangler-fig (모듈 마이그레이션), incident-review (blameless postmortem), threat-model-lite (STRIDE), observability-first (메트릭·SLO), rfc-driven (큰 변경 RFC). 총 **10종 번들**. 신규 14개 명령, 5개 게이트. (NON-BREAKING) |
-| [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `experimental` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론 플러그인 분리. 5종 번들(ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` 다중 활성화. (NON-BREAKING) |
-| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | `stable` ⭐ **권장** | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
+| **v2.5.1** | 2026-05-02 | `stable` ⭐ **권장** | **설치 마법사 메서드 선택** — `/install` 커맨드에 메서드 번들 선택 단계(Lean/Dev/Domain/Full) 추가, `init.sh`에 `--methodology` 플래그 추가. 선택 설치 시 미사용 메서드 디렉토리 정리. |
+| [**v2.5.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.0) | 2026-05-01 | `stable` | **메서드 3종 추가** — ddd-lite (Bounded Context·Aggregate·Ubiquitous Language, blocking gate), bdd (Given/When/Then 시나리오), shape-up (Appetite·Pitch·Betting Table). 총 **16종 번들**. (NON-BREAKING) |
+| [**v2.4.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.4.0) | 2026-04-30 | `stable` | **메서드 3종 추가** — tdd-strict (Red→Green→Refactor, blocking git gate), lean-mvp (Build→Measure→Learn 가설 검증), mikado-method (트리 기반 점진 리팩터링). 총 **13종 번들**. (NON-BREAKING) |
+| [**v2.3.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.3.0) | 2026-04-30 | `stable` | **메서드 5종 추가** — strangler-fig (모듈 마이그레이션), incident-review (blameless postmortem), threat-model-lite (STRIDE), observability-first (메트릭·SLO), rfc-driven (큰 변경 RFC). 총 **10종 번들**. 신규 14개 명령, 5개 게이트. (NON-BREAKING) |
+| [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `stable` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론 플러그인 분리. 5종 번들(ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` 다중 활성화. (NON-BREAKING) |
+| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | `stable` | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
 | [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` | **Unified layout** — `.ouroboros/`를 `.harness/ouroboros/`로 통합. opt-in 게이트 4종 분리. (BREAKING) |
-| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | 초기 | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
+| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | `stable` | 최초 릴리즈 — 11 게이트, 10 커맨드, 9 에이전트, 3-Tier 아키텍처 강제. |
 
-**v2.5.0 실험 버전 도입 시 주의사항:**
-- 메서드 플러그인 시스템은 v0.1 — API 변경 가능성 있음
-- 16종 번들 메서드 중 ouroboros 외 15종은 `0.1.0` (beta)
-- 모든 게이트는 충돌 없음 (16종 동시 활성화 가능, 단 실용적이진 않음)
-- ddd-lite의 `check-context-boundary.sh` (blocking): contexts 미정의 시 자동 스킵
-- `relaxes_gates` 컨슈머 컨트랙트는 정의됨, 코어 게이트 자동 소비는 v0.2 예정
-- 외주·프로덕션 도입은 v2.1.0 권장. v2.5.0은 사이드 프로젝트로 먼저 검증.
+**메서드 번들 도입 가이드:**
+- 16종 번들 모두 `stable`. `/methodology list`로 확인, `/methodology use <name>`으로 활성화.
+- 코어 7개 게이트는 항상 강제. 메서드별 추가 게이트는 활성화 시에만 적용.
+- 처음 도입은 `Lean(ouroboros)` 또는 `Dev(ouroboros + bdd + tdd-strict + exploration)` 번들 권장.
 
 ## 데모 영상
 

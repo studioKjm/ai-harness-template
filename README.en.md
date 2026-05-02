@@ -10,11 +10,18 @@ Combines **Harness (structural guardrails) + Ouroboros (spec-first development) 
 
 ## Releases
 
-| Version | Date | Highlights |
-|---------|------|-----------|
-| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | **Pair Mode** — AC complexity-based selective activation, Navigator as persistent background agent (SendMessage bidirectional), Test Designer with worktree isolation, Mixed Mode (direct+pair), auto /review checkpoints. Based on PairCoder (ASE 2024) + AgentCoder. |
-| [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` **Unified layout** — `.ouroboros/` merged under `.harness/ouroboros/`. Opt-in gates separated. (BREAKING) |
-| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | Initial release — 11 gates, 10 commands, 11 agents, 3-tier architecture enforcement. |
+> **Recommended: `v2.5.1` (latest stable).** All releases are `stable`. Method bundles are activated selectively via `/methodology`.
+
+| Version | Date | Status | Highlights |
+|---------|------|--------|-----------|
+| **v2.5.1** | 2026-05-02 | `stable` ⭐ **recommended** | **Installer methodology selector** — `/install` adds bundle selection step (Lean/Dev/Domain/Full); `init.sh` adds `--methodology` flag with cleanup of unused methodology directories. |
+| [**v2.5.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.0) | 2026-05-01 | `stable` | **3 new methods** — ddd-lite (Bounded Context · Aggregate · Ubiquitous Language, blocking gate), bdd (Given/When/Then), shape-up (Appetite · Pitch · Betting Table). **16 bundles** total. (NON-BREAKING) |
+| [**v2.4.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.4.0) | 2026-04-30 | `stable` | **3 new methods** — tdd-strict (Red → Green → Refactor, blocking git gate), lean-mvp (Build → Measure → Learn), mikado-method (tree-based incremental refactoring). **13 bundles** total. (NON-BREAKING) |
+| [**v2.3.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.3.0) | 2026-04-30 | `stable` | **5 new methods** — strangler-fig (module migration), incident-review (blameless postmortem), threat-model-lite (STRIDE), observability-first (metrics · SLO), rfc-driven (RFC for big changes). **10 bundles**, 14 new commands, 5 new gates. (NON-BREAKING) |
+| [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `stable` | **Methodology Plugin System** — harness core frozen, methodologies extracted as plugins. 5 bundles (ouroboros / living-spec / parallel-change / bmad-lite / exploration). `/methodology compose <a> <b>` for multi-activation. (NON-BREAKING) |
+| [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | `stable` | **Pair Mode** — AC complexity-based selective activation, Navigator as persistent background agent (SendMessage bidirectional), Test Designer with worktree isolation, Mixed Mode (direct+pair), auto /review checkpoints. Based on PairCoder (ASE 2024) + AgentCoder. |
+| [**v2.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.0.0) | 2026-04-12 | `stable` | **Unified layout** — `.ouroboros/` merged under `.harness/ouroboros/`. Opt-in gates separated. (BREAKING) |
+| [**v1.0.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v1.0.0) | 2026-04-12 | `stable` | Initial release — 11 gates, 10 commands, 11 agents, 3-tier architecture enforcement. |
 
 ---
 
