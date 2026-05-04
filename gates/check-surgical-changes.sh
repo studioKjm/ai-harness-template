@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Opt-in gate: warns when a diff touches too many files, suggesting scope creep.
-# Surgical Changes principle (Karpathy): touch only what you must.
+# Surgical Changes principle derived from Andrej Karpathy's LLM coding observations.
+# Ref: https://github.com/forrestchang/andrej-karpathy-skills
 #
 # Enable: export HARNESS_ENABLE_SURGICAL_CHANGES=1
 # Tune:   export SURGICAL_CHANGES_MAX_FILES=20  (default: 15)

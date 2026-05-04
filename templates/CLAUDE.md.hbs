@@ -45,6 +45,8 @@ This file provides guidance to Claude Code when working with this repository.
 
 모든 코딩 작업에 항상 적용. 워크플로우 선택과 무관.
 
+> 출처: [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) — Andrej Karpathy의 LLM 코딩 실수 관찰에서 도출한 4원칙
+
 1. **코딩 전 생각** — 불확실하면 가정하지 말고 물어라. 해석이 여럿이면 조용히 고르지 말고 제시한다
 2. **최소 코드** — 요청된 것만 구현. 단일 사용 추상화 금지, 추측성 유연성 금지, 발생 불가능한 에러 핸들링 금지. 200줄로 쓴 게 50줄로 될 것 같으면 다시 써라
 3. **외과적 변경 (Surgical Changes)** — 변경 대상 외 코드는 손대지 않는다. 무관한 dead code 발견 시 삭제하지 말고 언급만. 내 변경이 만든 orphan(import/var/func)만 정리한다. 모든 변경 라인은 요청으로 역추적 가능해야 한다

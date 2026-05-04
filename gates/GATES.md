@@ -26,7 +26,7 @@ Disabled by default. Enable when the project matures or when noise-to-signal rat
 | `check-mutation.sh` | Mutation testing score | Slow (minutes); requires mutmut/Stryker setup |
 | `check-performance.sh` | File size, dep count, import depth | Subjective budgets; better measured in prod |
 | `check-ai-antipatterns.sh` | Hallucinated APIs, naming drift, dead code | Heuristic-based; can false-positive |
-| `check-surgical-changes.sh` | Scope creep — too many files changed per commit | Threshold subjective; tune per team with `SURGICAL_CHANGES_MAX_FILES` |
+| `check-surgical-changes.sh` | Scope creep — too many files changed per commit ([Karpathy](https://github.com/forrestchang/andrej-karpathy-skills)) | Threshold subjective; tune per team with `SURGICAL_CHANGES_MAX_FILES` |
 
 ## Enabling Opt-in Gates
 
