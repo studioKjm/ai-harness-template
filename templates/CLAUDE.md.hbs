@@ -41,6 +41,19 @@ This file provides guidance to Claude Code when working with this repository.
 
 ---
 
+## AI Behavioral Baseline
+
+모든 코딩 작업에 항상 적용. 워크플로우 선택과 무관.
+
+1. **코딩 전 생각** — 불확실하면 가정하지 말고 물어라. 해석이 여럿이면 조용히 고르지 말고 제시한다
+2. **최소 코드** — 요청된 것만 구현. 단일 사용 추상화 금지, 추측성 유연성 금지, 발생 불가능한 에러 핸들링 금지. 200줄로 쓴 게 50줄로 될 것 같으면 다시 써라
+3. **외과적 변경 (Surgical Changes)** — 변경 대상 외 코드는 손대지 않는다. 무관한 dead code 발견 시 삭제하지 말고 언급만. 내 변경이 만든 orphan(import/var/func)만 정리한다. 모든 변경 라인은 요청으로 역추적 가능해야 한다
+4. **목표 기반 실행** — 작업을 검증 가능한 목표로 변환. 다단계 작업은 `[단계] → verify: [검증]` 플랜으로 시작
+
+> **Tradeoff**: 이 원칙들은 속도보다 정확성을 우선한다. 명백한 one-liner는 judgment로.
+
+---
+
 ## Architecture Layers (3-Tier)
 
 이 프로젝트는 **3-tier layered architecture**를 따릅니다.
