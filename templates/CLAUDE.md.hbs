@@ -133,17 +133,21 @@ Presentation ──→ Logic ──→ Data
 For new features or significant changes, use the Ouroboros workflow:
 
 ```
-/interview "what to build"  →  /seed  →  /run  →  /evaluate  →  /evolve
-     (명세 확정)              (스펙 생성)  (구현)    (검증)       (진화)
+/interview  →  /seed  →  /trd  →  /decompose  →  /run  →  /evaluate  →  /evolve
+  (명세 확정)  (스펙 생성) (기술 설계) (태스크 분해)  (구현)    (검증)      (진화)
 ```
 
 1. **`/interview`** — Socratic interview to clarify requirements (Ambiguity <= 0.2 to pass)
 2. **`/seed`** — Generate immutable spec from interview
-3. **`/run`** — Execute via Double Diamond (Discover→Define→Design→Deliver)
-4. **`/evaluate`** — 3-stage verification (Mechanical→Semantic→Judgment)
-5. **`/evolve`** — Incorporate learnings, converge ontology
+3. **`/trd`** — Layer-aware technical design document (3-tier mapping, discussion points)
+4. **`/decompose`** — Break seed AC into atomic, independently testable tasks
+5. **`/run`** — Execute via Double Diamond (Discover→Define→Design→Deliver)
+6. **`/evaluate`** — 3-stage verification (Mechanical→Semantic→Judgment)
+7. **`/evolve`** — Incorporate learnings, converge ontology
 
 Other commands: `/unstuck` (when stuck), `/pm` (generate PRD)
+
+> **Skip rules**: `/trd` and `/decompose` may be skipped ONLY when all ACs are `low` complexity AND the entire change touches a single layer. In all other cases, both steps are mandatory before `/run`.
 
 ### Before Starting Work
 1. Read `ARCHITECTURE_INVARIANTS.md`

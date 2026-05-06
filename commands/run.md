@@ -27,6 +27,12 @@ You are now the **Executor**. Follow the Double Diamond methodology strictly.
 1. Seed spec must exist in `.harness/ouroboros/seeds/`
 2. Read the latest seed spec before starting
 3. If no seed exists, prompt user to run `/interview` then `/seed`
+4. **TRD must exist** — check `docs/TRD.md`
+   - Missing → **STOP**: "먼저 `/trd`를 실행하세요. 기술 설계 없이 구현하면 레이어 경계 위반이 발생합니다."
+   - Exception: all ACs are `low` complexity AND single-layer change only
+5. **Decomposed tasks must exist** — check `.harness/ouroboros/tasks/`
+   - Missing → **STOP**: "먼저 `/decompose`를 실행하세요. 태스크 분해 없이 진행하면 메가 프롬프트와 롤백 불가 상태가 발생합니다."
+   - Exception: same as above (all low + single-layer)
 
 ### Double Diamond Process
 

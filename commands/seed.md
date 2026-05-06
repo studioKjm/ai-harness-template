@@ -153,7 +153,16 @@ Seed v{N} generated: .harness/ouroboros/seeds/seed-v{N}.yaml
 
 Ontology: {N} entities, {M} actions
 Acceptance Criteria: {K} items ({must} must, {should} should)
+  - low complexity:    {n} → Direct 구현 (skip 가능)
+  - medium complexity: {n} → Pair Mode
+  - high complexity:   {n} → Pair Mode + Test Designer
 MVP Scope: {items}
 
-Next: /run to execute Double Diamond
+Next steps (순서 중요 — 건너뛰지 않는다):
+  1. /trd        — 3-tier 기술 설계서 작성 및 논의점 확인
+  2. /decompose  — AC를 원자적 레이어별 태스크로 분해
+  3. /run        — Double Diamond 실행
+
+Skip 조건: AC 전체가 low complexity이고 단일 레이어만 변경할 경우에만
+           /trd와 /decompose를 생략하고 /run으로 바로 진행할 수 있다.
 ```
