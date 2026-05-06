@@ -10,11 +10,12 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 ## Releases
 
-> **권장 설치: `v2.5.2` (최신 안정).** 모든 릴리즈가 `stable` 상태이며, 메서드 번들은 `/methodology` 커맨드로 선택 활성화합니다.
+> **권장 설치: `v2.5.3` (최신 안정).** 모든 릴리즈가 `stable` 상태이며, 메서드 번들은 `/methodology` 커맨드로 선택 활성화합니다.
 
 | 버전 | 날짜 | 상태 | 주요 변경 |
 |------|------|------|----------|
-| [**v2.5.2**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.2) | 2026-05-04 | `stable` ⭐ **권장** | **AI Behavioral Baseline** — Karpathy 4원칙을 `CLAUDE.md`에 통합. 메서드 선택과 무관하게 항상 적용. `check-surgical-changes` opt-in 게이트 추가. (NON-BREAKING) |
+| [**v2.5.3**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.3) | 2026-05-06 | `stable` ⭐ **권장** | **Workflow Gate Fix** — AI가 `/seed` 후 `/trd`·`/decompose`를 건너뛰고 `/run`으로 직행하던 구조적 버그 수정. CLAUDE.md 워크플로우 다이어그램, seed 완료 메시지, /run Prerequisites 3곳 동시 수정. (NON-BREAKING) |
+| [**v2.5.2**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.2) | 2026-05-04 | `stable` | **AI Behavioral Baseline** — Karpathy 4원칙을 `CLAUDE.md`에 통합. 메서드 선택과 무관하게 항상 적용. `check-surgical-changes` opt-in 게이트 추가. (NON-BREAKING) |
 | [**v2.5.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.0) | 2026-05-01 | `stable` | **메서드 16종 완성** — ddd-lite·bdd·shape-up 포함 총 16종 번들 확정. `/install` 마법사에서 Lean/Dev/Domain/Full 선택 설치 지원. (NON-BREAKING) |
 | [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `stable` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론 플러그인 분리. `/methodology compose <a> <b>` 다중 활성화. (NON-BREAKING) |
 | [**v2.1.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.1.0) | 2026-04-19 | `stable` | **Pair Mode** — AC complexity 기반 선택적 활성화, Navigator를 persistent background agent로 전환 (SendMessage 양방향 통신), Test Designer worktree 격리, Mixed Mode (direct+pair 혼합), 자동 /review 체크포인트. PairCoder(ASE 2024) + AgentCoder 논문 기반. |
@@ -231,7 +232,7 @@ Claude Code에서 **클론한 하네스 디렉토리**를 열고:
 대화형 마법사가 단계별 질문을 통해 최적의 설정을 안내합니다:
 
 ```
-① 구성 선택        Full(Pair Mode 포함) / Minimal(제외)  ← v2.5.2 기준
+① 구성 선택        Full(Pair Mode 포함) / Minimal(제외)  ← v2.5.3 기준
 ② 트랙 선택        Lite (bash only) / Pro (Python)
 ③ 권한 프리셋      Strict / Standard / Permissive
 ④ Pair Mode       Auto / Always On / Off  (Full 구성만)

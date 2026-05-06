@@ -1,5 +1,38 @@
 # Changelog
 
+## v2.5.3 — 2026-05-06
+
+### Fix: /trd → /decompose → /run 워크플로우 강제 게이트
+
+실사용 테스트에서 AI가 `/seed` 완료 후 `/trd`, `/decompose`를 생략하고 `/run`으로 바로 진행하는 문제를 수정합니다.
+
+#### 원인
+
+3곳의 구조적 공백이 동시에 작용:
+1. `CLAUDE.md` 워크플로우 다이어그램에 `/trd`, `/decompose`가 누락
+2. `/seed` 완료 메시지가 `Next: /run`으로 직접 유도
+3. `/run` Prerequisites가 decompose 결과물 존재 여부를 체크하지 않음
+
+#### 변경 사항
+
+- **`templates/CLAUDE.md.hbs`**: Ouroboros 워크플로우 다이어그램을
+  `interview → seed → run` 에서 `interview → seed → trd → decompose → run`으로 수정.
+  skip 허용 조건 명시 (전체 AC가 `low` complexity이고 단일 레이어 변경인 경우만).
+
+- **`commands/seed.md`**: Output 완료 메시지의 `Next: /run to execute Double Diamond`를
+  3단계 순서 안내(`/trd → /decompose → /run`)로 교체. AC complexity별 카운트 표시 추가.
+
+- **`commands/run.md`**: Prerequisites에 항목 4, 5 추가:
+  - `docs/TRD.md` 미존재 시 **STOP** (skip 조건 외)
+  - `.harness/ouroboros/tasks/` 미존재 시 **STOP** (skip 조건 외)
+
+#### 영향 범위
+
+NON-BREAKING. 기존 프로젝트에서 `/run` 전에 이미 TRD와 decompose를 실행하고 있다면 동작 변화 없음.
+신규 설치에서는 `templates/CLAUDE.md.hbs`가 자동 반영됨. 기존 설치는 `commands/` 3개 파일 수동 복사.
+
+---
+
 ## v2.1.0 — 2026-04-19
 
 ### Pair Mode — Navigator-Driver Pattern (실험적 → 실행 가능)
