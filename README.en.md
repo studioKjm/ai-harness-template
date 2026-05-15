@@ -10,11 +10,12 @@ Combines **Harness (structural guardrails) + Ouroboros (spec-first development) 
 
 ## Releases
 
-> **Recommended: `v2.5.1` (latest stable).** All releases are `stable`. Method bundles are activated selectively via `/methodology`.
+> **Recommended: `v2.6.0` (latest stable).** All releases are `stable`. Method bundles are activated selectively via `/methodology`.
 
 | Version | Date | Status | Highlights |
 |---------|------|--------|-----------|
-| **v2.5.1** | 2026-05-02 | `stable` ⭐ **recommended** | **Installer methodology selector** — `/install` adds bundle selection step (Lean/Dev/Domain/Full); `init.sh` adds `--methodology` flag with cleanup of unused methodology directories. |
+| [**v2.6.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.6.0) | 2026-05-15 | `stable` ⭐ **recommended** | **Isolated AI Security Gate** — security agent fully isolated from coding agent, eliminating confirmation bias. Fresh Claude process, zero shared context. Blocks on critical/high. claude CLI (Pro/Max) first; ANTHROPIC_API_KEY fallback. (NON-BREAKING) |
+| **v2.5.1** | 2026-05-02 | `stable` | **Installer methodology selector** — `/install` adds bundle selection step (Lean/Dev/Domain/Full); `init.sh` adds `--methodology` flag with cleanup of unused methodology directories. |
 | [**v2.5.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.0) | 2026-05-01 | `stable` | **3 new methods** — ddd-lite (Bounded Context · Aggregate · Ubiquitous Language, blocking gate), bdd (Given/When/Then), shape-up (Appetite · Pitch · Betting Table). **16 bundles** total. (NON-BREAKING) |
 | [**v2.4.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.4.0) | 2026-04-30 | `stable` | **3 new methods** — tdd-strict (Red → Green → Refactor, blocking git gate), lean-mvp (Build → Measure → Learn), mikado-method (tree-based incremental refactoring). **13 bundles** total. (NON-BREAKING) |
 | [**v2.3.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.3.0) | 2026-04-30 | `stable` | **5 new methods** — strangler-fig (module migration), incident-review (blameless postmortem), threat-model-lite (STRIDE), observability-first (metrics · SLO), rfc-driven (RFC for big changes). **10 bundles**, 14 new commands, 5 new gates. (NON-BREAKING) |

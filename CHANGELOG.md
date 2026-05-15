@@ -1,5 +1,60 @@
 # Changelog
 
+## v2.6.0 — 2026-05-15
+
+### Isolated AI Security Gate (`check-security-ai.sh`)
+
+#### Problem
+
+When the same AI agent that writes code also reviews its own security, confirmation bias dramatically reduces vulnerability detection rates. The agent subconsciously protects its own assumptions, missing the vulns it just introduced.
+
+#### Solution
+
+A new opt-in gate that spawns a **completely separate Claude process** with zero context from the coding session. The security agent receives only raw source code — no design docs, no specs, no intent comments. It finds vulnerabilities without knowing WHY the code was written.
+
+#### Key behaviors
+
+- **Context stripping**: Comments containing `Why:`, `Intent:`, `Design:`, `Spec:` are removed before the code is sent — the agent sees only behavior, not justification.
+- **Adversarial persona**: The `security-agent-isolated.md` persona instructs the agent to treat every input as attacker-controlled and never give developers the benefit of the doubt.
+- **Finding tracker**: Results accumulate in `.harness/security/findings.json`. Dismissed false positives go to `dismissed.txt` with a mandatory reason.
+- **Exit policy**: `critical` or `high` severity → exit 1 (commit blocked). `medium` or `low` → exit 0 (warning only).
+- **Auth**: Primary — `claude -p` CLI (Pro/Max subscription, no API key needed). Fallback — `ANTHROPIC_API_KEY` via urllib.
+
+#### Files added
+
+- `gates/check-security-ai.sh` — opt-in gate script
+- `methodologies/threat-model-lite/personas/security-agent-isolated.md` — adversarial researcher persona
+- `security/findings.json` — finding tracker template
+- `security/dismissed.txt` — dismissal list template
+- `security/dismiss-finding.sh` — dismissal helper
+
+#### Enable
+
+```bash
+export HARNESS_ENABLE_AI_SECURITY=1
+git commit  # gate runs automatically
+```
+
+Or run manually:
+
+```bash
+bash .harness/gates/check-security-ai.sh . --full-scan
+```
+
+#### Self-validation
+
+During dogfooding on the marketingagent project, the security agent (analyzing the gate's own code) found two legitimate vulnerabilities:
+- Passing `full_prompt` (80KB code bundle) as a CLI argv argument — fixed by switching to stdin
+- Passing `ANTHROPIC_API_KEY` via `sys.argv` where it appears in process listing — fixed by reading from `os.environ`
+
+This confirms the isolation design works: the agent was genuinely adversarial even against its own containing script.
+
+#### NON-BREAKING
+
+Existing installations are unaffected. Enable via `HARNESS_ENABLE_AI_SECURITY=1`.
+
+---
+
 ## v2.5.3 — 2026-05-06
 
 ### Fix: /trd → /decompose → /run 워크플로우 강제 게이트

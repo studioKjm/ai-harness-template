@@ -10,11 +10,12 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 ## Releases
 
-> **권장 설치: `v2.5.3` (최신 안정).** 모든 릴리즈가 `stable` 상태이며, 메서드 번들은 `/methodology` 커맨드로 선택 활성화합니다.
+> **권장 설치: `v2.6.0` (최신 안정).** 모든 릴리즈가 `stable` 상태이며, 메서드 번들은 `/methodology` 커맨드로 선택 활성화합니다.
 
 | 버전 | 날짜 | 상태 | 주요 변경 |
 |------|------|------|----------|
-| [**v2.5.3**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.3) | 2026-05-06 | `stable` ⭐ **권장** | **Workflow Gate Fix** — AI가 `/seed` 후 `/trd`·`/decompose`를 건너뛰고 `/run`으로 직행하던 구조적 버그 수정. CLAUDE.md 워크플로우 다이어그램, seed 완료 메시지, /run Prerequisites 3곳 동시 수정. (NON-BREAKING) |
+| [**v2.6.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.6.0) | 2026-05-15 | `stable` ⭐ **권장** | **Isolated AI Security Gate** — 코딩 에이전트와 완전히 분리된 보안 전용 에이전트. 확증 편향 없이 취약점 탐지. claude CLI(Pro/Max) 우선, ANTHROPIC_API_KEY 폴백. critical/high 발견 시 커밋 차단. (NON-BREAKING) |
+| [**v2.5.3**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.3) | 2026-05-06 | `stable` | **Workflow Gate Fix** — AI가 `/seed` 후 `/trd`·`/decompose`를 건너뛰고 `/run`으로 직행하던 구조적 버그 수정. CLAUDE.md 워크플로우 다이어그램, seed 완료 메시지, /run Prerequisites 3곳 동시 수정. (NON-BREAKING) |
 | [**v2.5.2**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.2) | 2026-05-04 | `stable` | **AI Behavioral Baseline** — Karpathy 4원칙을 `CLAUDE.md`에 통합. 메서드 선택과 무관하게 항상 적용. `check-surgical-changes` opt-in 게이트 추가. (NON-BREAKING) |
 | [**v2.5.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.0) | 2026-05-01 | `stable` | **메서드 16종 완성** — ddd-lite·bdd·shape-up 포함 총 16종 번들 확정. `/install` 마법사에서 Lean/Dev/Domain/Full 선택 설치 지원. (NON-BREAKING) |
 | [**v2.2.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.2.0) | 2026-04-29 | `stable` | **Methodology Plugin System** — 하네스 코어 고정, 개발 방법론 플러그인 분리. `/methodology compose <a> <b>` 다중 활성화. (NON-BREAKING) |
@@ -47,7 +48,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 - [Methodology System (v0.1)](#methodology-system-v01)
 - [하네스 6가지 구성요소](#하네스-6가지-구성요소)
 - [Ouroboros 워크플로우](#ouroboros-워크플로우)
-- [11개 게이트](#11개-게이트)
+- [12개 게이트](#12개-게이트)
 - [3-Tier Layered Architecture](#3-tier-layered-architecture)
 - [11개 에이전트 페르소나 + Orchestration](#11개-에이전트-페르소나)
 - [Lite vs Pro 비교](#lite-vs-pro)
@@ -71,9 +72,10 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 └───────────────────────────────────────────────────────────────────┘
                           ↕ (강제됨)
 ┌───────────────────────────────────────────────────────────────────┐
-│  HARNESS GATES (11개 구조적 가드레일)                               │
+│  HARNESS GATES (12개 구조적 가드레일)                               │
 │  boundaries | layers | secrets | security | structure | spec       │
 │  | complexity | deps | mutation | performance | ai-antipatterns    │
+│  | security-ai                                                      │
 └───────────────────────────────────────────────────────────────────┘
                           ↕ (학습됨)
 ┌───────────────────────────────────────────────────────────────────┐
@@ -407,7 +409,7 @@ Stage 3 Judgment:   코드 품질 + 엣지 케이스 (선택적)
 
 ---
 
-## 11개 게이트
+## 12개 게이트
 
 ### 차단 게이트 (위반 시 커밋/CI 차단)
 
@@ -429,6 +431,12 @@ Stage 3 Judgment:   코드 품질 + 엣지 케이스 (선택적)
 | `check-complexity.sh` | 함수 길이(80L), 파라미터(5개), 파일 길이(500L), 중첩(5단계) |
 | `check-performance.sh` | 파일 크기, 의존성 수, 빌드 출력, import 깊이 |
 | `check-ai-antipatterns.sh` | 환각 API, 과잉 추상화, 네이밍 드리프트, 미사용 import |
+
+### Opt-in 차단 게이트 (활성화 시 critical/high 발견 → 커밋 차단)
+
+| 게이트 | 검사 대상 |
+|--------|----------|
+| `check-security-ai.sh` | 격리된 AI 보안 분석 — 코딩 에이전트와 완전히 분리된 신선한 Claude 세션으로 의미적 취약점 탐지. critical/high 발견 시 커밋 차단. `HARNESS_ENABLE_AI_SECURITY=1`로 활성화. |
 
 ### 실행 시점
 
@@ -719,15 +727,20 @@ my-project/
 │       ├── interviewer.md ... hacker.md
 │       └── topology.yaml            # 에이전트 협업 패턴
 ├── .harness/
-│   ├── gates/                       # 게이트 스크립트 (기본 7 + opt-in 4)
+│   ├── gates/                       # 게이트 스크립트 (기본 7 + opt-in 5)
 │   │   ├── check-boundaries.sh      check-layers.sh
 │   │   ├── check-secrets.sh         check-security.sh
 │   │   ├── check-structure.sh       check-spec.sh
 │   │   ├── check-deps.sh
+│   │   ├── check-security-ai.sh     # opt-in: 격리된 AI 보안 분석
 │   │   ├── GATES.md                  # 기본/옵션 게이트 설명
 │   │   └── rules/
 │   │       ├── boundaries.yaml      # 의존성 + 레이어 규칙
 │   │       └── structure.yaml       # 파일 배치 규칙
+│   ├── security/                    # AI 보안 게이트 결과물 (check-security-ai 활성화 시)
+│   │   ├── findings.json            # 누적 취약점 (팀 공유 — git 커밋 권장)
+│   │   ├── dismissed.txt            # 기각된 오탐 목록 (팀 공유 — git 커밋 권장)
+│   │   └── dismiss-finding.sh       # 기각 헬퍼
 │   ├── hooks/
 │   │   ├── post-edit-lint.sh        # 편집 후 자동 린트
 │   │   └── pre-commit-gate.sh       # 커밋 전 게이트

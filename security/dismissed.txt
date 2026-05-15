@@ -1,0 +1,5 @@
+# Dismissed security findings
+# Format: one ID per line, with # comment above explaining reason
+# Example:
+# 2026-05-15 | yourname | False positive — input sanitized upstream
+# SEC-001
