@@ -7,7 +7,7 @@
 #   --name NAME              Project name (default: target dirname)
 #   --version VERSION        stable | experimental (default: stable)
 #   --pair-mode MODE         auto | on | off (default: off). Only with --version experimental
-#   --gates GATES            Comma-separated: default, +complexity, +performance, +ai-antipatterns
+#   --gates GATES            Comma-separated: default, +complexity, +performance, +ai-antipatterns, +security-ai
 #   --methodology LIST       all | none | comma-separated names (e.g. ouroboros,bdd,ddd-lite)
 #   --no-hooks               Skip pre-commit hook installation
 #   --no-ci                  Skip GitHub Actions workflow
@@ -569,8 +569,15 @@ if [ -n "$EXTRA_GATES" ]; then
     if [ -f "$HARNESS_DIR/$gate_file" ]; then
       cp "$HARNESS_DIR/$gate_file" "$HARNESS_TARGET/gates/"
       step "Installed opt-in gate: check-${gate_name}.sh"
+      # security-ai gate: also copy the security/ helper directory
+      if [ "$gate_name" = "security-ai" ] && [ -d "$HARNESS_DIR/security" ]; then
+        mkdir -p "$HARNESS_TARGET/security"
+        cp "$HARNESS_DIR/security/"* "$HARNESS_TARGET/security/" 2>/dev/null || true
+        chmod +x "$HARNESS_TARGET/security/dismiss-finding.sh" 2>/dev/null || true
+        step "Installed .harness/security/ (findings tracker + dismiss helper)"
+      fi
     else
-      warn "Unknown gate: '${gate_name}'. Available opt-in gates: complexity, mutation, performance, ai-antipatterns"
+      warn "Unknown gate: '${gate_name}'. Available opt-in gates: complexity, mutation, performance, ai-antipatterns, security-ai"
     fi
   done
 fi

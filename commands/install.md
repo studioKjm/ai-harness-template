@@ -33,9 +33,9 @@ AskUserQuestion을 호출하여 다음 3개 질문을 **한 번에** 묻는다:
   header: "Configuration"
   options:
     - label: "Full — Pair Mode 포함 (Recommended)"
-      description: "v2.5.1 전체 구성. 11 게이트 + 12 커맨드 + 9 에이전트 + Pair Mode (Navigator-Driver, Test Designer worktree 격리, Mixed Mode). AC complexity 기반 선택적 활성화."
+      description: "v2.6.0 전체 구성. 12 게이트 + 12 커맨드 + 9 에이전트 + Pair Mode (Navigator-Driver, Test Designer worktree 격리, Mixed Mode). AC complexity 기반 선택적 활성화."
     - label: "Minimal — Pair Mode 제외"
-      description: "v2.5.1 최소 구성. 11 게이트 + 12 커맨드 + 9 에이전트만. Pair Mode 관련 에이전트(navigator, test-designer) 미설치."
+      description: "v2.6.0 최소 구성. 12 게이트 + 12 커맨드 + 9 에이전트만. Pair Mode 관련 에이전트(navigator, test-designer) 미설치."
 
 (내부 매핑: Full → --version experimental, Minimal → --version stable)
 
@@ -89,6 +89,8 @@ VERSION 결과에 따라 질문을 구성한다.
       description: "파일 크기/번들 크기 예산"
     - label: "+ AI Antipatterns"
       description: "AI 생성 코드의 환각/반복 패턴 감지"
+    - label: "+ AI Security (격리된 보안 분석)"
+      description: "코딩 에이전트와 완전히 분리된 별도 Claude 프로세스로 취약점 탐지. 확증 편향 없음. critical/high 발견 시 커밋 차단. claude CLI(Pro/Max) 또는 ANTHROPIC_API_KEY 필요."
 
 질문 6: "Git pre-commit hook을 설치하시겠습니까?"
   header: "Git Hooks"
@@ -214,6 +216,7 @@ AskUserQuestion으로 한 개 질문:
 🔐 권한: {PRESET}
 🤝 Pair Mode: {PAIR_MODE}
 🚧 게이트: {기본 7개 + 추가 목록}
+  {AI Security 게이트 선택 시: "🛡 AI Security: HARNESS_ENABLE_AI_SECURITY=1로 활성화"}
 🪝 Git Hooks: {HOOKS}
 ⚙️ CI/CD: {CI}
 📚 스택: {STACK}
@@ -230,7 +233,7 @@ AskUserQuestion으로 한 개 질문:
   --version {VERSION} \
   --pair-mode {PAIR_MODE} \
   --methodology {METHODOLOGY} \
-  --gates {GATES_LIST} \
+  --gates {GATES_LIST} \      # +complexity,+performance,+ai-antipatterns,+security-ai 형태
   --no-hooks      # (HOOKS가 스킵일 때만) \
   --no-ci         # (CI가 스킵일 때만) \
   --stack {STACK}  # (수동 선택일 때만)
@@ -263,6 +266,12 @@ AskUserQuestion으로 한 개 질문:
   .harness/gates/check-secrets.sh
   .harness/gates/check-layers.sh
   .harness/detect-violations.sh  (전체)
+
+{AI Security 게이트 설치한 경우:}
+AI 보안 분석 (격리된 에이전트):
+  export HARNESS_ENABLE_AI_SECURITY=1  # 커밋 시 자동 실행
+  bash .harness/gates/check-security-ai.sh . --full-scan  # 전체 스캔
+  bash .harness/security/dismiss-finding.sh SEC-001 "이유"  # 오탐 기각
 
 문서:
   CLAUDE.md                   → 프로젝트 규칙 (수정 가능)
