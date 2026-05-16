@@ -89,13 +89,38 @@ jobs:
   #   opt-in-gates uses continue-on-error: true (warning only).
   #   This gate exits 1 on critical/high — it must be a blocking job.
   #
-  # ENABLE:
-  #   1. Add ANTHROPIC_API_KEY to repo secrets:
-  #      GitHub → Settings → Secrets and variables → Actions → New secret
-  #   2. Uncomment the job below.
+  # ── AUTH OPTIONS (choose one) ─────────────────────────────────
   #
-  # COST: ~$0.01–0.10 per scan (claude-opus-4-7, capped at 50 files / 80KB)
+  # Option A — Self-hosted runner (RECOMMENDED, no API key needed)
+  #   Claude Code Pro/Max session is already present on your machine.
+  #   1. Register your machine as a GitHub Actions runner:
+  #      GitHub repo → Settings → Actions → Runners → New self-hosted runner
+  #   2. Uncomment Option A job below.
+  #   Cost: $0 (uses your existing Pro/Max subscription)
+  #
+  # Option B — GitHub-hosted runner (requires ANTHROPIC_API_KEY secret)
+  #   1. Settings → Secrets and variables → Actions → New secret
+  #      Name: ANTHROPIC_API_KEY
+  #   2. Uncomment Option B job below.
+  #   Cost: ~$0.01–0.10 per scan (claude-opus-4-7, 50 files / 80KB cap)
   # ──────────────────────────────────────────────────────────────
+
+  # ── Option A: Self-hosted runner (Pro/Max subscription, no API key) ──
+  # ai-security-gate:
+  #   name: AI Security Gate (Isolated Agent)
+  #   runs-on: self-hosted          # your machine with Claude Code installed
+  #   needs: default-gates
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #
+  #     - name: AI Security Analysis
+  #       run: bash .harness/gates/check-security-ai.sh . --full-scan
+  #       # claude -p uses the local Pro/Max session — no ANTHROPIC_API_KEY needed
+
+  # ── Option B: GitHub-hosted runner (ANTHROPIC_API_KEY required) ──────
   # ai-security-gate:
   #   name: AI Security Gate (Isolated Agent)
   #   runs-on: ubuntu-latest
@@ -110,9 +135,8 @@ jobs:
   #       env:
   #         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   #       run: |
-  #         if [ -z "$ANTHROPIC_API_KEY" ]; then
-  #           echo "::warning::ANTHROPIC_API_KEY secret not set — skipping AI security gate."
-  #           echo "::warning::Add it: Settings → Secrets and variables → Actions → New secret"
+  #         if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+  #           echo "::warning::ANTHROPIC_API_KEY not set — skipping. Use Option A (self-hosted) to avoid API key."
   #           exit 0
   #         fi
   #         bash .harness/gates/check-security-ai.sh . --full-scan
