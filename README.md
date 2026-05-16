@@ -49,6 +49,7 @@ https://github.com/user-attachments/assets/87a778e3-1fee-451e-9e18-f0cda740e7da
 - [하네스 6가지 구성요소](#하네스-6가지-구성요소)
 - [Ouroboros 워크플로우](#ouroboros-워크플로우)
 - [12개 게이트](#12개-게이트)
+- [AI Security Gate](#ai-security-gate)
 - [3-Tier Layered Architecture](#3-tier-layered-architecture)
 - [11개 에이전트 페르소나 + Orchestration](#11개-에이전트-페르소나)
 - [Lite vs Pro 비교](#lite-vs-pro)
@@ -272,7 +273,7 @@ Claude Code에서 **클론한 하네스 디렉토리**를 열고:
 | `--preset` | strict / standard / permissive | standard | 권한 프리셋 |
 | `--version` | stable / experimental | stable | 설치 버전 |
 | `--pair-mode` | auto / on / off | off | Pair Mode 설정 (experimental만) |
-| `--gates` | +complexity,+performance,+ai-antipatterns | - | opt-in 게이트 추가 |
+| `--gates` | +complexity,+performance,+ai-antipatterns,+security-ai | - | opt-in 게이트 추가 |
 | `--no-hooks` | - | - | Git pre-commit hook 스킵 |
 | `--no-ci` | - | - | GitHub Actions 스킵 |
 | `--stack` | auto / nextjs-django / python / nodejs ... | auto | 스택 감지 방식 |
@@ -446,6 +447,175 @@ CI push/PR  → .github/workflows/harness-gates.yaml
 수동        → .harness/detect-violations.sh
 MCP         → harness mcp-serve (외부 에이전트에서 호출)
 ```
+
+---
+
+## AI Security Gate
+
+> v2.6.0에서 추가된 opt-in 차단 게이트. 코딩 에이전트와 **완전히 격리된** 신선한 Claude 세션으로 취약점을 탐지한다.
+
+### 왜 격리가 필요한가?
+
+코딩 에이전트는 자신이 작성한 코드의 의도를 안다 — "이렇게 짠 이유가 있다"는 확증 편향이 생긴다.
+AI Security Gate는 해당 컨텍스트를 **완전히 차단**한 독립 프로세스가 코드만 보고 취약점을 찾는다.
+
+```
+코딩 에이전트 (확증 편향 있음)
+    ↕ 완전 격리 (컨텍스트 공유 없음)
+보안 에이전트 (신선한 Claude 세션 · 적대적 페르소나)
+    → 결과: findings.json (팀 공유)
+```
+
+### 설치
+
+**옵션 1: `/install` 마법사 (권장)**
+
+```
+/install /path/to/your-project
+```
+
+Phase 2 게이트 선택에서 `+ AI Security (격리된 보안 분석)`을 체크한다.
+
+**옵션 2: CLI 플래그**
+
+```bash
+./init.sh /path/to/your-project --yes --gates +security-ai
+```
+
+설치 후 생성되는 파일:
+
+```
+.harness/
+├── gates/check-security-ai.sh      # 게이트 스크립트
+└── security/
+    ├── findings.json               # 누적 취약점 (git 커밋 권장)
+    ├── dismissed.txt               # 기각된 오탐 (git 커밋 권장)
+    └── dismiss-finding.sh          # 기각 헬퍼
+```
+
+### 사용법
+
+**수동 실행**
+
+```bash
+# 변경된 파일만 스캔 (빠름)
+bash .harness/gates/check-security-ai.sh .
+
+# 전체 코드베이스 스캔
+bash .harness/gates/check-security-ai.sh . --full-scan
+
+# 결과를 마크다운으로 내보내기
+bash .harness/gates/check-security-ai.sh . --export=markdown
+```
+
+**pre-commit hook 자동 실행**
+
+```bash
+# 환경 변수로 활성화 (비활성화가 기본값)
+export HARNESS_ENABLE_AI_SECURITY=1
+git commit -m "..."   # 커밋 시 자동 실행
+```
+
+**결과 확인**
+
+```bash
+cat .harness/security/findings.json
+```
+
+```json
+{
+  "findings": [
+    {
+      "id": "SEC-001",
+      "severity": "critical",
+      "title": "SQL Injection in search endpoint",
+      "file": "src/api/search.py",
+      "line": 42,
+      "description": "..."
+    }
+  ]
+}
+```
+
+**오탐 기각**
+
+```bash
+bash .harness/security/dismiss-finding.sh SEC-001 "파라미터 바인딩으로 이미 처리됨"
+```
+
+기각 이유는 `dismissed.txt`에 기록되며 다음 스캔에서 자동으로 제외된다.
+
+### GitHub Actions CI 연동
+
+`check-security-ai.sh`는 **claude CLI 세션**을 사용하므로 클라우드 runner와 직접 연동하려면 `ANTHROPIC_API_KEY`가 필요하다. 구독(Pro/Max)을 그대로 쓰려면 Option A(self-hosted runner)를 권장한다.
+
+**Option A — Self-hosted runner (Pro/Max 구독, API 키 불필요)**
+
+자신의 Mac을 GitHub Actions runner로 등록:
+
+```
+GitHub repo → Settings → Actions → Runners → New self-hosted runner
+```
+
+`.github/workflows/harness-gates.yaml`에서 아래 주석 해제:
+
+```yaml
+ai-security-gate:
+  name: AI Security Gate (Isolated Agent)
+  runs-on: self-hosted          # claude CLI가 설치된 로컬 머신
+  needs: default-gates
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: AI Security Analysis
+      run: bash .harness/gates/check-security-ai.sh . --full-scan
+      # claude -p는 로컬 Pro/Max 세션을 사용 — ANTHROPIC_API_KEY 불필요
+```
+
+**Option B — GitHub-hosted runner (ANTHROPIC_API_KEY 사용)**
+
+```
+Settings → Secrets and variables → Actions → New secret
+Name: ANTHROPIC_API_KEY
+```
+
+`.github/workflows/harness-gates.yaml`에서 Option B 블록 주석 해제:
+
+```yaml
+ai-security-gate:
+  name: AI Security Gate (Isolated Agent)
+  runs-on: ubuntu-latest
+  needs: default-gates
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: AI Security Analysis
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+          echo "::warning::ANTHROPIC_API_KEY not set — skipping."
+          exit 0
+        fi
+        bash .harness/gates/check-security-ai.sh . --full-scan
+```
+
+비용: ~$0.01–0.10 / 스캔 (claude-opus-4-7, 최대 50파일 / 80KB)
+
+### 취약점 생명주기
+
+```
+발견 (findings.json)
+    ↓
+코드 수정 → 재스캔 → 자동 해소
+    또는
+오탐 기각 → dismiss-finding.sh → dismissed.txt
+```
+
+`findings.json`과 `dismissed.txt`는 팀 공유를 위해 **git에 커밋 권장**.
+`SECURITY_REPORT.md` (--export=markdown 결과물)는 `.gitignore`에 포함되어 있어 커밋되지 않는다.
 
 ---
 

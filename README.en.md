@@ -137,7 +137,7 @@ Plus `/rollback`, `/unstuck`, `/pm` for edge cases.
 | `/unstuck` | 5-agent multi-perspective deadlock breaker |
 | `/pm` | Generate PRD for non-engineering stakeholders |
 
-### 11 Gates (7 default + 4 opt-in)
+### 12 Gates (7 default + 5 opt-in)
 
 **Default (blocking on pre-commit + CI):**
 - `check-secrets` — 35+ secret patterns (AWS, GitHub, Stripe, OpenAI, …)
@@ -148,10 +148,63 @@ Plus `/rollback`, `/unstuck`, `/pm` for edge cases.
 - `check-security` — SAST (Semgrep / Bandit / built-in)
 - `check-deps` — dependency vulnerability audit
 
-**Opt-in (enable via `HARNESS_ENABLE_*` env vars):**
+**Opt-in warning (enable via `HARNESS_ENABLE_*` env vars):**
 - `check-complexity`, `check-mutation`, `check-performance`, `check-ai-antipatterns`
 
+**Opt-in blocking (v2.6.0+):**
+- `check-security-ai` — Isolated AI security analysis. Fresh Claude session, zero coding-agent context, adversarial persona. Blocks on critical/high findings.
+
 See [`gates/GATES.md`](./gates/GATES.md) for details.
+
+### AI Security Gate (v2.6.0)
+
+The AI Security Gate runs a **completely isolated** Claude process with zero shared context from the coding agent — eliminating confirmation bias in vulnerability detection.
+
+**Install:**
+```bash
+# Via wizard (recommended)
+/install /path/to/your-project
+# → Phase 2: select "+ AI Security"
+
+# Or directly
+./init.sh /path/to/your-project --yes --gates +security-ai
+```
+
+**Run:**
+```bash
+bash .harness/gates/check-security-ai.sh .             # staged files
+bash .harness/gates/check-security-ai.sh . --full-scan # full codebase
+export HARNESS_ENABLE_AI_SECURITY=1 && git commit      # auto on commit
+```
+
+**Dismiss false positives:**
+```bash
+bash .harness/security/dismiss-finding.sh SEC-001 "already mitigated by X"
+```
+
+**CI — Option A: self-hosted runner (no API key, uses Pro/Max session):**
+```yaml
+ai-security-gate:
+  runs-on: self-hosted
+  needs: default-gates
+  steps:
+    - uses: actions/checkout@v4
+    - run: bash .harness/gates/check-security-ai.sh . --full-scan
+```
+
+**CI — Option B: GitHub-hosted runner (ANTHROPIC_API_KEY required):**
+```yaml
+ai-security-gate:
+  runs-on: ubuntu-latest
+  needs: default-gates
+  steps:
+    - uses: actions/checkout@v4
+    - env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: bash .harness/gates/check-security-ai.sh . --full-scan
+```
+
+See [Korean README — AI Security Gate section](./README.md#ai-security-gate) for full details.
 
 ### 11 Agent Personas
 
