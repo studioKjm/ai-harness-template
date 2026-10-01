@@ -10,11 +10,12 @@ AI 에이전트가 자율적으로 일하되, 안전하게 통제할 수 있는 
 
 ## Releases
 
-> **권장 설치: `v2.6.0` (최신 안정).** 모든 릴리즈가 `stable` 상태이며, 메서드 번들은 `/methodology` 커맨드로 선택 활성화합니다.
+> **권장 설치: `v2.7.0` (최신 안정).** 모든 릴리즈가 `stable` 상태이며, 메서드 번들은 `/methodology` 커맨드로 선택 활성화합니다.
 
 | 버전 | 날짜 | 상태 | 주요 변경 |
 |------|------|------|----------|
-| [**v2.6.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.6.0) | 2026-05-15 | `stable` ⭐ **권장** | **Isolated AI Security Gate** — 코딩 에이전트와 완전히 분리된 보안 전용 에이전트. 확증 편향 없이 취약점 탐지. claude CLI(Pro/Max) 우선, ANTHROPIC_API_KEY 폴백. critical/high 발견 시 커밋 차단. (NON-BREAKING) |
+| [**v2.7.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.7.0) | 2026-10-01 | `stable` ⭐ **권장** | **Claude Code 2026-10 현행화** — 권한 프리셋을 최신 문법(`Bash(cmd *)`)으로 교체(구문법 `:*`은 더 이상 유효하지 않아 규칙이 적용되지 않았음), 훅 입력을 stdin JSON으로 전환(`$CLAUDE_FILE_PATH` 제거), 공유용 `settings.json` 기본 설치, `--commands-as skills`, **Supabase 스택 지원**(마이그레이션 불변·RLS 게이트, 운영 DB 보호 훅, skills, 보안 리뷰어, 로컬 MCP). 자세한 내용은 [CHANGELOG](./CHANGELOG.md), [docs/2026-10-update.md](./docs/2026-10-update.md). (설치 기본 동작 일부 변경) |
+| [**v2.6.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.6.0) | 2026-05-15 | `stable` | **Isolated AI Security Gate** — 코딩 에이전트와 완전히 분리된 보안 전용 에이전트. 확증 편향 없이 취약점 탐지. claude CLI(Pro/Max) 우선, ANTHROPIC_API_KEY 폴백. critical/high 발견 시 커밋 차단. (NON-BREAKING) |
 | [**v2.5.3**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.3) | 2026-05-06 | `stable` | **Workflow Gate Fix** — AI가 `/seed` 후 `/trd`·`/decompose`를 건너뛰고 `/run`으로 직행하던 구조적 버그 수정. CLAUDE.md 워크플로우 다이어그램, seed 완료 메시지, /run Prerequisites 3곳 동시 수정. (NON-BREAKING) |
 | [**v2.5.2**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.2) | 2026-05-04 | `stable` | **AI Behavioral Baseline** — Karpathy 4원칙을 `CLAUDE.md`에 통합. 메서드 선택과 무관하게 항상 적용. `check-surgical-changes` opt-in 게이트 추가. (NON-BREAKING) |
 | [**v2.5.0**](https://github.com/studioKjm/ai-harness-template/releases/tag/v2.5.0) | 2026-05-01 | `stable` | **메서드 16종 완성** — ddd-lite·bdd·shape-up 포함 총 16종 번들 확정. `/install` 마법사에서 Lean/Dev/Domain/Full 선택 설치 지원. (NON-BREAKING) |
@@ -277,6 +278,8 @@ Claude Code에서 **클론한 하네스 디렉토리**를 열고:
 | `--no-hooks` | - | - | Git pre-commit hook 스킵 |
 | `--no-ci` | - | - | GitHub Actions 스킵 |
 | `--stack` | auto / nextjs-django / python / nodejs ... | auto | 스택 감지 방식 |
+| `--settings-file` | shared / local | shared | `shared`=`.claude/settings.json`(팀 공유), `local`=`.claude/settings.local.json`(개인, 2.6 이전 동작) |
+| `--commands-as` | commands / skills | commands | `skills`=`.claude/skills/<name>/SKILL.md`로 설치 (현재 Claude Code 표준, commands도 계속 동작) |
 | `--name` | 문자열 | 디렉토리명 | 프로젝트 이름 |
 
 </details>

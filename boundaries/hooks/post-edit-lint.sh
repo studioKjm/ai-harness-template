@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
 # Auto-lint after file edit. Called by Claude Code PostToolUse hook.
-# Usage: ./post-edit-lint.sh <file-path>
+# Input: Claude Code passes hook input as JSON on stdin (tool_input.file_path).
+#        The legacy $CLAUDE_FILE_PATH variable is not documented anymore.
+# Usage: echo '{"tool_input":{"file_path":"..."}}' | ./post-edit-lint.sh
+#        ./post-edit-lint.sh <file-path>            (manual / backward compatible)
 
 set -euo pipefail
 
 FILE_PATH="${1:-}"
+if [ -z "$FILE_PATH" ] && [ ! -t 0 ]; then
+  STDIN_JSON="$(cat || true)"
+  if command -v jq &>/dev/null; then
+    FILE_PATH="$(printf '%s' "$STDIN_JSON" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)"
+  elif command -v python3 &>/dev/null; then
+    FILE_PATH="$(printf '%s' "$STDIN_JSON" | python3 -c 'import sys,json
+try: print(json.load(sys.stdin).get("tool_input",{}).get("file_path",""))
+except Exception: pass' 2>/dev/null || true)"
+  fi
+fi
 
 if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ]; then
   exit 0

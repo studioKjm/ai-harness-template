@@ -1,49 +1,55 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "_comment": "STANDARD preset — Regular development. Balanced restrictions.",
+  "_comment": "STANDARD preset — Regular development. Balanced restrictions. Syntax: Bash(cmd *) (the old Bash(cmd:*) form is no longer supported by Claude Code).",
   "permissions": {
     "deny": [
-      "Bash(rm -rf /:*)",
-      "Bash(DROP DATABASE:*)",
-      "Bash(git push --force:*)",
-      "Bash(git reset --hard:*)",
-      "Bash(sudo rm:*)",
-      "Bash(chmod 777:*)",
-      "Bash(curl * | sh:*)"
+      "Bash(rm -rf /*)",
+      "Bash(DROP DATABASE *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(sudo rm *)",
+      "Bash(chmod 777 *)",
+      "Bash(curl * | sh)",
+      "Read(./.env.production*)"
+    ],
+    "ask": [
+      "Bash(git push *)"
     ],
     "allow": [
       "Read",
       "Glob",
       "Grep",
-      "Bash(git:*)",
-      "Bash(ls:*)",
-      "Bash(pwd:*)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(find:*)",
-      "Bash(wc:*)",
-      "Bash(npm:*)",
-      "Bash(npx:*)",
-      "Bash(pnpm:*)",
-      "Bash(yarn:*)",
-      "Bash(bun:*)",
-      "Bash(pip:*)",
-      "Bash(python:*)",
-      "Bash(pytest:*)",
-      "Bash(docker compose:*)",
-      "Bash(docker ps:*)",
-      "Bash(docker logs:*)"
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(pwd)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(find *)",
+      "Bash(wc *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(pnpm *)",
+      "Bash(yarn *)",
+      "Bash(bun *)",
+      "Bash(pip *)",
+      "Bash(python *)",
+      "Bash(pytest *)",
+      "Bash(docker compose *)",
+      "Bash(docker ps *)",
+      "Bash(docker logs *)"
     ]
   },
   "hooks": {
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {
             "type": "command",
-            "command": ".harness/hooks/post-edit-lint.sh $CLAUDE_FILE_PATH"
+            "command": "${CLAUDE_PROJECT_DIR}/.harness/hooks/post-edit-lint.sh",
+            "timeout": 60
           }
         ]
       }

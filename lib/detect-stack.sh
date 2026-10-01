@@ -167,6 +167,10 @@ fi
 if grep -rq "drizzle" "$TARGET/package.json" "$TARGET/drizzle.config.*" 2>/dev/null; then
   STACKS+=("drizzle")
 fi
+if [ -f "$TARGET/supabase/config.toml" ] || has_dir "supabase/migrations" || \
+   ( [ -f "$TARGET/package.json" ] && grep -q '"@supabase/' "$TARGET/package.json" 2>/dev/null ); then
+  STACKS+=("supabase")
+fi
 
 # --- Infrastructure ---
 if has_glob "docker-compose*.yml" || has_glob "docker-compose*.yaml"; then

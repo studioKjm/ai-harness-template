@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(supabase status *)",
+      "Bash(supabase start *)",
+      "Bash(supabase stop *)",
+      "Bash(supabase db reset --local *)",
+      "Bash(supabase db advisors --local *)",
+      "Bash(supabase migration new *)",
+      "Bash(supabase gen types typescript --local *)"
+    ],
+    "ask": [
+      "Bash(supabase db pull *)"
+    ],
+    "deny": [
+      "Bash(supabase db push *)",
+      "Bash(supabase link *)",
+      "Bash(supabase migration repair *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/pretool-guard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

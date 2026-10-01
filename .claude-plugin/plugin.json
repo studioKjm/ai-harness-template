@@ -1,6 +1,6 @@
 {
   "name": "harness",
-  "version": "2.1.0",
+  "version": "2.7.0",
   "description": "Specification-first AI harness: 11 structural gates, 11 Ouroboros commands, 11 agent personas, and 3-tier architecture enforcement. v2.1: Pair Mode (Navigator-Driver + independent test design + /review command).",
   "author": "studioKjm",
   "license": "MIT",

@@ -1,5 +1,28 @@
 # Changelog
 
+## v2.7.0 — 2026-10-01
+
+Claude Code(2026-10 기준 공식 문서)에 맞춘 현행화와 Supabase 스택 지원.
+
+### 수정 (기존 설치가 의도대로 동작하지 않던 부분)
+- **권한 프리셋 문법**: `Bash(cmd:*)`는 현재 지원되지 않고 `Bash(cmd *)`만 유효하다. 3개 프리셋(strict/standard/permissive)을 새 문법으로 교체했고, `git push`는 `ask`로 분리했다. 기존 설치는 `init.sh`를 다시 실행하거나 프리셋을 수동 교체해야 한다.
+- **훅 입력**: `post-edit-lint.sh`는 이제 stdin JSON(`tool_input.file_path`)을 읽는다. `$CLAUDE_FILE_PATH`는 공식 문서에 없어 제거했다. 인자로 경로를 주는 수동 호출은 그대로 동작한다. 훅 command는 `${CLAUDE_PROJECT_DIR}` 기준 경로를 쓴다.
+- `PreCommit`은 Claude Code 이벤트가 아니라 git hook이다. `pre-commit-gate.sh`의 설명을 바로잡았다.
+
+### 추가
+- **`--settings-file shared|local`** (기본 `shared`): 권한·훅을 팀과 공유되는 `.claude/settings.json`에 설치한다. 이전 동작(`settings.local.json`)은 `--settings-file local`. `.claude/settings.local.json`은 `.gitignore`에 추가된다.
+- **`--commands-as commands|skills`** (기본 `commands`): `skills`는 워크플로 커맨드를 `.claude/skills/<name>/SKILL.md`로 설치한다(`disable-model-invocation: true`, 직접 `/name`으로 호출). `.claude/commands/`도 계속 동작하며 기본값은 v3에서 `skills`로 바꿀 예정이다. 런타임 `/methodology use`가 복사하는 번들 커맨드는 아직 `.claude/commands/`를 쓴다.
+- **Supabase 스택** (`supabase/config.toml` 또는 `@supabase/*` 의존성이 있으면 자동 감지, `stacks/supabase/`):
+  - `gates/check-migrations.sh` (기본 게이트): 기존 마이그레이션 수정·삭제·이름변경 금지, 파일명 형식, 새 테이블의 RLS, `using (true)` 금지. 커밋 시엔 스테이징 기준, CI에선 `HARNESS_BASE_REF`(기본 `origin/main`)와 비교한다. 정당한 재작성은 `HARNESS_ALLOW_MIGRATION_REWRITE=1`. supabase 디렉터리가 없으면 아무것도 하지 않는다.
+  - `pretool-guard.sh` (PreToolUse 훅): 원격 프로젝트 쓰기(`db push` 등), 기존 마이그레이션 편집, 운영 env 파일 접근, `--no-verify`를 결정적으로 차단한다.
+  - skills `supabase-migration`, `verify`, 서브에이전트 `rls-security-reviewer`(읽기 전용), `.mcp.json`(next-devtools + **로컬** Supabase MCP), 권한 오버레이 자동 병합.
+- `gates/lint-changed.py`: 변경한 줄의 lint 오류만 검사한다. 기존 오류가 많은 코드베이스에서 "손대는 코드만 깨끗하게"를 강제할 때 쓴다.
+
+### 알려진 한계
+- deny 규칙과 PreToolUse 훅은 정규식 기반이라 다단 셸 우회를 완전히 막지 못한다 (공식 문서도 같은 한계를 명시). `/sandbox` 병행 권장.
+- `post-edit-lint.sh`는 여전히 `eslint --fix`/`prettier --write`로 파일을 자동 수정한다. 기존 코드가 포맷되지 않은 프로젝트에서는 범위 밖 diff가 생길 수 있어 주의.
+
+
 ## v2.6.0 — 2026-05-15
 
 ### Isolated AI Security Gate (`check-security-ai.sh`)

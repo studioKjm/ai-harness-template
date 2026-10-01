@@ -38,6 +38,7 @@ run_gate "check-boundaries.sh"
 run_gate "check-structure.sh"
 run_gate "check-spec.sh"
 run_gate "check-layers.sh"
+run_gate "check-migrations.sh"   # no-op unless supabase/migrations exists
 run_gate "check-security.sh"
 run_gate "check-deps.sh"
 

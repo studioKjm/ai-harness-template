@@ -1,13 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "_comment": "PERMISSIVE preset — Prototyping. Minimal restrictions, secret checks only.",
+  "_comment": "PERMISSIVE preset — Prototyping. Minimal restrictions, secret checks only. Syntax: Bash(cmd *) (the old Bash(cmd:*) form is no longer supported by Claude Code).",
   "permissions": {
     "deny": [
-      "Bash(rm -rf /:*)",
-      "Bash(sudo rm -rf:*)",
-      "Bash(DROP DATABASE:*)",
-      "Bash(git push --force origin main:*)",
-      "Bash(git push --force origin master:*)"
+      "Bash(rm -rf /*)",
+      "Bash(sudo rm -rf *)",
+      "Bash(DROP DATABASE *)",
+      "Bash(git push --force origin main *)",
+      "Bash(git push --force origin master *)"
     ],
     "allow": [
       "Read",

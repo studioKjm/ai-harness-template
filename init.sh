@@ -12,6 +12,10 @@
 #   --no-hooks               Skip pre-commit hook installation
 #   --no-ci                  Skip GitHub Actions workflow
 #   --stack STACK             auto | nextjs-django | nextjs-fastapi | nextjs-nestjs | python | nodejs
+#   --settings-file MODE      shared | local (default: shared → .claude/settings.json, team-shared;
+#                             local → .claude/settings.local.json, personal/gitignored — the pre-2.7 behavior)
+#   --commands-as MODE        commands | skills (default: commands). skills installs the workflow commands as
+#                             .claude/skills/<name>/SKILL.md (current Claude Code standard; commands still work)
 # Detects tech stack, generates CLAUDE.md, installs gates & boundaries.
 
 set -euo pipefail
@@ -31,6 +35,8 @@ METHODOLOGY_ARG=""
 SKIP_HOOKS=0
 SKIP_CI=0
 STACK_MODE="auto"
+SETTINGS_MODE="shared"
+COMMANDS_AS="commands"
 while [ $# -gt 0 ]; do
   case "$1" in
     --yes|-y) AUTO_YES=1; shift ;;
@@ -43,10 +49,16 @@ while [ $# -gt 0 ]; do
     --no-hooks) SKIP_HOOKS=1; shift ;;
     --no-ci) SKIP_CI=1; shift ;;
     --stack) STACK_MODE="$2"; shift 2 ;;
+    --settings-file) SETTINGS_MODE="$2"; shift 2 ;;
+    --commands-as) COMMANDS_AS="$2"; shift 2 ;;
     -*) error "Unknown option: $1"; exit 1 ;;
     *) TARGET="$1"; shift ;;
   esac
 done
+
+# Validate settings/commands modes
+case "$SETTINGS_MODE" in shared|local) ;; *) error "--settings-file must be shared or local"; exit 1 ;; esac
+case "$COMMANDS_AS" in commands|skills) ;; *) error "--commands-as must be commands or skills"; exit 1 ;; esac
 
 # Validate version
 case "$VERSION" in
@@ -252,18 +264,22 @@ header "Step 7: Configuring Claude Code boundaries"
 
 mkdir -p "$TARGET/.claude"
 
-if [ ! -f "$TARGET/.claude/settings.local.json" ]; then
-  cp "$HARNESS_DIR/boundaries/presets/$PRESET.json" "$TARGET/.claude/settings.local.json"
-  success "Installed settings.local.json (preset: $PRESET)"
+SETTINGS_NAME="settings.json"
+[ "$SETTINGS_MODE" = "local" ] && SETTINGS_NAME="settings.local.json"
+SETTINGS_PATH="$TARGET/.claude/$SETTINGS_NAME"
+
+if [ ! -f "$SETTINGS_PATH" ]; then
+  cp "$HARNESS_DIR/boundaries/presets/$PRESET.json" "$SETTINGS_PATH"
+  success "Installed $SETTINGS_NAME (preset: $PRESET)"
 else
-  warn ".claude/settings.local.json already exists"
+  warn ".claude/$SETTINGS_NAME already exists"
   if [ "$AUTO_YES" -eq 1 ]; then
     info "Kept existing settings (--yes mode)"
   else
     read -p "  Overwrite with $PRESET preset? [y/N] " -n 1 -r OVERWRITE
     echo ""
     if [[ "$OVERWRITE" =~ ^[Yy]$ ]]; then
-      cp "$HARNESS_DIR/boundaries/presets/$PRESET.json" "$TARGET/.claude/settings.local.json"
+      cp "$HARNESS_DIR/boundaries/presets/$PRESET.json" "$SETTINGS_PATH"
       success "Overwritten with $PRESET preset"
     else
       info "Kept existing settings"
@@ -274,18 +290,44 @@ fi
 # ─── Step 8: Install Ouroboros commands & agents ─────────────────
 header "Step 8: Installing Ouroboros commands & agents"
 
-COMMANDS_TARGET="$TARGET/.claude/commands"
-mkdir -p "$COMMANDS_TARGET"
+# install_command_file <src.md> — install as .claude/commands/<name>.md or as a skill
+install_command_file() {
+  local src="$1" name
+  name="$(basename "$src" .md)"
+  if [ "$COMMANDS_AS" = "skills" ]; then
+    mkdir -p "$TARGET/.claude/skills/$name"
+    python3 - "$src" "$TARGET/.claude/skills/$name/SKILL.md" "$name" <<'PY'
+import re, sys
+src, dst, name = sys.argv[1:4]
+s = open(src, encoding="utf8").read()
+m = re.match(r"^---\n(.*?)\n---\n", s, re.S)
+if m:
+    fm, body = m.group(1), s[m.end():]
+    if not re.search(r"^name:", fm, re.M):
+        fm = "name: " + name + "\n" + fm
+    if not re.search(r"^disable-model-invocation:", fm, re.M):
+        fm += "\ndisable-model-invocation: true"
+    out = "---\n" + fm + "\n---\n" + body
+else:
+    out = "---\nname: " + name + "\ndescription: " + name + " workflow command\ndisable-model-invocation: true\n---\n" + s
+open(dst, "w", encoding="utf8").write(out)
+PY
+  else
+    mkdir -p "$TARGET/.claude/commands"
+    cp "$src" "$TARGET/.claude/commands/"
+  fi
+}
+
 cmd_count=0
 for cmd in "$HARNESS_DIR/commands/"*.md; do
   [ -f "$cmd" ] || continue
-  cp "$cmd" "$COMMANDS_TARGET/"
+  install_command_file "$cmd"
   cmd_count=$((cmd_count + 1))
 done
 if [ "$cmd_count" -eq 0 ]; then
   warn "No command files found in $HARNESS_DIR/commands/"
 else
-  success "Installed $cmd_count slash commands"
+  success "Installed $cmd_count slash commands (as $COMMANDS_AS)"
 fi
 
 AGENTS_TARGET="$TARGET/.claude/agents"
@@ -503,7 +545,7 @@ if [ -d "$HARNESS_DIR/methodologies" ]; then
     if [ -d "$plugin_dir/commands" ]; then
       for cmd in "$plugin_dir/commands/"*.md; do
         [ -f "$cmd" ] || continue
-        cp "$cmd" "$TARGET/.claude/commands/"
+        install_command_file "$cmd"
       done
     fi
     # If methodology bundles personas, install them as agents
@@ -523,6 +565,53 @@ elif [ "$plugin_count" -gt 0 ]; then
   success "Installed $plugin_count methodology plugin(s): ${SELECTED_METHODS[*]}"
 fi
 
+# ─── Step 8.7: Stack extras (Supabase) ────────────────────────────
+if echo ",$STACKS_COMMA," | grep -q ",supabase,"; then
+  header "Step 8.7: Supabase stack extras"
+  SB_SRC="$HARNESS_DIR/stacks/supabase"
+  if [ -d "$SB_SRC" ]; then
+    mkdir -p "$TARGET/.claude/skills" "$TARGET/.claude/agents" "$TARGET/.claude/hooks"
+    cp -R "$SB_SRC/skills/"* "$TARGET/.claude/skills/"
+    cp "$SB_SRC/agents/"*.md "$TARGET/.claude/agents/"
+    cp "$SB_SRC/hooks/"*.sh "$TARGET/.claude/hooks/"
+    chmod +x "$TARGET/.claude/hooks/"*.sh 2>/dev/null || true
+    success "Installed Supabase skills (supabase-migration, verify), rls-security-reviewer agent, pretool-guard hook"
+
+    if [ ! -f "$TARGET/.mcp.json" ]; then
+      cp "$SB_SRC/mcp.json" "$TARGET/.mcp.json"
+      success "Installed .mcp.json (next-devtools + LOCAL supabase MCP; adjust the port if you changed supabase/config.toml)"
+    else
+      info ".mcp.json already exists — kept (see $SB_SRC/mcp.json for the recommended entries)"
+    fi
+
+    # Merge the permission/hook overlay into the settings file (union, no duplicates)
+    python3 - "$SETTINGS_PATH" "$SB_SRC/settings.overlay.json" <<'PY'
+import json, sys
+target, overlay = sys.argv[1:3]
+t = json.load(open(target, encoding="utf8"))
+o = json.load(open(overlay, encoding="utf8"))
+perms = t.setdefault("permissions", {})
+for key, items in o.get("permissions", {}).items():
+    cur = perms.setdefault(key, [])
+    for it in items:
+        if it not in cur:
+            cur.append(it)
+hooks = t.setdefault("hooks", {})
+for event, entries in o.get("hooks", {}).items():
+    cur = hooks.setdefault(event, [])
+    for e in entries:
+        if e not in cur:
+            cur.append(e)
+json.dump(t, open(target, "w", encoding="utf8"), indent=2, ensure_ascii=False)
+open(target, "a").write("\n")
+PY
+    success "Merged Supabase permissions + PreToolUse guard into $SETTINGS_NAME"
+    info "Never connect the Supabase MCP to a production project. Keep it local / read-only."
+  else
+    warn "stacks/supabase not found in harness source — skipping"
+  fi
+fi
+
 # ─── Step 9: Copy gate rules ──────────────────────────────────────
 header "Step 9: Installing CI/CD gates & spec gate"
 
@@ -539,6 +628,7 @@ gate_files=(
   "gates/check-structure.sh"
   "gates/check-spec.sh"
   "gates/check-deps.sh"
+  "gates/check-migrations.sh"
 )
 for gf in "${gate_files[@]}"; do
   if [ -f "$HARNESS_DIR/$gf" ]; then
@@ -582,7 +672,9 @@ if [ -n "$EXTRA_GATES" ]; then
   done
 fi
 
-chmod +x "$HARNESS_TARGET/gates/"*.sh 2>/dev/null || true
+# Optional helper: lint only the lines you changed (baseline-aware)
+[ -f "$HARNESS_DIR/gates/lint-changed.py" ] && cp "$HARNESS_DIR/gates/lint-changed.py" "$HARNESS_TARGET/gates/"
+chmod +x "$HARNESS_TARGET/gates/"*.sh "$HARNESS_TARGET/gates/"*.py 2>/dev/null || true
 
 # Copy hooks
 for hf in "boundaries/hooks/post-edit-lint.sh" "boundaries/hooks/pre-commit-gate.sh"; do
@@ -644,7 +736,7 @@ fi
 header "Step 12: Updating .gitignore"
 
 GITIGNORE="$TARGET/.gitignore"
-ENTRIES=(".env" ".env.local" ".env.*.local" ".review-artifacts/" ".harness/ouroboros/session.db")
+ENTRIES=(".env" ".env.local" ".env.*.local" ".claude/settings.local.json" ".review-artifacts/" ".harness/ouroboros/session.db")
 
 touch "$GITIGNORE"
 for entry in "${ENTRIES[@]}"; do
@@ -694,8 +786,12 @@ echo "    CLAUDE.md                       - AI agent context file"
 echo "    ARCHITECTURE_INVARIANTS.md      - Architecture rules"
 echo "    docs/code-convention.yaml       - Coding conventions"
 echo "    docs/adr.yaml                   - Architecture Decision Records"
-echo "    .claude/settings.local.json     - Claude Code permissions ($PRESET)"
-echo "    .claude/commands/               - Ouroboros slash commands"
+echo "    .claude/$SETTINGS_NAME          - Claude Code permissions ($PRESET)"
+if [ "$COMMANDS_AS" = "skills" ]; then
+  echo "    .claude/skills/                 - Ouroboros workflow skills (invoke as /<name>)"
+else
+  echo "    .claude/commands/               - Ouroboros slash commands"
+fi
 echo "    .claude/agents/                 - $agent_count agent personas"
 echo "    .harness/                       - Gates, hooks, tools, and Ouroboros workspace"
 echo ""
