@@ -22,8 +22,11 @@ case "$TOOL" in
   Edit|Write|MultiEdit)
     FILE="$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty')"
     REL="${FILE#"$PROJECT"/}"
-    if [[ "$REL" == supabase/migrations/*.sql && -e "$FILE" ]]; then
-      decide deny "Existing migrations are immutable. Add a new one (supabase migration new <name>)."
+    # Only migrations tracked by git are immutable; a freshly created, uncommitted file
+    # (right after `supabase migration new`) must stay writable.
+    if [[ "$REL" == supabase/migrations/*.sql && -e "$FILE" ]] \
+       && git -C "$PROJECT" ls-files --error-unmatch -- "$REL" >/dev/null 2>&1; then
+      decide deny "Committed migrations are immutable. Add a new one (supabase migration new <name>)."
     fi
     if [[ "$REL" == .env.production* || "$REL" == .env.remote ]]; then
       decide deny "Production/remote env files must not be modified by the agent."
