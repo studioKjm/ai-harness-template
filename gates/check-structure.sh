@@ -79,7 +79,7 @@ find "$PROJECT_ROOT/src" "$PROJECT_ROOT/app" \
   grep -v ".next" | while IFS= read -r file; do
   # This is actually fine for co-located tests — just informational
   :
-done
+done || true  # informational only: a missing src/ or app/, or no test files, must not abort under pipefail
 
 # Report
 echo ""
